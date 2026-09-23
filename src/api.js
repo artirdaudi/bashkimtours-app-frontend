@@ -81,7 +81,7 @@ export const studentsApi = {
     api(`/students/${id}/qr/regenerate`, { method: "POST" }),
 };
 export const qrApi = {
-  profile: (token) => publicApi(`/qr/${encodeURIComponent(token)}`),
+  profile: (token, options) => publicApi(`/qr/${encodeURIComponent(token)}`, options),
 };
 export const calendarApi = {
   years: (p) => api(`/academic-calendar/years${query(p)}`),

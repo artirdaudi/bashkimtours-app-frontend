@@ -12,6 +12,7 @@ import StudentCardsPage from "./StudentCardsPage";
 import PaymentFollowupRulesPage from "./PaymentFollowupRulesPage";
 import PaymentsPage from "./PaymentsPage";
 import StudentDebtsPage from "./StudentDebtsPage";
+import ScanPage from "./ScanPage";
 import PublicStudentPage from "./PublicStudentPage";
 import "./bashkimtours.css";
 
@@ -42,6 +43,7 @@ export default function BashkimToursApp() {
         <Route element={<MaarifTabs />}>
           <Route path="students" element={<StudentsPage />} />
           <Route path="debts" element={<StudentDebtsPage />} />
+          <Route path="skano" element={<ScanPage />} />
           <Route path="cards" element={<StudentCardsPage />} />
           <Route path="areas" element={<AreasPage />} />
           <Route path="vehicles" element={<VehiclesManagementPage />} />

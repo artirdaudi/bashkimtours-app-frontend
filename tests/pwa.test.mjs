@@ -48,7 +48,7 @@ test('only app assets are precached and live APIs have no runtime cache', () => 
   const allowed = (path, mode = 'navigate', sameOrigin = true) => routes[0].match({ request: { mode }, url: new URL(path, 'https://app.bashkimtours.com'), sameOrigin });
   assert(!allowed('/students', 'cors'));
   assert(!allowed('/students', 'navigate', false));
-  for (const path of ['/', '/students', '/payments', '/student/test-token']) assert(allowed(path), path);
+  for (const path of ['/', '/students', '/skano', '/payments', '/student/test-token']) assert(allowed(path), path);
   for (const path of ['/api/auth/me', '/api/payments', '/auth/login', '/qr/test-token', '/health']) assert(!allowed(path), path);
 });
 

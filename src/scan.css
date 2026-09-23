@@ -1,0 +1,30 @@
+.bt-scan-page { max-width: 850px; margin: 0 auto; }
+.bt-scan-camera-panel, .bt-scan-result { background: #fff; border: 1px solid #dce4ee; border-radius: 18px; padding: 20px; margin-bottom: 20px; }
+.bt-scan-video { position: relative; background: #0b172b; border-radius: 12px; overflow: hidden; aspect-ratio: 16 / 9; max-height: 360px; }
+.bt-scan-video video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.bt-scan-placeholder { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 12px; justify-content: center; align-items: center; color: #dce8fa; background: #0b172b; }
+.bt-scan-controls { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+.bt-scan-sound { display: inline-flex; align-items: center; gap: 8px; border: 1px solid #dce4ee; background: #f4f7fb; padding: 10px 14px; border-radius: 10px; color: #073878; cursor: pointer; }
+.bt-scan-hint { font-size: 13px; color: #64748b; margin: 14px 0 0; }
+.bt-scan-result { border-top: 5px solid #94a3b8; }
+.bt-scan-result.good { border-top-color: #15803d; background: #f0fdf4; }
+.bt-scan-result.bad { border-top-color: #dc2626; background: #fff5f5; }
+.bt-scan-result.unknown { border-top-color: #d97706; background: #fffbeb; }
+.bt-scan-result-heading { display: flex; gap: 14px; align-items: center; }
+.bt-scan-result-heading > svg { flex-shrink: 0; width: 32px; height: 32px; }
+.bt-scan-result.good .bt-scan-result-heading { color: #166534; }
+.bt-scan-result.bad .bt-scan-result-heading { color: #b91c1c; }
+.bt-scan-result.unknown .bt-scan-result-heading { color: #92400e; }
+.bt-scan-result-heading h2 { margin: 0; font-size: 23px; }
+.bt-scan-result-heading p { margin: 4px 0 0; line-height: 1.5; }
+.bt-scan-student { padding: 20px 0; border-bottom: 1px solid #dce4ee; }
+.bt-scan-student span { font-weight: 700; color: #64748b; }
+.bt-scan-student h2 { margin: 6px 0; font-size: 26px; }
+.bt-scan-student p { margin: 0; color: #475569; }
+.bt-scan-result dl > div, .bt-scan-dues > div { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; }
+.bt-scan-result dt { color: #64748b; }
+.bt-scan-result dd { margin: 0; text-align: right; font-weight: 600; }
+.bt-scan-dues { border-top: 1px solid #e5caca; }
+.bt-scan-dues h3 { font-size: 16px; margin-bottom: 4px; }
+.bt-scan-empty { text-align: center; padding: 20px; color: #64748b; }
+@media (max-width: 600px) { .bt-scan-camera-panel, .bt-scan-result { padding: 14px; } .bt-scan-video { aspect-ratio: 4 / 3; } .bt-scan-result dl > div { flex-direction: column; gap: 4px; } .bt-scan-result dd { text-align: left; } }

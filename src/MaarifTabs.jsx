@@ -1,5 +1,6 @@
 import {
   BellRing,
+  ScanLine,
   Bus,
   CalendarDays,
   Contact,
@@ -18,6 +19,7 @@ const tabs = [
   ["calendar", CalendarDays, "Kalendari"],
   ["followup-rules", BellRing, "Rregullat e pagesave"],
   ["cards", Contact, "Kartelat"],
+  ["skano", ScanLine, "Skano"],
 ];
 
 export default function MaarifTabs() {

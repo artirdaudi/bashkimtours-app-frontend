@@ -34,7 +34,7 @@ export default defineConfig(({ mode }) => {
         runtimeCaching: [{
           urlPattern: ({ request, url, sameOrigin }) => sameOrigin && request.mode === "navigate" && (
             /^\/$/.test(url.pathname) ||
-            /^\/(students|debts|cards|areas|vehicles|drivers|calendar|followup-rules|payments|account|income)\/?$/.test(url.pathname) ||
+            /^\/(students|debts|cards|skano|areas|vehicles|drivers|calendar|followup-rules|payments|account|income)\/?$/.test(url.pathname) ||
             /^\/student\/[^/]+\/?$/.test(url.pathname)
           ),
           handler: "NetworkFirst",

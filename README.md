@@ -50,3 +50,15 @@ Before release, check on an actual phone and desktop browser:
 4. Keep a browser tab and installed app open while deploying a new build; verify they reload automatically after detection, without any update prompt. Also test returning from the background and reconnecting after being offline.
 
 Existing clients running an older release must receive this release once before the new periodic update checks apply. Automatic updates require a working service worker and internet connection; they are not a substitute for backend minimum-version enforcement.
+
+## Maarif scanner
+
+Open **Maarif → Skano** (`/skano`) and tap **Hap kamerën** once to grant camera access and unlock audio. The rear camera is preferred, with a JavaScript QR decoder fallback for browsers without native barcode detection. Camera access requires HTTPS (localhost is supported for development).
+
+Scanning stays active between cards. Each new QR is verified against the live `/qr/{token}` endpoint; scanned URLs are never navigated to. Repeated frames of the same card are suppressed until it leaves the frame for two seconds. A newer scan cancels any earlier lookup, and leaving the page releases the camera.
+
+- Green / rising tone: current month paid, no unpaid prior/current months, and transport allowed.
+- Red / low tone: transport blocked or an unpaid prior/current month. Future pending months do not trigger this result.
+- Neutral warning: no confirmed current-month payment, invalid card, or unsuccessful verification. These never play the paid tone.
+
+Use `npm run test:scanner` for QR parsing, payment classification, and duplicate-frame checks. Before deployment, test real cards on the staff phones: camera permission, sound, paid/unpaid/blocked cards, rapid consecutive cards, denied permission, and connection failure. Scanning only reads status; it does not record attendance or payments.
