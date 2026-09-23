@@ -10,3 +10,11 @@
 .bt-pwa-offline h1 { font-size: 26px; margin: 20px 0 12px; }
 .bt-pwa-offline p { line-height: 1.6; }
 @media print { .bt-pwa-notice, .bt-pwa-offline { display: none !important; } }
+/* Keep scrolling available while suppressing touch zoom in installed windows. */
+html.bt-pwa-fixed-zoom,
+html.bt-pwa-fixed-zoom body { touch-action: pan-x pan-y; }
+@media (pointer: coarse) {
+  html.bt-pwa-fixed-zoom input,
+  html.bt-pwa-fixed-zoom select,
+  html.bt-pwa-fixed-zoom textarea { font-size: max(16px, 1em); }
+}

@@ -17,6 +17,50 @@ export default function PwaSupport() {
   const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
   useEffect(() => {
+    const displayMode = window.matchMedia("(display-mode: standalone)");
+    const viewport = document.querySelector('meta[name="viewport"]');
+    const originalViewport = viewport?.getAttribute("content");
+    const syncZoomMode = () => {
+      const standalone = isStandalone();
+      document.documentElement.classList.toggle("bt-pwa-fixed-zoom", standalone);
+      if (viewport) viewport.setAttribute("content", standalone
+        ? "width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no"
+        : originalViewport);
+    };
+    const preventGesture = (event) => {
+      if (isStandalone()) event.preventDefault();
+    };
+    const preventPinch = (event) => {
+      if (isStandalone() && event.touches.length > 1) event.preventDefault();
+    };
+    const preventWheelZoom = (event) => {
+      if (isStandalone() && event.ctrlKey) event.preventDefault();
+    };
+    const preventKeyboardZoom = (event) => {
+      if (isStandalone() && (event.ctrlKey || event.metaKey) && ["+", "=", "-", "0"].includes(event.key)) {
+        event.preventDefault();
+      }
+    };
+    syncZoomMode();
+    displayMode.addEventListener("change", syncZoomMode);
+    document.addEventListener("gesturestart", preventGesture, { passive: false });
+    document.addEventListener("gesturechange", preventGesture, { passive: false });
+    document.addEventListener("touchmove", preventPinch, { passive: false });
+    window.addEventListener("wheel", preventWheelZoom, { passive: false });
+    window.addEventListener("keydown", preventKeyboardZoom);
+    return () => {
+      displayMode.removeEventListener("change", syncZoomMode);
+      document.removeEventListener("gesturestart", preventGesture);
+      document.removeEventListener("gesturechange", preventGesture);
+      document.removeEventListener("touchmove", preventPinch);
+      window.removeEventListener("wheel", preventWheelZoom);
+      window.removeEventListener("keydown", preventKeyboardZoom);
+      document.documentElement.classList.remove("bt-pwa-fixed-zoom");
+      if (viewport && originalViewport !== null) viewport.setAttribute("content", originalViewport);
+    };
+  }, []);
+
+  useEffect(() => {
     const online = () => {
       // Public transport eligibility must be fetched again after reconnection.
       if (window.location.pathname.startsWith("/student/")) {
