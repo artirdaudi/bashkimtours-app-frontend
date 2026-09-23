@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, cwd(), "");
   return {
     plugins: [react(), tailwindcss(), VitePWA({
-      registerType: "prompt",
+      registerType: "autoUpdate",
       manifest: {
         id: "/",
         name: "Bashkim Tours",
@@ -27,11 +27,24 @@ export default defineConfig(({ mode }) => {
         ],
       },
       workbox: {
-        globPatterns: ["**/*.{js,css,html,png,jpg,jpeg,svg,woff,woff2}"],
-        navigateFallback: "index.html",
-        // Only app pages receive the shell. API responses are never cached.
-        navigateFallbackAllowlist: [/^\/$/, /^\/(students|debts|cards|areas|vehicles|drivers|calendar|followup-rules|payments|account|income)\/?$/, /^\/student\/[^/]+\/?$/],
-        runtimeCaching: [],
+        // Fetch page HTML from the network on every navigation/reload so browser
+        // tabs receive deployments without accepting a service-worker update.
+        globPatterns: ["**/*.{js,css,png,jpg,jpeg,svg,woff,woff2}"],
+        navigateFallback: null,
+        runtimeCaching: [{
+          urlPattern: ({ request, url, sameOrigin }) => sameOrigin && request.mode === "navigate" && (
+            /^\/$/.test(url.pathname) ||
+            /^\/(students|debts|cards|areas|vehicles|drivers|calendar|followup-rules|payments|account|income)\/?$/.test(url.pathname) ||
+            /^\/student\/[^/]+\/?$/.test(url.pathname)
+          ),
+          handler: "NetworkFirst",
+          options: {
+            cacheName: "bt-page-shells",
+            fetchOptions: { cache: "no-store" },
+            cacheableResponse: { statuses: [200] },
+            expiration: { maxEntries: 20 },
+          },
+        }],
         cleanupOutdatedCaches: true,
       },
     })],

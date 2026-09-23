@@ -10,9 +10,9 @@ export default function PwaSupport() {
   const [installed, setInstalled] = useState(isStandalone);
   const [dismissed, setDismissed] = useState(false);
   const [error, setError] = useState("");
-  const [updating, setUpdating] = useState(false);
-  const { needRefresh: [needRefresh, setNeedRefresh], updateServiceWorker } = useRegisterSW({
-    onRegisterError: () => setError("Instalimi jashtë linje nuk është gati. Rifreskoni faqen për të provuar përsëri."),
+  useRegisterSW({
+    onNeedReload: () => window.location.reload(),
+    onRegisterError: () => isStandalone() && setError("Përditësimi automatik nuk është gati. Rifreskoni faqen për të provuar përsëri."),
   });
   const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
@@ -24,6 +24,7 @@ export default function PwaSupport() {
         return;
       }
       setOffline(false);
+      checkUpdate();
     };
     const offline = () => setOffline(true);
     const offerInstall = (event) => {
@@ -39,12 +40,19 @@ export default function PwaSupport() {
         navigator.serviceWorker.getRegistration().then((registration) => registration?.update()).catch(() => {});
       }
     };
+    const updateTimer = window.setInterval(checkUpdate, 60_000);
+    checkUpdate();
+    window.addEventListener("focus", checkUpdate);
+    window.addEventListener("pageshow", checkUpdate);
     window.addEventListener("online", online);
     window.addEventListener("offline", offline);
     window.addEventListener("beforeinstallprompt", offerInstall);
     window.addEventListener("appinstalled", installed);
     document.addEventListener("visibilitychange", checkUpdate);
     return () => {
+      window.clearInterval(updateTimer);
+      window.removeEventListener("focus", checkUpdate);
+      window.removeEventListener("pageshow", checkUpdate);
       window.removeEventListener("online", online);
       window.removeEventListener("offline", offline);
       window.removeEventListener("beforeinstallprompt", offerInstall);
@@ -73,17 +81,6 @@ export default function PwaSupport() {
     }
   }
 
-  async function update() {
-    setUpdating(true);
-    try {
-      await updateServiceWorker(true);
-    } catch {
-      setError("Përditësimi dështoi. Provoni përsëri.");
-    } finally {
-      setUpdating(false);
-    }
-  }
-
   if (offline) return (
     <div className="bt-pwa-offline" role="alertdialog" aria-modal="true" aria-labelledby="bt-offline-title" aria-describedby="bt-offline-description">
       <section>
@@ -94,22 +91,15 @@ export default function PwaSupport() {
     </div>
   );
 
-  if (!needRefresh && !error && (installed || dismissed || (!installPrompt && !ios))) return null;
+  if (!error && (installed || dismissed || (!installPrompt && !ios))) return null;
   return (
     <aside className="bt-pwa-notice" aria-label="Bashkim Tours aplikacioni">
       {error && <p role="alert">{error}</p>}
-      {needRefresh ? <>
-        <strong>Një version i ri është gati</strong>
-        <p>Ruani punën në të gjitha dritaret e aplikacionit para rifreskimit.</p>
-        <button type="button" onClick={update} disabled={updating}>{updating ? "Duke përditësuar…" : "Përditëso"}</button>
-        <button type="button" onClick={() => { setNeedRefresh(false); setError(""); }}>Më vonë</button>
-      </> : <>
         {!installed && !dismissed && <>
           <strong>Instalo Bashkim Tours</strong>
           {installPrompt ? <><p>Hapeni aplikacionin direkt nga ekrani kryesor.</p><button type="button" onClick={install}>Instalo</button></> : ios ? <p>Në Safari, hapni menynë “Share”, zgjidhni “Add to Home Screen”, pastaj “Add”.</p> : null}
         </>}
-        <button type="button" onClick={() => { setDismissed(true); setError(""); }}>Mbyll</button>
-      </>}
+      <button type="button" onClick={() => { setDismissed(true); setError(""); }}>Mbyll</button>
     </aside>
   );
 }

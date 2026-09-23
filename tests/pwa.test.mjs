@@ -7,17 +7,21 @@ const manifest = JSON.parse(readFileSync(new URL('../dist/manifest.webmanifest',
 const worker = readFileSync(new URL('../dist/sw.js', import.meta.url), 'utf8');
 const routes = [];
 const precache = [];
-const listeners = new Map();
 let skipped = false;
+let claimed = false;
 const workbox = {
   precacheAndRoute: (entries) => precache.push(...entries),
   cleanupOutdatedCaches() {},
+  clientsClaim() { claimed = true; },
   createHandlerBoundToURL: (url) => url,
   NavigationRoute: class { constructor(handler, options) { this.handler = handler; this.options = options; } },
-  registerRoute: (route) => routes.push(route),
+  NetworkFirst: class { constructor(options) { this.options = options; } },
+  CacheableResponsePlugin: class {},
+  ExpirationPlugin: class {},
+  registerRoute: (match, handler) => routes.push({ match, handler }),
 };
 runInNewContext(worker, {
-  self: { define() {}, addEventListener: (event, callback) => listeners.set(event, callback), skipWaiting: () => { skipped = true; } },
+  self: { define() {}, addEventListener() {}, skipWaiting: () => { skipped = true; } },
   define: (_deps, factory) => factory(workbox),
 });
 
@@ -34,20 +38,21 @@ test('manifest has installable identity and correctly sized icons', () => {
 
 test('only app assets are precached and live APIs have no runtime cache', () => {
   assert.equal(routes.length, 1);
-  assert.equal(routes[0].handler, 'index.html');
+  assert(routes[0].handler instanceof workbox.NetworkFirst);
+  assert.equal(routes[0].handler.options.fetchOptions.cache, 'no-store');
+  assert(!precache.some(({ url }) => url.endsWith('.html')));
   for (const { url } of precache) {
     assert(existsSync(new URL('../dist/' + url, import.meta.url)), url);
     assert(!url.startsWith('http') && !url.startsWith('api/'));
   }
-  const allowed = (path) => routes[0].options.allowlist.some((pattern) => pattern.test(path));
+  const allowed = (path, mode = 'navigate', sameOrigin = true) => routes[0].match({ request: { mode }, url: new URL(path, 'https://app.bashkimtours.com'), sameOrigin });
+  assert(!allowed('/students', 'cors'));
+  assert(!allowed('/students', 'navigate', false));
   for (const path of ['/', '/students', '/payments', '/student/test-token']) assert(allowed(path), path);
   for (const path of ['/api/auth/me', '/api/payments', '/auth/login', '/qr/test-token', '/health']) assert(!allowed(path), path);
 });
 
-test('new service worker waits for explicit update acceptance', () => {
-  assert.equal(skipped, false);
-  listeners.get('message')({ data: { type: 'UNRELATED' } });
-  assert.equal(skipped, false);
-  listeners.get('message')({ data: { type: 'SKIP_WAITING' } });
+test('new service worker activates and claims clients without user acceptance', () => {
   assert.equal(skipped, true);
+  assert.equal(claimed, true);
 });
