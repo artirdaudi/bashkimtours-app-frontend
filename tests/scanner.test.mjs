@@ -27,3 +27,40 @@ test('continuous frames do not beep repeatedly; different cards scan immediately
   assert(accept('B', 1600)); assert(accept('A', 1700)); assert(!accept('A', 1800));
   assert(accept('A', 4001));
 });
+
+test('scanner audio requests playback, resumes on interaction, and restores the session', async () => {
+  const { readFileSync } = await import('node:fs');
+  const { runInNewContext } = await import('node:vm');
+  const source = readFileSync(new URL('../src/scanAudio.js', import.meta.url), 'utf8').replaceAll('export function', 'function');
+  let resumed = 0;
+  let closed = 0;
+  const navigator = { audioSession: { type: 'ambient' } };
+  class AudioContext {
+    state = 'suspended';
+    resume() { resumed++; this.state = 'running'; return Promise.resolve(); }
+    close() { closed++; this.state = 'closed'; return Promise.resolve(); }
+  }
+  const audio = runInNewContext(source + '\n({prepareScanAudio, releaseScanAudio})', { navigator, window: { AudioContext } });
+  audio.prepareScanAudio();
+  assert.equal(navigator.audioSession.type, 'playback');
+  assert.equal(resumed, 1);
+  audio.releaseScanAudio();
+  assert.equal(navigator.audioSession.type, 'ambient');
+  assert.equal(closed, 1);
+});
+
+test('unsupported audio APIs and autoplay suspension do not break scanning or queue tones', async () => {
+  const { readFileSync } = await import('node:fs');
+  const { runInNewContext } = await import('node:vm');
+  const source = readFileSync(new URL('../src/scanAudio.js', import.meta.url), 'utf8').replaceAll('export function', 'function');
+  const unsupported = runInNewContext(source + '\n({prepareScanAudio, playScanTone})', { navigator: {}, window: {} });
+  assert.equal(unsupported.prepareScanAudio(), null);
+  assert.doesNotThrow(() => unsupported.playScanTone('good'));
+  class AudioContext {
+    state = 'suspended';
+    resume() { return Promise.resolve(); }
+    createOscillator() { throw new Error('Must not queue a tone while suspended'); }
+  }
+  const blocked = runInNewContext(source + '\n({playScanTone})', { navigator: {}, window: { AudioContext } });
+  assert.doesNotThrow(() => blocked.playScanTone('good'));
+});

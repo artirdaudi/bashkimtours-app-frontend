@@ -53,7 +53,7 @@ Existing clients running an older release must receive this release once before 
 
 ## Maarif scanner
 
-Open **Maarif → Skano** (`/skano`) and tap **Hap kamerën** once to grant camera access and unlock audio. The rear camera is preferred, with a JavaScript QR decoder fallback for browsers without native barcode detection. Camera access requires HTTPS (localhost is supported for development).
+Open **Maarif → Skano** (`/skano`); the camera starts automatically after camera permission is granted. The page uses two equal panels (stacked on phones, side by side on wider screens) with scrolling confined to longer student details. Audio is prepared by the Skano navigation tap, with no camera or sound controls. A direct launch may require one touch anywhere on the page under browser autoplay rules. Supported iPhones use the playback audio-session category for tones in Silent Mode; media volume and OS restrictions still apply. The previous audio-session category is restored on leaving the page. The rear camera is preferred, with a JavaScript QR decoder fallback for browsers without native barcode detection. Camera access requires HTTPS (localhost is supported for development).
 
 Scanning stays active between cards. Each new QR is verified against the live `/qr/{token}` endpoint; scanned URLs are never navigated to. Repeated frames of the same card are suppressed until it leaves the frame for two seconds. A newer scan cancels any earlier lookup, and leaving the page releases the camera.
 
