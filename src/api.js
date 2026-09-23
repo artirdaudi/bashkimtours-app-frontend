@@ -15,6 +15,7 @@ export async function api(path, options = {}) {
   try {
     response = await fetch(`${API_BASE_URL}${path}`, {
       ...options,
+      cache: "no-store",
       headers: {
         ...(options.body ? { "Content-Type": "application/json" } : {}),
         Authorization: `Bearer ${getToken()}`,
@@ -45,7 +46,7 @@ export async function api(path, options = {}) {
 export async function publicApi(path, options = {}) {
   let response;
   try {
-    response = await fetch(`${API_BASE_URL}${path}`, options);
+    response = await fetch(`${API_BASE_URL}${path}`, { ...options, cache: "no-store" });
   } catch {
     throw new Error("Nuk mund të lidhemi me serverin.");
   }

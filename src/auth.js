@@ -10,6 +10,7 @@ export const API_BASE_URL = (import.meta.env.VITE_BASHKIMTOURS_API_URL || "").re
 
 export async function login(username, password) {
   const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    cache: "no-store",
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password }),

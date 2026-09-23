@@ -1,0 +1,12 @@
+.bt-pwa-notice { position: fixed; z-index: 10000; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); width: min(360px, calc(100vw - 32px)); padding: 20px; color: #073878; background: white; border: 1px solid #dbe3ee; border-radius: 16px; box-shadow: 0 8px 40px #07387826; font-family: inherit; }
+.bt-pwa-notice p { margin: 8px 0 14px; font-size: 14px; line-height: 1.5; }
+.bt-pwa-notice button { background: #073878; color: white; border: 0; border-radius: 8px; padding: 10px 14px; margin: 4px 8px 0 0; cursor: pointer; font: inherit; }
+.bt-pwa-notice button:last-child { background: #edf2f8; color: #073878; }
+.bt-pwa-notice button:disabled { opacity: .6; cursor: wait; }
+.bt-pwa-notice button:focus-visible { outline: 3px solid #0faab7; outline-offset: 3px; }
+.bt-pwa-offline { position: fixed; inset: 0; z-index: 20000; display: grid; place-items: center; overflow: auto; padding: 24px; background: #f3f6fa; color: #073878; text-align: center; }
+.bt-pwa-offline section { max-width: 440px; }
+.bt-pwa-offline img { border-radius: 20px; }
+.bt-pwa-offline h1 { font-size: 26px; margin: 20px 0 12px; }
+.bt-pwa-offline p { line-height: 1.6; }
+@media print { .bt-pwa-notice, .bt-pwa-offline { display: none !important; } }
