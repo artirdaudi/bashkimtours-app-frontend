@@ -109,7 +109,7 @@ export default function PwaSupport() {
   // Keep forms mounted while offline so unfinished input is not lost.
   useEffect(() => {
     const app = document.getElementById("bt-app-content");
-    if (app) app.inert = offline;
+    if (app) app.inert = offline || document.documentElement.classList.contains("bt-pwa-launch");
     return () => { if (app) app.inert = false; };
   }, [offline]);
 

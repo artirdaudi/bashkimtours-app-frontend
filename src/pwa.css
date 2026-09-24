@@ -83,3 +83,28 @@ html.bt-pwa-fixed-zoom body { touch-action: pan-x pan-y; }
   html.bt-pwa-standalone :is(.bt-form-grid, .bt-assignment-form) { grid-template-columns: minmax(0, 1fr); }
   html.bt-pwa-standalone :is(.bt-form-grid, .bt-assignment-form) > * { min-width: 0; grid-column: auto; }
 }
+
+/* Extra launch/login motion belongs only to standalone PWA windows. */
+.bt-pwa-login-feedback { display: none; }
+html.bt-pwa-standalone .bt-pwa-login-feedback { display: inline-flex; align-items: center; }
+html.bt-pwa-standalone .bt-pwa-login-feedback:empty { display: none; }
+html.bt-pwa-standalone .bt-submit { display: flex; justify-content: center; align-items: center; gap: 9px; transition: background .2s, transform .2s; }
+html.bt-pwa-standalone .bt-submit:active { transform: scale(.98); }
+html.bt-pwa-standalone .bt-pwa-login-spinner { animation: bt-pwa-login-spin .8s linear infinite; }
+html.bt-pwa-standalone .bt-login-card { animation: bt-pwa-login-reveal .45s ease-out both; }
+html.bt-pwa-launch .bt-login-card,
+html.bt-pwa-launch .bt-login-brand,
+html.bt-pwa-launch .bt-login-panel,
+html.bt-pwa-launch .bt-brand-copy { animation: none; }
+html.bt-pwa-standalone .bt-login-page.is-exiting .bt-login-brand,
+html.bt-pwa-standalone .bt-login-page.is-exiting .bt-login-panel { animation: bt-pwa-login-exit .45s ease-in both; }
+html.bt-pwa-standalone .bt-login-page.is-exiting .bt-login-card { animation: none; }
+html.bt-pwa-standalone .bt-login-page.is-exiting .bt-submit { background: #15803d; }
+@keyframes bt-pwa-login-reveal { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes bt-pwa-login-exit { to { opacity: 0; transform: translateY(-8px); } }
+@keyframes bt-pwa-login-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  html.bt-pwa-standalone .bt-login-page *,
+  html.bt-pwa-standalone .bt-login-page.is-exiting .bt-login-brand,
+  html.bt-pwa-standalone .bt-login-page.is-exiting .bt-login-panel { animation: none !important; transition: none !important; transform: none !important; }
+}

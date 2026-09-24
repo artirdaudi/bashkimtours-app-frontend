@@ -56,3 +56,57 @@ test('new service worker activates and claims clients without user acceptance', 
   assert.equal(skipped, true);
   assert.equal(claimed, true);
 });
+
+function launchHarness(standalone, reduced = false) {
+  const classes = new Set();
+  const timers = [];
+  const events = new Map();
+  const app = { inert: true };
+  let removed = false;
+  const splash = { remove() { removed = true; } };
+  runInNewContext(readFileSync(new URL('../public/pwa-launch.js', import.meta.url), 'utf8'), {
+    navigator: { standalone: false, onLine: true }, performance: { now: () => 0 },
+    window: {
+      matchMedia: (query) => ({ matches: query.includes('reduced-motion') ? reduced : standalone }),
+      setTimeout: (callback, delay) => { const timer = { callback, delay }; timers.push(timer); return timer; },
+      clearTimeout: (timer) => { timer.cancelled = true; },
+    },
+    document: {
+      documentElement: { classList: { add: (...names) => names.forEach((name) => classes.add(name)), remove: (...names) => names.forEach((name) => classes.delete(name)) } },
+      getElementById: (id) => id === 'bt-app-content' ? app : splash,
+      addEventListener: (event, callback) => events.set(event, callback),
+    },
+  });
+  return { classes, timers, events, app, removed: () => removed };
+}
+
+test('ordinary browser tabs never show or wait for the PWA splash', () => {
+  const launch = launchHarness(false);
+  assert.equal(launch.classes.size, 0);
+  assert.equal(launch.timers.length, 0);
+});
+
+test('installed launch fades away after app readiness and releases interaction', () => {
+  const launch = launchHarness(true);
+  assert(launch.classes.has('bt-pwa-launch'));
+  launch.events.get('bt-app-ready')();
+  assert(launch.timers[0].cancelled);
+  assert.equal(launch.timers[1].delay, 950);
+  launch.timers[1].callback();
+  launch.timers[2].callback();
+  assert(launch.removed());
+  assert(!launch.classes.has('bt-pwa-launch'));
+  assert.equal(launch.app.inert, false);
+});
+
+test('launch has a failsafe and respects reduced motion', () => {
+  const launch = launchHarness(true);
+  assert.equal(launch.timers[0].delay, 8000);
+  launch.timers[0].callback(); launch.timers[1].callback();
+  assert(launch.removed());
+  const reduced = launchHarness(true, true);
+  reduced.events.get('bt-app-ready')();
+  assert.equal(reduced.timers[1].delay, 0);
+  reduced.timers[1].callback();
+  assert.equal(reduced.timers[2].delay, 0);
+});

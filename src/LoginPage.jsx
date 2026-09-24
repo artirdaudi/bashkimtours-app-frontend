@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Eye, EyeOff, LockKeyhole, UserRound } from "lucide-react";
+import { Eye, EyeOff, LockKeyhole, UserRound, Check, LoaderCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { login } from "./auth";
 import logo from "./assets/bashkimtours_logo.png";
@@ -68,7 +68,10 @@ export default function LoginPage() {
           </label>
 
           {error && <p className="bt-error" role="alert">{error}</p>}
-          <button className="bt-submit" type="submit" disabled={loading}>{loading ? "Duke u kyçur…" : "Kyçu"}</button>
+          <button className="bt-submit" type="submit" disabled={loading} aria-busy={loading}>
+            <span className="bt-pwa-login-feedback" aria-hidden="true">{exiting ? <Check size={20} /> : loading ? <LoaderCircle size={20} className="bt-pwa-login-spinner" /> : null}</span>
+            {loading ? "Duke u kyçur…" : "Kyçu"}
+          </button>
           <p className="bt-help">Për ndihmë me llogarinë, kontaktoni administratorin.</p>
         </form>
       </section>

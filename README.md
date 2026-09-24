@@ -62,3 +62,7 @@ Scanning stays active between cards. Each new QR is verified against the live `/
 - Neutral warning: no confirmed current-month payment, invalid card, or unsuccessful verification. These never play the paid tone.
 
 Use `npm run test:scanner` for QR parsing, payment classification, and duplicate-frame checks. Before deployment, test real cards on the staff phones: camera permission, sound, paid/unpaid/blocked cards, rapid consecutive cards, denied permission, and connection failure. Scanning only reads status; it does not record attendance or payments.
+
+## PWA launch screen
+
+Installed standalone windows show a branded launch overlay before React renders, followed by PWA-only login motion and submit feedback. Browser tabs do not show the overlay. The splash lasts about one second on a normal launch, exits when the app mounts, and has an eight-second failsafe; it never waits for API calls. Reduced-motion preferences remove the animated transition and minimum delay. This is the in-app launch screen; the operating system may briefly show its own launch screen first.
