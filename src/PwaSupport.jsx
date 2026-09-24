@@ -23,6 +23,7 @@ export default function PwaSupport() {
     const syncZoomMode = () => {
       const standalone = isStandalone();
       document.documentElement.classList.toggle("bt-pwa-fixed-zoom", standalone);
+      document.documentElement.classList.toggle("bt-pwa-standalone", standalone);
       if (viewport) viewport.setAttribute("content", standalone
         ? "width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no"
         : originalViewport);
@@ -55,7 +56,7 @@ export default function PwaSupport() {
       document.removeEventListener("touchmove", preventPinch);
       window.removeEventListener("wheel", preventWheelZoom);
       window.removeEventListener("keydown", preventKeyboardZoom);
-      document.documentElement.classList.remove("bt-pwa-fixed-zoom");
+      document.documentElement.classList.remove("bt-pwa-fixed-zoom", "bt-pwa-standalone");
       if (viewport && originalViewport !== null) viewport.setAttribute("content", originalViewport);
     };
   }, []);

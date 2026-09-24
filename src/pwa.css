@@ -18,3 +18,68 @@ html.bt-pwa-fixed-zoom body { touch-action: pan-x pan-y; }
   html.bt-pwa-fixed-zoom select,
   html.bt-pwa-fixed-zoom textarea { font-size: max(16px, 1em); }
 }
+
+/* Installed-app form sizing. Keep table/card canvases and tab scrolling intact. */
+@media screen {
+  html.bt-pwa-standalone :is(input, select, textarea) {
+    box-sizing: border-box;
+    min-width: 0;
+    max-width: 100%;
+  }
+  html.bt-pwa-standalone textarea { resize: vertical; }
+  html.bt-pwa-standalone :is(
+    .bt-field, .bt-input-wrap, .bt-form-grid, .bt-payment-form,
+    .bt-payment-due-form, .bt-assignment-form, .bt-account-card,
+    .bt-admin-filters, .bt-card-filters, .bt-finance-filterbar,
+    .bt-payments-controls, .bt-payment-period-input, .bt-payment-search,
+    .bt-labeled-filter, .bt-finance-month-picker
+  ),
+  html.bt-pwa-standalone :is(
+    .bt-form-grid, .bt-payment-form, .bt-payment-due-form,
+    .bt-assignment-form, .bt-account-card, .bt-admin-filters,
+    .bt-card-filters, .bt-finance-filterbar, .bt-payments-controls
+  ) > *,
+  html.bt-pwa-standalone :is(.bt-labeled-filter, .bt-finance-filterbar label) > div {
+    min-width: 0;
+    max-width: 100%;
+  }
+  html.bt-pwa-standalone :is(
+    .bt-admin-filters, .bt-card-filters, .bt-labeled-filter,
+    .bt-input-wrap, .bt-payment-search, .bt-payment-period-input
+  ) input:not([type="checkbox"]):not([type="radio"]) {
+    flex: 1 1 0%;
+    width: 100%;
+  }
+  html.bt-pwa-standalone :is(
+    .bt-input-wrap, .bt-admin-filters label, .bt-labeled-filter > div,
+    .bt-card-filters label, .bt-finance-filterbar label > div
+  ) > svg { flex-shrink: 0; }
+  html.bt-pwa-standalone :is(.bt-admin-filters, .bt-card-filters) { flex-wrap: wrap; }
+  html.bt-pwa-standalone :is(.bt-form-grid, .bt-account-card, .bt-assignment-form, .bt-payment-due-form) label {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+}
+@media screen and (max-width: 800px) {
+  html.bt-pwa-standalone :is(.bt-admin-filters, .bt-card-filters, .bt-finance-filterbar, .bt-payments-controls) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  html.bt-pwa-standalone :is(.bt-admin-filters, .bt-card-filters, .bt-finance-filterbar, .bt-payments-controls) > * {
+    width: 100%;
+    grid-column: auto;
+  }
+  html.bt-pwa-standalone :is(.bt-admin-filters, .bt-card-filters) select { min-width: 0; width: 100%; min-height: 42px; }
+  html.bt-pwa-standalone .bt-finance-month-picker { grid-template-columns: minmax(0, 1fr) minmax(0, 0.65fr); }
+  html.bt-pwa-standalone .bt-finance-period-filter > div { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  html.bt-pwa-standalone .bt-period-tabs { flex-wrap: wrap; }
+  html.bt-pwa-standalone .bt-period-tabs button { flex: 1 1 auto; min-width: 0; }
+  html.bt-pwa-standalone .bt-modal-actions { flex-wrap: wrap; }
+  html.bt-pwa-standalone .bt-modal-actions button { max-width: 100%; white-space: normal; }
+  html.bt-pwa-standalone .bt-multi-month-list > label { grid-template-columns: auto minmax(0, 1fr) minmax(65px, 85px); }
+  html.bt-pwa-standalone .bt-multi-month-list > label > span { min-width: 0; overflow-wrap: anywhere; }
+}
+@media screen and (max-width: 600px) {
+  html.bt-pwa-standalone :is(.bt-form-grid, .bt-assignment-form) { grid-template-columns: minmax(0, 1fr); }
+  html.bt-pwa-standalone :is(.bt-form-grid, .bt-assignment-form) > * { min-width: 0; grid-column: auto; }
+}
