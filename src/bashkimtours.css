@@ -6213,3 +6213,18 @@
     flex: 0 0 68px;
   }
 }
+
+.bt-card-pdf-settings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 14px;
+  padding: 18px;
+  margin-bottom: 20px;
+  border: 1px solid #dce3ed;
+  border-radius: 14px;
+  background: #fff;
+}
+.bt-card-pdf-settings label { display: grid; gap: 6px; font-size: 13px; font-weight: 600; }
+.bt-card-pdf-settings input { width: 130px; max-width: 100%; padding: 10px; border: 1px solid #dce3ed; border-radius: 8px; font: inherit; }
+.bt-card-pdf-settings p { flex-basis: 100%; margin: 0; font-size: 13px; color: #526078; }

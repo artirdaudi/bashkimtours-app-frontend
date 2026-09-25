@@ -5,6 +5,8 @@ import { toPng } from "html-to-image";
 import JSZip from "jszip";
 import { studentsApi } from "./api";
 import StudentTravelCard from "./StudentTravelCard";
+import cardBackUrl from "../bashkimtours_kartela_prapa.png";
+import { getCardLayout, createCardsPdf } from "./cardsPdf";
 
 const APP_ORIGIN = (import.meta.env.VITE_APP_URL || window.location.origin).replace(/\/$/, "");
 const QR_ORIGIN = `${APP_ORIGIN}/student`;
@@ -66,6 +68,9 @@ export default function StudentCardsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [downloading, setDownloading] = useState("");
+  const [widthCm, setWidthCm] = useState("9.3");
+  const [heightCm, setHeightCm] = useState("5.8");
+  const layout = getCardLayout(Number(widthCm), Number(heightCm));
   const cardRefs = useRef(new Map());
 
   useEffect(() => {
@@ -143,17 +148,40 @@ export default function StudentCardsPage() {
     finally { setDownloading(""); }
   };
 
+  const downloadPdf = async () => {
+    if (!layout || !qrReady || downloading) return;
+    setDownloading("PDF...");
+    setError("");
+    try {
+      const response = await fetch(cardBackUrl);
+      if (!response.ok) throw new Error("Fotoja e pasme nuk mund të ngarkohet.");
+      const backImage = new Uint8Array(await response.arrayBuffer());
+      const pdf = await createCardsPdf(shown, layout, renderCard, backImage, (done) => {
+        setDownloading(`PDF ${done}/${shown.length}`);
+      });
+      saveBlob(pdf.output("blob"), "bashkim-tours-kartelat-a4.pdf");
+    } catch (err) { setError(err.message); }
+    finally { setDownloading(""); }
+  };
+
   return (
     <div className="bt-page bt-cards-page">
       <div className="bt-page-header">
-        <div><span className="bt-eyebrow">Maarif</span><h1>Kartelat e nxënësve</h1><p>Preview, QR dhe shkarkim i kartelave si imazh.</p></div>
+        <div><span className="bt-eyebrow">Maarif</span><h1>Kartelat e nxënësve</h1><p>Preview, QR dhe shkarkim i kartelave si imazh ose PDF A4.</p></div>
         <button className="bt-btn-primary" onClick={downloadAll} disabled={Boolean(downloading) || !qrReady}>
-          <Images size={17} /> {downloading ? `Duke përgatitur ${downloading === "all" ? "..." : downloading}` : !qrReady && shown.length ? "Duke krijuar QR..." : `Shkarko të gjitha (${shown.length})`}
+          <Images size={17} /> {downloading ? `Duke përgatitur ${downloading === "all" ? "..." : downloading}` : !qrReady && shown.length ? "Duke krijuar QR..." : `Shkarko ZIP (${shown.length})`}
         </button>
       </div>
       <div className="bt-card-filters">
-        <label><Search /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Kërko me emër, kod ose zonë..." /></label>
-        <select value={status} onChange={(e) => setStatus(e.target.value)}><option value="ACTIVE">Aktiv</option><option value="INACTIVE">Jo aktiv</option><option value="">Të gjithë</option></select>
+        <label><Search /><input disabled={Boolean(downloading)} value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Kërko me emër, kod ose zonë..." /></label>
+        <select disabled={Boolean(downloading)} value={status} onChange={(e) => setStatus(e.target.value)}><option value="ACTIVE">Aktiv</option><option value="INACTIVE">Jo aktiv</option><option value="">Të gjithë</option></select>
+      </div>
+      <div className="bt-card-pdf-settings">
+        <label>Gjerësia (cm)<input type="number" min="1" max="19" step="0.01" value={widthCm} disabled={Boolean(downloading)} onChange={(e) => setWidthCm(e.target.value)} /></label>
+        <label>Lartësia (cm)<input type="number" min="1" max="27.7" step="0.01" value={heightCm} disabled={Boolean(downloading)} onChange={(e) => setHeightCm(e.target.value)} /></label>
+        <button className="bt-btn-primary" onClick={downloadPdf} disabled={Boolean(downloading) || !qrReady || !layout}><Download size={17} />{downloading.startsWith("PDF") ? `Duke përgatitur ${downloading}` : `Shkarko PDF A4 (${shown.length})`}</button>
+        <p aria-live="polite">{layout ? `${layout.columns} kolona × ${layout.rows} rreshta · ${layout.perPage} kartela në A4 · ${2 * Math.ceil(shown.length / layout.perPage)} faqe (para + pas) · ${widthCm} × ${heightCm} cm` : "Vendosni përmasa nga 1 × 1 cm deri në 19 × 27.7 cm."}</p>
+        <p>PDF përfshin kartelat sipas filtrave. Për të gjitha, zgjidhni “Të gjithë” dhe pastroni kërkimin. Faqet alternohen: para, pas. Printoni në A4, në të dyja anët, me kthim në anën e gjatë (Flip on long edge), madhësi 100% / Actual size, pa përshtatje në faqe. Fotoja mbush përmasat e zgjedhura; vijat tregojnë ku të pritet.</p>
       </div>
       {error && <div className="bt-alert-error">{error}</div>}
       {loading ? <div className="bt-cards-empty">Duke ngarkuar kartelat...</div> : !shown.length ? <div className="bt-cards-empty">Nuk u gjet asnjë nxënës.</div> : (
