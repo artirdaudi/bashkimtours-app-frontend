@@ -1813,6 +1813,30 @@
   color: var(--bt-muted);
   font-size: 13px;
 }
+.bt-income-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 15px 17px;
+  color: #7a4b0a;
+  background: #fff8e8;
+  border: 1px solid #f4d69b;
+  border-radius: 12px;
+}
+.bt-income-notice > svg {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+.bt-income-notice strong {
+  font-size: 13px;
+}
+.bt-income-notice p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
 .bt-finance-live {
   display: inline-flex;
   align-items: center;

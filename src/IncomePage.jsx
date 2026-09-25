@@ -3,6 +3,7 @@ import {
   Banknote,
   Building2,
   CalendarDays,
+  Info,
   Layers3,
   RefreshCw,
   TrendingUp,
@@ -215,6 +216,14 @@ export default function IncomePage() {
           </p>
         </div>
       </header>
+
+      <div className="bt-income-notice" role="status">
+        <Info aria-hidden="true" />
+        <div>
+          <strong>Kjo faqe është ende në përpunim</strong>
+          <p>Faqja e të hyrave kërkon ende punë shtesë për të qenë plotësisht funksionale. Disa të dhëna dhe funksione mund të mos jenë ende të plota.</p>
+        </div>
+      </div>
 
       <section className="bt-finance-filterbar bt-finance-filterbar--calendar">
         <label>
