@@ -68,8 +68,8 @@ export default function StudentCardsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [downloading, setDownloading] = useState("");
-  const [widthCm, setWidthCm] = useState("9.3");
-  const [heightCm, setHeightCm] = useState("5.8");
+  const [widthCm, setWidthCm] = useState("9");
+  const [heightCm, setHeightCm] = useState("5.5");
   const layout = getCardLayout(Number(widthCm), Number(heightCm));
   const cardRefs = useRef(new Map());
 
