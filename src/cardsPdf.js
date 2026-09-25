@@ -3,7 +3,7 @@ export function getCardLayout(widthCm, heightCm) {
   const width = widthCm * 10;
   const height = heightCm * 10;
   if (!Number.isFinite(width) || !Number.isFinite(height) || width < 10 || height < 10 || width > 190 || height > 277) return null;
-  const gap = 3;
+  const gap = 0;
   const columns = Math.floor((190 + gap + 1e-9) / (width + gap));
   const rows = Math.floor((277 + gap + 1e-9) / (height + gap));
   return {
