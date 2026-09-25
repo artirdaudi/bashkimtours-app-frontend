@@ -8,7 +8,7 @@ import {
   RefreshCw,
   TrendingUp,
 } from "lucide-react";
-import { paymentsApi, reportingApi } from "./api";
+import { monthlyPaymentsApi, maarifReportingApi } from "./api";
 import maarifLogo from "./assets/maarif_logo.jpeg";
 import DateInput from "./DateInput";
 
@@ -62,7 +62,7 @@ const rangeFor = (period, selectedDay, selectedMonth, selectedYear) => {
 };
 
 async function getPaymentsForDay(day) {
-  const first = await paymentsApi.list({
+  const first = await monthlyPaymentsApi.list({
     payment_date_from: day,
     payment_date_to: day,
     page: 1,
@@ -73,7 +73,7 @@ async function getPaymentsForDay(day) {
   if (first.total_pages <= 1) return first.items;
   const remaining = await Promise.all(
     Array.from({ length: first.total_pages - 1 }, (_, index) =>
-      paymentsApi.list({
+      monthlyPaymentsApi.list({
         payment_date_from: day,
         payment_date_to: day,
         page: index + 2,
@@ -163,9 +163,9 @@ export default function IncomePage() {
         payment_date_to: dateTo,
       };
       Promise.all([
-        reportingApi.summary(filters),
-        reportingApi.breakdown("user", filters),
-        reportingApi.breakdown("date", filters),
+        maarifReportingApi.summary(filters),
+        maarifReportingApi.byUser(filters),
+        maarifReportingApi.byDate(filters),
         period === "day" ? getPaymentsForDay(selectedDay) : Promise.resolve([]),
       ])
         .then(([summaryData, users, dates, dayPayments]) => {
@@ -208,10 +208,10 @@ export default function IncomePage() {
     <div className="bt-page bt-ops-page bt-finance-page">
       <header className="bt-finance-header">
         <div>
-          <span className="bt-eyebrow">Bashkim Tours · Financa</span>
+          <span className="bt-eyebrow">Bashkim Tours · Maarif · Financa</span>
           <h1>Të hyrat</h1>
           <p>
-            Përmbledhja e të gjitha të hyrave të Bashkim Tours, e organizuar
+            Përmbledhja e të hyrave nga transporti Maarif, e organizuar
             sipas burimit dhe datës së arkëtimit.
           </p>
         </div>
@@ -286,7 +286,7 @@ export default function IncomePage() {
           <section className="bt-finance-overview bt-finance-overview--total-only">
             <article className="bt-finance-total-card">
               <div>
-                <span>TË HYRAT E BASHKIM TOURS</span>
+                <span>TË HYRAT NGA MAARIF</span>
               </div>
               <strong>{money(summary.total_income)}</strong>
               <div className="bt-finance-total-meta">

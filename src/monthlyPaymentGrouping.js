@@ -10,10 +10,10 @@ const samePaymentContext = (left, right) =>
   left.created_by_user_id === right.created_by_user_id &&
   left.payment_date === right.payment_date;
 
-// The API currently stores one payment per monthly due and has no batch ID.
+// The Maarif API stores one monthly payment per monthly due and has no batch ID.
 // Treat nearby records from the same student/user/date as one checkout only for
 // presentation and receipt printing; the original payment records remain intact.
-export function groupRelatedPayments(payments, windowMs = PAYMENT_BATCH_WINDOW_MS) {
+export function groupRelatedMonthlyPayments(payments, windowMs = PAYMENT_BATCH_WINDOW_MS) {
   const sorted = [...payments].sort((a, b) => {
     const timeDifference = (timestamp(b) || 0) - (timestamp(a) || 0);
     return timeDifference || Number(b.id || 0) - Number(a.id || 0);

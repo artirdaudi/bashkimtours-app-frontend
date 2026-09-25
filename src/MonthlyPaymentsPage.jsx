@@ -6,11 +6,11 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
-import { paymentsApi } from "./api";
+import { monthlyPaymentsApi } from "./api";
 import DateInput from "./DateInput";
 import { formatDate, formatDateTime } from "./dateUtils";
 import { PaymentReceipt } from "./StudentsPage";
-import { groupRelatedPayments } from "./paymentGrouping";
+import { groupRelatedMonthlyPayments } from "./monthlyPaymentGrouping";
 import bashkimToursLogo from "./assets/bashkimtours_logo.png";
 
 const localIsoDate = () => {
@@ -62,7 +62,7 @@ function rangeFor(period, day, month, year) {
 }
 
 async function getAllPayments(params) {
-  const first = await paymentsApi.list({
+  const first = await monthlyPaymentsApi.list({
     ...params,
     page: 1,
     page_size: 100,
@@ -72,7 +72,7 @@ async function getAllPayments(params) {
   if (first.total_pages <= 1) return first.items;
   const remaining = await Promise.all(
     Array.from({ length: first.total_pages - 1 }, (_, index) =>
-      paymentsApi.list({
+      monthlyPaymentsApi.list({
         ...params,
         page: index + 2,
         page_size: 100,
@@ -84,7 +84,7 @@ async function getAllPayments(params) {
   return [first, ...remaining].flatMap((response) => response.items);
 }
 
-export default function PaymentsPage() {
+export default function MonthlyPaymentsPage() {
   const today = localIsoDate();
   const [period, setPeriod] = useState("day");
   const [day, setDay] = useState(today);
@@ -154,7 +154,7 @@ export default function PaymentsPage() {
     setError("");
     try {
       await Promise.all(
-        group.payments.map((payment) => paymentsApi.remove(payment.id)),
+        group.payments.map((payment) => monthlyPaymentsApi.remove(payment.id)),
       );
       await load();
     } catch (requestError) {
@@ -185,7 +185,7 @@ export default function PaymentsPage() {
         .includes(term);
     });
     const grouped = new Map();
-    groupRelatedPayments(filtered).forEach((paymentGroup) => {
+    groupRelatedMonthlyPayments(filtered).forEach((paymentGroup) => {
       const username =
         paymentGroup.firstPayment.created_by_username || "Përdorues i panjohur";
       if (!grouped.has(username)) grouped.set(username, []);

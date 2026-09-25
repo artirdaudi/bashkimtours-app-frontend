@@ -5212,6 +5212,29 @@
   border: 1px solid var(--bt-line);
   border-radius: 8px;
 }
+.bt-card-price-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid var(--bt-line);
+  border-radius: 11px;
+}
+.bt-card-price-panel > div { flex-basis: 100%; }
+.bt-card-price-panel h2 { margin: 0 0 4px; font-size: 17px; }
+.bt-card-price-panel p { margin: 0; color: var(--bt-muted); font-size: 12px; }
+.bt-card-price-panel label { display: grid; gap: 5px; color: #475467; font-size: 12px; font-weight: 700; }
+.bt-card-price-panel input,
+.bt-card-price-panel select { min-height: 39px; padding: 8px 10px; border: 1px solid var(--bt-line); border-radius: 8px; font: inherit; }
+.bt-card-price-panel label:first-of-type { min-width: 220px; flex: 2; }
+.bt-card-price-panel label { min-width: 130px; flex: 1; }
+.bt-card-price-panel > p { flex-basis: 100%; }
+.bt-student-card-section { margin-top: 18px; }
+.bt-student-card-section > p { font-size: 13px; }
+.bt-card-record-actions { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; margin: 12px 0 20px; }
 .bt-cards-empty {
   padding: 50px;
   color: var(--bt-muted);
@@ -5253,6 +5276,12 @@
 .bt-card-preview-meta > div {
   display: grid;
   gap: 3px;
+}
+.bt-card-preview-meta .bt-card-preview-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
 }
 .bt-card-preview-meta span {
   color: var(--bt-muted);
@@ -5775,6 +5804,7 @@
     width: 100%;
     justify-content: center;
   }
+  .bt-card-preview-meta .bt-card-preview-actions { width: 100%; }
   .bt-qr-page {
     padding: 12px;
   }

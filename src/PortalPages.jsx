@@ -27,7 +27,7 @@ import {
   driversApi,
   duesApi,
   followupApi,
-  reportingApi,
+  maarifReportingApi,
   studentAssignmentsApi,
   studentsApi,
   vehiclesApi,
@@ -462,7 +462,7 @@ export function DashboardPage() {
       studentAssignmentsApi.summary(),
       duesApi.summary(),
       followupApi.summary(),
-      reportingApi.summary(),
+      maarifReportingApi.summary(),
     ])
       .then(([students, assignments, dues, followup, income]) =>
         setData({ students, assignments, dues, followup, income }),
@@ -562,14 +562,14 @@ export function IncomePage() {
       academic_month_id: monthId,
     };
     Promise.all([
-      reportingApi.summary(common),
-      reportingApi.breakdown("user", common),
-      reportingApi.breakdown("area", {
+      maarifReportingApi.summary(common),
+      maarifReportingApi.byUser(common),
+      maarifReportingApi.byArea({
         academic_year_id: yearId,
         academic_month_id: monthId,
       }),
       yearId
-        ? reportingApi.breakdown("month", {
+        ? maarifReportingApi.byMonth({
             academic_year_id: yearId,
           })
         : Promise.resolve([]),

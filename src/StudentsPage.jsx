@@ -22,7 +22,7 @@ import {
   areasApi,
   driverAssignmentsApi,
   duesApi,
-  paymentsApi,
+  monthlyPaymentsApi,
   studentAssignmentsApi,
   studentsApi,
 } from "./api";
@@ -31,7 +31,8 @@ import { monthSq } from "./locale";
 import bashkimToursLogo from "./assets/bashkimtours_logo.png";
 import DateInput from "./DateInput";
 import { formatDateTime } from "./dateUtils";
-import { groupRelatedPayments } from "./paymentGrouping";
+import { groupRelatedMonthlyPayments } from "./monthlyPaymentGrouping";
+import StudentCardDetails from "./StudentCardDetails";
 const now = () => {
   const d = new Date(),
     o = d.getTimezoneOffset() * 60000;
@@ -686,7 +687,7 @@ export default function StudentsPage() {
     if (due.status !== "PAID") return setPaymentDue({ due, student });
     setPaymentDue({ due, student, loadingPayment: true });
     try {
-      const response = await paymentsApi.list({
+      const response = await monthlyPaymentsApi.list({
         student_id: student.id,
         academic_month_id: due.academic_month_id,
         page: 1,
@@ -1384,7 +1385,7 @@ function MonthlyDuePaymentForm({
           });
         }
         createdPayments.push(
-          await paymentsApi.create(selectedDue.id, {
+          await monthlyPaymentsApi.create(selectedDue.id, {
             payment_date: paymentDate,
             comment: comment.trim() || null,
           }),
@@ -2160,7 +2161,7 @@ export function StudentProfile({
     () =>
       Promise.all([
         studentsApi.get(id),
-        paymentsApi.list({
+        monthlyPaymentsApi.list({
           student_id: id,
           page: 1,
           page_size: 100,
@@ -2241,7 +2242,7 @@ export function StudentProfile({
         (item) => item.is_active,
       )
     : null;
-  const paymentGroups = useMemo(() => groupRelatedPayments(payments), [payments]);
+  const paymentGroups = useMemo(() => groupRelatedMonthlyPayments(payments), [payments]);
   async function deletePaymentGroup(group) {
     const months = group.payments
       .map((payment) => monthSq(payment.month, payment.month_name))
@@ -2254,7 +2255,7 @@ export function StudentProfile({
     setError("");
     try {
       await Promise.all(
-        group.payments.map((payment) => paymentsApi.remove(payment.id)),
+        group.payments.map((payment) => monthlyPaymentsApi.remove(payment.id)),
       );
       await load();
       onChanged();
@@ -2439,6 +2440,7 @@ export function StudentProfile({
               }}
             />
           )}
+          <StudentCardDetails studentId={student.id} />
           <section className="bt-vehicle-history-section">
             <div className="bt-section-heading">
               <div>
@@ -2626,7 +2628,7 @@ function StudentPrintSheet({
   driversByVehicle,
   payments,
 }) {
-  const paymentGroups = groupRelatedPayments(payments);
+  const paymentGroups = groupRelatedMonthlyPayments(payments);
   const title =
     type === "profile"
       ? "Profili i nxënësit"

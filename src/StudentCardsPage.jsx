@@ -3,7 +3,7 @@ import { Download, Images, Search } from "lucide-react";
 import QRCode from "qrcode";
 import { toPng } from "html-to-image";
 import JSZip from "jszip";
-import { studentsApi } from "./api";
+import { maarifSettingsApi, studentsApi } from "./api";
 import StudentTravelCard from "./StudentTravelCard";
 import cardBackUrl from "../bashkimtours_kartela_prapa.png";
 import { getCardLayout, createCardsPdf } from "./cardsPdf";
@@ -70,6 +70,9 @@ export default function StudentCardsPage() {
   const [downloading, setDownloading] = useState("");
   const [widthCm, setWidthCm] = useState("9");
   const [heightCm, setHeightCm] = useState("5.5");
+  const [cardPrice, setCardPrice] = useState("");
+  const [savingPrice, setSavingPrice] = useState(false);
+  const [priceMessage, setPriceMessage] = useState("");
   const layout = getCardLayout(Number(widthCm), Number(heightCm));
   const cardRefs = useRef(new Map());
 
@@ -119,6 +122,33 @@ export default function StudentCardsPage() {
   }, [search, status, students]);
   const qrReady = shown.length > 0 && shown.every((student) => Boolean(qrCodes[student.id]));
 
+  useEffect(() => {
+    let cancelled = false;
+    maarifSettingsApi.get()
+      .then((settings) => { if (!cancelled) setCardPrice(String(Number(settings.new_card_price))); })
+      .catch((requestError) => { if (!cancelled) setPriceMessage(requestError.message); });
+    return () => { cancelled = true; };
+  }, []);
+
+  const saveCardPrice = async (event) => {
+    event.preventDefault();
+    const amount = Number(cardPrice);
+    if (cardPrice === "" || !Number.isInteger(amount) || amount < 0) {
+      setPriceMessage("Vendosni një çmim me numër të plotë.");
+      return;
+    }
+    setSavingPrice(true);
+    setPriceMessage("");
+    try {
+      const settings = await maarifSettingsApi.update({ new_card_price: amount });
+      setCardPrice(String(Number(settings.new_card_price)));
+      setPriceMessage("Çmimi për kartelën e re u ruajt.");
+    } catch (requestError) {
+      setPriceMessage(requestError.message);
+    } finally {
+      setSavingPrice(false);
+    }
+  };
   const renderCard = async (student) => {
     const node = cardRefs.current.get(student.id);
     if (!node || !qrCodes[student.id]) throw new Error("Kartela ende nuk është gati.");
@@ -164,6 +194,20 @@ export default function StudentCardsPage() {
     finally { setDownloading(""); }
   };
 
+  const downloadStudentPdf = async (student) => {
+    if (!layout || !qrCodes[student.id] || downloading) return;
+    setDownloading(`PDF-${student.id}`);
+    setError("");
+    try {
+      const response = await fetch(cardBackUrl);
+      if (!response.ok) throw new Error("Fotoja e pasme nuk mund të ngarkohet.");
+      const backImage = new Uint8Array(await response.arrayBuffer());
+      const pdf = await createCardsPdf([student], layout, renderCard, backImage, undefined, { centerSingle: true });
+      saveBlob(pdf.output("blob"), `${safeName(student)}-A4.pdf`);
+    } catch (err) { setError(err.message); }
+    finally { setDownloading(""); }
+  };
+
   return (
     <div className="bt-page bt-cards-page">
       <div className="bt-page-header">
@@ -176,6 +220,14 @@ export default function StudentCardsPage() {
         <label><Search /><input disabled={Boolean(downloading)} value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Kërko me emër, kod ose zonë..." /></label>
         <select disabled={Boolean(downloading)} value={status} onChange={(e) => setStatus(e.target.value)}><option value="ACTIVE">Aktiv</option><option value="INACTIVE">Jo aktiv</option><option value="">Të gjithë</option></select>
       </div>
+      <form className="bt-card-price-panel" onSubmit={saveCardPrice}>
+        <div><h2>Çmimi për kartelë të re</h2><p>Ky çmim përdoret në profil kur nxënësi kërkon kartelë zëvendësuese.</p></div>
+        <label>Shuma (€)
+          <input type="number" min="0" step="1" value={cardPrice} onChange={(event) => setCardPrice(event.target.value)} required disabled={savingPrice} />
+        </label>
+        <button className="bt-btn-primary" disabled={savingPrice}>{savingPrice ? "Duke ruajtur…" : "Ruaj çmimin"}</button>
+        {priceMessage && <p role="status">{priceMessage}</p>}
+      </form>
       <div className="bt-card-pdf-settings">
         <label>Gjerësia (cm)<input type="number" min="1" max="19" step="0.01" value={widthCm} disabled={Boolean(downloading)} onChange={(e) => setWidthCm(e.target.value)} /></label>
         <label>Lartësia (cm)<input type="number" min="1" max="27.7" step="0.01" value={heightCm} disabled={Boolean(downloading)} onChange={(e) => setHeightCm(e.target.value)} /></label>
@@ -189,7 +241,13 @@ export default function StudentCardsPage() {
           {shown.map((student) => (
             <article className="bt-card-preview" key={student.id}>
               <CardPreview student={student} qrSvg={qrCodes[student.id]} registerCard={(node) => node ? cardRefs.current.set(student.id, node) : cardRefs.current.delete(student.id)} />
-              <div className="bt-card-preview-meta"><div><strong>{student.first_name} {student.last_name}</strong><span>BT{student.student_code} · {student.area_name}</span></div><button onClick={() => downloadOne(student)} disabled={Boolean(downloading) || !qrCodes[student.id]} title="Shkarko kartelën"><Download /> {qrCodes[student.id] ? "Shkarko PNG" : "Duke krijuar QR..."}</button></div>
+              <div className="bt-card-preview-meta">
+                <div><strong>{student.first_name} {student.last_name}</strong><span>BT{student.student_code} · {student.area_name}</span></div>
+                <div className="bt-card-preview-actions">
+                  <button onClick={() => downloadOne(student)} disabled={Boolean(downloading) || !qrCodes[student.id]} title="Shkarko kartelën"><Download /> {qrCodes[student.id] ? "Shkarko PNG" : "Duke krijuar QR..."}</button>
+                  <button onClick={() => downloadStudentPdf(student)} disabled={Boolean(downloading) || !qrCodes[student.id] || !layout} title="Shkarko PDF për këtë nxënës"><Download /> {downloading === `PDF-${student.id}` ? "Duke përgatitur..." : "Shkarko PDF"}</button>
+                </div>
+              </div>
             </article>
           ))}
         </div>

@@ -56,3 +56,16 @@ test('PDF alternates front and back sheets with matching duplex positions', asyn
     assert.ok(Math.abs(matrix[3] * 25.4 / 72 - 58) < 0.001);
   }
 });
+
+test('single student PDF centers both sides at the same position', async () => {
+  const front = new Uint8Array(readFileSync(new URL('../src/assets/bashkimtours_logo.png', import.meta.url)));
+  const back = new Uint8Array(readFileSync(new URL('../bashkimtours_kartela_prapa.png', import.meta.url)));
+  const layout = getCardLayout(9, 5.5);
+  const pdf = await createCardsPdf([1], layout, async () => front, back, undefined, { centerSingle: true });
+  assert.equal(pdf.getNumberOfPages(), 2);
+  for (const page of [1, 2]) {
+    const matrix = pdf.internal.pages[page].find((command) => command.endsWith(' cm')).split(' ').map(Number);
+    assert.ok(Math.abs(matrix[4] * 25.4 / 72 - (210 - layout.width) / 2) < 0.001);
+    assert.ok(Math.abs(matrix[5] * 25.4 / 72 - (297 - layout.height) / 2) < 0.001);
+  }
+});

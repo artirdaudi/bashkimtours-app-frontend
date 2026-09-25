@@ -49,7 +49,7 @@ test('only app assets are precached and live APIs have no runtime cache', () => 
   assert(!allowed('/students', 'cors'));
   assert(!allowed('/students', 'navigate', false));
   for (const path of ['/', '/students', '/skano', '/payments', '/student/test-token']) assert(allowed(path), path);
-  for (const path of ['/api/auth/me', '/api/payments', '/auth/login', '/qr/test-token', '/health']) assert(!allowed(path), path);
+  for (const path of ['/api/auth/me', '/api/maarif/monthly-payments', '/api/maarif/qr/test-token', '/auth/login', '/health']) assert(!allowed(path), path);
 });
 
 test('new service worker activates and claims clients without user acceptance', () => {

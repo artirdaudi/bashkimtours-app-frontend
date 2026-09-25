@@ -13,7 +13,7 @@ export function getCardLayout(widthCm, heightCm) {
   };
 }
 
-export async function createCardsPdf(students, layout, renderCard, backImage, onProgress = () => {}) {
+export async function createCardsPdf(students, layout, renderCard, backImage, onProgress = () => {}, options = {}) {
   if (!students.length || !layout?.perPage) throw new Error("Nuk ka kartela ose përmasat janë të pavlefshme.");
   const { jsPDF } = await import("jspdf");
   const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
@@ -22,8 +22,8 @@ export async function createCardsPdf(students, layout, renderCard, backImage, on
   const drawCard = (image, slot, back = false) => {
     // Mirror columns for duplex printing with a long-edge flip, including partial sheets.
     const column = back ? columns - 1 - (slot % columns) : slot % columns;
-    const x = left + column * (width + gap);
-    const y = top + Math.floor(slot / columns) * (height + gap);
+    const x = options.centerSingle ? (210 - width) / 2 : left + column * (width + gap);
+    const y = options.centerSingle ? (297 - height) / 2 : top + Math.floor(slot / columns) * (height + gap);
     pdf.addImage(image, "PNG", x, y, width, height, back ? "card-back" : undefined, "FAST");
     pdf.setDrawColor(175);
     pdf.setLineWidth(0.1);
