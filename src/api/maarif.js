@@ -138,6 +138,10 @@ export const followupRulesApi = {
       body: JSON.stringify(body),
     }),
 };
+export const whatsappNotificationsApi = {
+  sendPayment: () => api("/whatsapp/payment-notification/send", { method: "POST" }),
+  sendCard: () => api("/whatsapp/card-notification/send", { method: "POST" }),
+};
 export const maarifReportingApi = {
   summary: (p) => api(`/maarif/reporting/income/summary${query(p)}`),
   byUser: (p) => api(`/maarif/reporting/income/by-user${query(p)}`),

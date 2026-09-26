@@ -1,5 +1,4 @@
 import {
-  BellRing,
   ScanLine,
   Bus,
   CalendarDays,
@@ -19,7 +18,6 @@ const tabs = [
   ["drivers", Users, "Shoferët"],
   ["areas", MapPin, "Zonat"],
   ["calendar", CalendarDays, "Kalendari"],
-  ["followup-rules", BellRing, "Rregullat e pagesave"],
   ["cards", Contact, "Kartelat"],
   ["skano", ScanLine, "Skano"],
 ];

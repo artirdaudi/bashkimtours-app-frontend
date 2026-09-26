@@ -1,4 +1,4 @@
-import { Banknote, LogOut, Menu, UserCircle, X } from "lucide-react";
+import { Banknote, BellRing, LogOut, Menu, UserCircle, X } from "lucide-react";
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { clearToken } from "./auth";
@@ -36,6 +36,10 @@ export default function DashboardLayout() {
           <NavLink to="/income" onClick={() => setOpen(false)}>
             <Banknote />
             <span>Të hyrat</span>
+          </NavLink>
+          <NavLink to="/messages" onClick={() => setOpen(false)}>
+            <BellRing />
+            <span>Mesazhet dhe Njoftimet</span>
           </NavLink>
           <NavLink to="/account" onClick={() => setOpen(false)}>
             <UserCircle />

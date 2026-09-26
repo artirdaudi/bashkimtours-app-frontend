@@ -11,7 +11,7 @@ import {
 import { formatDateTime } from "./dateUtils";
 import { followupRulesApi } from "./api";
 import { Modal } from "./PortalPages";
-import messagePreview from "./assets/message_preview.png";
+import messagePreview from "./assets/message-previews/payment_notification.png";
 
 const initialForm = {
   is_active: true,

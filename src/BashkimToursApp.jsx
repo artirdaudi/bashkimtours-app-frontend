@@ -10,6 +10,7 @@ import IncomePage from "./IncomePage";
 import AcademicCalendarPage from "./AcademicCalendarPage";
 import StudentCardsPage from "./StudentCardsPage";
 import PaymentFollowupRulesPage from "./PaymentFollowupRulesPage";
+import MessagesPage from "./MessagesPage";
 import MonthlyPaymentsPage from "./MonthlyPaymentsPage";
 import StudentDebtsPage from "./StudentDebtsPage";
 import ScanPage from "./ScanPage";
@@ -54,6 +55,7 @@ export default function BashkimToursApp() {
         </Route>
         <Route path="account" element={<AccountPage />} />
         <Route path="income" element={<IncomePage />} />
+        <Route path="messages" element={<MessagesPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

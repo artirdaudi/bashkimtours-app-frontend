@@ -6282,3 +6282,33 @@
 .bt-card-pdf-settings label { display: grid; gap: 6px; font-size: 13px; font-weight: 600; }
 .bt-card-pdf-settings input { width: 130px; max-width: 100%; padding: 10px; border: 1px solid #dce3ed; border-radius: 8px; font: inherit; }
 .bt-card-pdf-settings p { flex-basis: 100%; margin: 0; font-size: 13px; color: #526078; }
+.bt-messages-service-tabs { display: flex; gap: 10px; margin: 22px 0; border-bottom: 1px solid var(--bt-border, #e3e8ee); }
+.bt-messages-service-tabs button { border: 0; border-bottom: 3px solid #185a88; background: transparent; padding: 11px 20px; font: inherit; font-weight: 700; color: #185a88; }
+.bt-messages-search { display: flex; align-items: center; gap: 10px; max-width: 460px; margin: 0 0 16px; padding: 10px 14px; border: 1px solid #dce5eb; border-radius: 12px; background: #fff; }
+.bt-messages-search input { width: 100%; border: 0; outline: 0; background: transparent; font: inherit; }
+.bt-messages-list { display: flex; flex-direction: column; gap: 10px; }
+.bt-messages-list button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 18px; border: 1px solid #dce5eb; border-radius: 14px; background: #fff; text-align: left; color: inherit; cursor: pointer; }
+.bt-messages-empty { padding: 18px; color: #637582; }
+.bt-messages-info { color: #526675; }
+.bt-messages-list button.selected { border-color: #1872a3; box-shadow: 0 0 0 2px #1872a326; }
+.bt-messages-list button span { display: grid; min-width: 0; gap: 4px; }
+.bt-messages-list button small { color: #637582; overflow-wrap: anywhere; }
+.bt-messages-list button em, .bt-messages-detail-heading > span { margin-left: auto; border-radius: 100px; padding: 5px 9px; background: #f2f3f5; color: #58636c; font-size: 12px; font-style: normal; white-space: nowrap; }
+.bt-messages-detail { padding: 4px 0 12px; }
+.bt-messages-detail-heading, .bt-messages-actions { display: flex; align-items: center; gap: 12px; }
+.bt-messages-detail-heading h2 { margin: 0 0 5px; }
+.bt-messages-detail-heading p { margin: 0; }
+.bt-messages-actions { margin-top: 20px; flex-wrap: wrap; }
+.bt-messages-actions button { display: inline-flex; align-items: center; gap: 8px; }
+.bt-messages-preview { margin: 20px 0 0; padding: 18px; border-radius: 14px; background: #f5f7f9; text-align: center; }
+.bt-messages-preview img { display: block; max-width: 100%; max-height: 55vh; margin: auto; object-fit: contain; }
+.bt-messages-preview figcaption { margin-top: 12px; color: #62717d; font-size: 13px; }
+.bt-messages-preview small { color: #62717d; }
+.bt-messages-confirm { display: grid; gap: 15px; }
+.bt-messages-confirm .bt-field input { width: 100%; }
+.bt-messages-confirm button { justify-self: start; }
+.bt-messages-schedule { margin-top: 28px; border-top: 1px solid #e3e8ee; padding-top: 20px; }
+.bt-messages-schedule h3 { display: flex; align-items: center; gap: 9px; }
+.bt-messages-schedule .bt-page { padding: 0; }
+.bt-messages-schedule .bt-page-header { display: none; }
+@media (max-width: 850px) { .bt-messages-detail-heading { align-items: flex-start; } }
