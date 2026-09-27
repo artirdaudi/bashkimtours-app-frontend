@@ -32,15 +32,14 @@ export async function api(path, options = {}) {
   }
   const data =
     response.status === 204 ? null : await response.json().catch(() => ({}));
-  if (!response.ok)
-    throw new Error(
-      message(
-        data,
-        response.status === 409
-          ? "Veprimi bie ndesh me të dhënat ekzistuese."
-          : "Kërkesa dështoi.",
-      ),
-    );
+  if (!response.ok) {
+    const fallback = response.status === 409
+      ? "Veprimi bie ndesh me të dhënat ekzistuese."
+      : `Kërkesa dështoi (HTTP ${response.status}).`;
+    const error = new Error(message(data, fallback));
+    error.status = response.status;
+    throw error;
+  }
   return data;
 }
 export async function publicApi(path, options = {}) {

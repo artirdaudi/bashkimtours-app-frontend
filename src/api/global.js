@@ -1,4 +1,4 @@
-import { api, resource } from "./client";
+import { api, query, resource } from "./client";
 
 export const authApi = {
   me: () => api("/auth/me"),
@@ -7,6 +7,10 @@ export const authApi = {
 };
 export const vehiclesApi = resource("/vehicles");
 export const driversApi = resource("/drivers");
+export const shoferiApi = {
+  ...resource("/shoferi"),
+  select: (params) => api(`/shoferi/select${query(params)}`),
+};
 
 export const transportCardsApi = {
   getForStudent: (studentId) => api(`/transport-cards/students/${studentId}`),

@@ -6321,3 +6321,40 @@
 .bt-messages-schedule .bt-page-header { display: none; }
 .bt-messages-schedule .bt-followup-rule-grid { grid-template-columns: minmax(0, 1fr); }
 @media (max-width: 850px) { .bt-messages-detail { grid-template-columns: minmax(0, 1fr); } .bt-messages-detail-heading { align-items: flex-start; } }
+
+.bt-shoferat-notice { margin: 0 0 22px; padding: 14px 18px; border: 1px solid #f1d68d; border-radius: 12px; background: #fff8e5; color: #735615; font-weight: 700; }
+.bt-shoferat-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+.bt-shoferat-search { display: flex; align-items: center; gap: 9px; flex: 1; min-width: 240px; max-width: 460px; padding: 10px 13px; border: 1px solid #dce5eb; border-radius: 11px; background: #fff; }
+.bt-shoferat-search input { flex: 1; min-width: 0; border: 0; outline: 0; font: inherit; }
+.bt-shoferat-search button, .bt-shoferat-icon { border: 0; background: transparent; color: #526675; cursor: pointer; }
+.bt-shoferat-toolbar > label:not(.bt-shoferat-search) { display: flex; align-items: center; gap: 8px; color: #526675; font-size: 13px; }
+.bt-shoferat-toolbar select { padding: 9px 11px; border: 1px solid #dce5eb; border-radius: 9px; background: #fff; font: inherit; }
+.bt-shoferat-suggestions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; font-size: 13px; color: #526675; }
+.bt-shoferat-suggestions button { padding: 5px 10px; border: 1px solid #dce5eb; border-radius: 100px; background: #fff; color: #185a88; cursor: pointer; }
+.bt-shoferat-summary { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; color: #526675; }
+.bt-shoferat-summary strong { color: #152e42; font-size: 20px; }
+.bt-shoferat-table-wrap { overflow-x: auto; border: 1px solid #dce5eb; border-radius: 14px; background: #fff; }
+.bt-shoferat-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+.bt-shoferat-table th { padding: 14px 16px; background: #f5f8fa; color: #526675; text-align: left; font-size: 12px; font-weight: 700; }
+.bt-shoferat-table td { padding: 15px 16px; border-top: 1px solid #edf1f4; font-size: 14px; }
+.bt-shoferat-table tbody tr:hover { background: #f8fbfc; }
+.bt-shoferat-name { border: 0; background: transparent; padding: 0; color: #185a88; font: inherit; font-weight: 700; cursor: pointer; }
+.bt-shoferat-empty { padding: 35px 16px; text-align: center; color: #637582; }
+.bt-shoferat-loading { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.bt-shoferat-loading svg { animation: bt-shoferat-spin 1s linear infinite; }
+@keyframes bt-shoferat-spin { to { transform: rotate(360deg); } }
+.bt-shoferat-pages { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 18px; }
+.bt-shoferat-pages button { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border: 1px solid #dce5eb; border-radius: 9px; background: #fff; cursor: pointer; }
+.bt-shoferat-pages button:disabled { opacity: .45; cursor: default; }
+.bt-shoferat-detail-grid, .bt-shoferat-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.bt-shoferat-detail-grid > div, .bt-shoferat-form label { display: grid; gap: 6px; min-width: 0; }
+.bt-shoferat-detail-grid span, .bt-shoferat-form label span { display: flex; align-items: center; gap: 5px; color: #637582; font-size: 13px; }
+.bt-shoferat-detail-grid strong { overflow-wrap: anywhere; }
+.bt-shoferat-form input { width: 100%; padding: 10px 12px; border: 1px solid #dce5eb; border-radius: 9px; font: inherit; }
+.bt-shoferat-form input.bt-shoferat-license-empty { color: transparent; }
+.bt-shoferat-form input.bt-shoferat-license-empty::-webkit-datetime-edit { color: transparent; }
+.bt-shoferat-form input.bt-shoferat-license-empty::-webkit-calendar-picker-indicator { opacity: 1; cursor: pointer; }
+.bt-shoferat-actions { display: flex; gap: 10px; grid-column: 1 / -1; margin-top: 20px; }
+.bt-shoferat-detail .bt-shoferat-actions { margin-top: 28px; }
+.bt-shoferat-actions button { display: inline-flex; align-items: center; gap: 7px; }
+@media (max-width: 600px) { .bt-shoferat-detail-grid, .bt-shoferat-form { grid-template-columns: 1fr; } }
