@@ -3,15 +3,12 @@ import {
   BellRing,
   Check,
   Clock3,
-  MessageSquareText,
   RefreshCw,
   Save,
   ShieldAlert,
 } from "lucide-react";
 import { formatDateTime } from "./dateUtils";
 import { followupRulesApi } from "./api";
-import { Modal } from "./PortalPages";
-import messagePreview from "./assets/message-previews/payment_notification.png";
 
 const initialForm = {
   is_active: true,
@@ -29,14 +26,13 @@ const toForm = (rules) => ({
   message_day: rules.message_day,
 });
 
-export default function PaymentFollowupRulesPage() {
+export default function PaymentFollowupRulesPage({ onSaved }) {
   const [rules, setRules] = useState();
   const [form, setForm] = useState();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
-  const [previewOpen, setPreviewOpen] = useState(false);
 
   useEffect(() => {
     followupRulesApi
@@ -72,6 +68,7 @@ export default function PaymentFollowupRulesPage() {
         : await followupRulesApi.create(body);
       setRules(response);
       setForm(toForm(response));
+      onSaved?.(response);
       setSaved(true);
     } catch (requestError) {
       setError(requestError.message);
@@ -162,46 +159,8 @@ export default function PaymentFollowupRulesPage() {
               onEnabledChange={(value) => set("message_enabled", value)}
               day={form.message_day}
               onDayChange={(value) => set("message_day", value)}
-            >
-              <figure className="bt-rule-message-preview">
-                <div>
-                  <MessageSquareText />
-                  <figcaption>
-                    <strong>Pamja e mesazhit</strong>
-                    <span>
-                      Të dhënat e nxënësit, muajt dhe shuma plotësohen
-                      automatikisht.
-                    </span>
-                  </figcaption>
-                </div>
-                <button
-                  type="button"
-                  className="bt-rule-message-preview-button"
-                  onClick={() => setPreviewOpen(true)}
-                  aria-label="Hap pamjen e zmadhuar të mesazhit"
-                >
-                  <img
-                    src={messagePreview}
-                    alt="Shembull i mesazhit automatik të pagesës në WhatsApp"
-                  />
-                  <span>Kliko për ta zmadhuar</span>
-                </button>
-              </figure>
-            </RuleRow>
+            />
           </div>
-          {previewOpen && (
-            <Modal
-              title="Pamja e mesazhit automatik"
-              onClose={() => setPreviewOpen(false)}
-            >
-              <div className="bt-rule-message-preview-modal">
-                <img
-                  src={messagePreview}
-                  alt="Pamja e zmadhuar e mesazhit automatik të pagesës"
-                />
-              </div>
-            </Modal>
-          )}
 
           <div className="bt-followup-rule-footer">
             {rules && (

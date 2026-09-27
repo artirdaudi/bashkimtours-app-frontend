@@ -40,13 +40,13 @@ const euro = new Intl.NumberFormat("sq-AL", {
   currency: "EUR",
 });
 const money = (v) => euro.format(Number(v || 0));
-export function Modal({ title, onClose, children }) {
+export function Modal({ title, onClose, children, className = "" }) {
   return createPortal(
     <div
       className="bt-modal-backdrop"
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
-      <section className="bt-modal bt-modal--wide">
+      <section className={`bt-modal bt-modal--wide ${className}`}>
         <header>
           <h2>{title}</h2>
           <button type="button" onClick={onClose}>

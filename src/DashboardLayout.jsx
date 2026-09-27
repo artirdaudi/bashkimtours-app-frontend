@@ -39,7 +39,7 @@ export default function DashboardLayout() {
           </NavLink>
           <NavLink to="/messages" onClick={() => setOpen(false)}>
             <BellRing />
-            <span>Mesazhet dhe Njoftimet</span>
+            <span>Whatsapp Messages</span>
           </NavLink>
           <NavLink to="/account" onClick={() => setOpen(false)}>
             <UserCircle />
