@@ -2509,7 +2509,7 @@ export function StudentProfile({
               }}
             />
           )}
-          <StudentCardDetails studentId={student.id} />
+          <StudentCardDetails studentId={student.id} onChanged={onChanged} />
           <section className="bt-vehicle-history-section">
             <div className="bt-section-heading">
               <div>

@@ -6,7 +6,7 @@ const money = (value) => new Intl.NumberFormat("sq-AL", {
   style: "currency", currency: "EUR",
 }).format(Number(value || 0));
 
-export default function StudentCardDetails({ studentId }) {
+export default function StudentCardDetails({ studentId, onChanged }) {
   const [card, setCard] = useState(null);
   const [payments, setPayments] = useState([]);
   const [newCardPrice, setNewCardPrice] = useState(null);
@@ -54,6 +54,7 @@ export default function StudentCardDetails({ studentId }) {
         comment: null,
       });
       await load();
+      onChanged?.();
     } catch (requestError) {
       setError(requestError.message);
     } finally {
@@ -86,6 +87,7 @@ export default function StudentCardDetails({ studentId }) {
       await transportCardsApi.update(studentId, { issued_at: paidAt });
       setPendingPaidAt(null);
       await load();
+      onChanged?.();
     } catch (requestError) {
       setError(paymentRecorded
         ? `Pagesa është regjistruar. Provojeni sërish për të përfunduar lëshimin: ${requestError.message}`
