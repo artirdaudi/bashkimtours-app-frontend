@@ -1,12 +1,15 @@
-import { Banknote, BellRing, LogOut, Menu, UserCircle, UsersRound, X } from "lucide-react";
+import { Banknote, BellRing, ChevronDown, LogOut, Menu, Settings, ShieldCheck, UserCircle, UsersRound, X } from "lucide-react";
 import { useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { clearToken } from "./auth";
 import logo from "./assets/bashkimtours_logo.png";
 import maarifLogo from "./assets/maarif_logo.jpeg";
 
 export default function DashboardLayout() {
   const [open, setOpen] = useState(false);
+  const location = useLocation();
+  const inSettings = ["/messages", "/settings/accounts-roles"].includes(location.pathname);
+  const [settingsOpen, setSettingsOpen] = useState(inSettings);
   const [loginArrival] = useState(() => {
     const active = sessionStorage.getItem("bt_login_transition") === "1";
     sessionStorage.removeItem("bt_login_transition");
@@ -39,15 +42,37 @@ export default function DashboardLayout() {
           </NavLink>
           <NavLink to="/shoferat" onClick={() => setOpen(false)}>
             <UsersRound />
-            <span>Shoferat</span>
+            <span>Shoferat dhe Staff</span>
           </NavLink>
-          <NavLink to="/messages" onClick={() => setOpen(false)}>
-            <BellRing />
-            <span>Whatsapp Messages</span>
-          </NavLink>
+          <div className="bt-settings-group">
+            <button
+              type="button"
+              className={`bt-settings-toggle ${inSettings ? "active" : ""}`}
+              onClick={() => setSettingsOpen((current) => !current)}
+              aria-expanded={settingsOpen}
+              aria-controls="bt-settings-links"
+              aria-label="Settings"
+            >
+              <Settings />
+              <span>Settings</span>
+              <ChevronDown className={`bt-settings-chevron ${settingsOpen ? "open" : ""}`} />
+            </button>
+            {settingsOpen && (
+              <div id="bt-settings-links" className="bt-settings-links">
+                <NavLink to="/messages" onClick={() => setOpen(false)}>
+                  <BellRing />
+                  <span>WhatsApp Messages</span>
+                </NavLink>
+                <NavLink to="/settings/accounts-roles" onClick={() => setOpen(false)}>
+                  <ShieldCheck />
+                  <span>Llogaritë dhe rolet</span>
+                </NavLink>
+              </div>
+            )}
+          </div>
           <NavLink to="/account" onClick={() => setOpen(false)}>
             <UserCircle />
-            <span>Llogaria</span>
+            <span>Llogaria Ime</span>
           </NavLink>
         </nav>
         <button className="bt-logout" onClick={logout}>

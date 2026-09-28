@@ -854,9 +854,19 @@ export function AccountPage() {
   }, []);
   return (
     <Page
-      title="Llogaria"
+      title="Llogaria Ime"
       subtitle={user ? `Kyçur si ${user.username}` : "Profili juaj"}
     >
+      {user && <section className="bt-account-card bt-account-details" aria-label="Të dhënat e llogarisë">
+        <h3>Të dhënat e llogarisë</h3>
+        <dl>
+          <div><dt>Emri i përdoruesit</dt><dd>{user.username || "—"}</dd></div>
+          <div><dt>ID</dt><dd>{user.id ?? "—"}</dd></div>
+          <div><dt>Roli</dt><dd>{user.role?.name || "Pa rol"}</dd></div>
+          <div><dt>Statusi</dt><dd>{user.is_active === undefined ? "—" : user.is_active ? "Aktive" : "Joaktive"}</dd></div>
+          <div><dt>Koment</dt><dd>{user.comment || "—"}</dd></div>
+        </dl>
+      </section>}
       <form
         className="bt-account-card"
         onSubmit={async (e) => {

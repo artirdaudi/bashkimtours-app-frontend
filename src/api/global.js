@@ -5,6 +5,19 @@ export const authApi = {
   changePassword: (b) =>
     api("/auth/change-password", { method: "POST", body: JSON.stringify(b) }),
 };
+export const rolesApi = {
+  list: () => api("/auth/roles"),
+  create: (body) => api("/auth/roles", { method: "POST", body: JSON.stringify(body) }),
+  update: (id, body) => api(`/auth/roles/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
+  deactivate: (id) => api(`/auth/roles/${id}`, { method: "DELETE" }),
+};
+export const usersApi = {
+  list: () => api("/auth/users"),
+  get: (id) => api(`/auth/users/${id}`),
+  create: (body) => api("/auth/users", { method: "POST", body: JSON.stringify(body) }),
+  update: (id, body) => api(`/auth/users/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
+  assignRole: (id, roleId) => api(`/auth/users/${id}/role`, { method: "PATCH", body: JSON.stringify({ role_id: roleId }) }),
+};
 export const vehiclesApi = resource("/vehicles");
 export const driversApi = resource("/drivers");
 export const shoferiApi = {

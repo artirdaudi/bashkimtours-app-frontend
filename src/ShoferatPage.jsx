@@ -115,7 +115,7 @@ export default function ShoferatPage() {
 
   const items = loading ? [] : data?.items ?? [];
   return <div className="bt-page bt-shoferat-page">
-    <header className="bt-page-header"><div><span className="bt-eyebrow">Bashkim Tours</span><h1>Shoferat</h1><p>Regjistri i shoferëve dhe dokumenteve të tyre.</p></div><button className="bt-btn-primary" onClick={() => startEdit(null)}><Plus size={18} /> Shto shofer</button></header>
+    <header className="bt-page-header"><div><span className="bt-eyebrow">Bashkim Tours</span><h1>Shoferat dhe Staff</h1><p>Regjistri i shoferëve dhe dokumenteve të tyre.</p></div><button className="bt-btn-primary" onClick={() => startEdit(null)}><Plus size={18} /> Shto shofer</button></header>
     <div className="bt-shoferat-notice" role="note">Faqja ende është në përpunim.</div>
     <section className="bt-shoferat-toolbar">
       <label className="bt-shoferat-search"><Search size={19} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Kërko sipas emrit, telefonit, EMBG…" aria-label="Kërko shoferët" />{search && <button type="button" onClick={() => setSearch("")} aria-label="Pastro kërkimin"><X size={16} /></button>}</label>
