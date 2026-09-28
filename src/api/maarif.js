@@ -40,7 +40,7 @@ export const duesApi = {
   list: (p) => api(`/maarif/monthly-dues${query(p)}`),
   student: (id) => api(`/maarif/monthly-dues/students/${id}`),
   summary: (p) => api(`/maarif/monthly-dues/summary${query(p)}`),
-  remove: (id) => api(`/monthly-dues/${id}`, { method: "DELETE" }),
+  remove: (id) => api(`/maarif/monthly-dues/${id}`, { method: "DELETE" }),
   generate: (id) =>
     api(`/maarif/monthly-dues/students/${id}/generate`, { method: "POST" }),
   updateAmount: (id, b) =>

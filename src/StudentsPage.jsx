@@ -407,6 +407,7 @@ function refineOverviewSearch(
         );
         return due?.status === "PAID";
       }).length,
+      transport_cards_issued: activeStudents.filter((student) => student.has_transport_card).length,
       unassigned_active_students: activeStudents.filter(
         (student) => !student.current_vehicle,
       ).length,
@@ -525,6 +526,9 @@ export default function StudentsPage() {
       setSummary({
         ...overview.summary,
         current_paid_students: currentPaidStudents,
+        transport_cards_issued: overview.students.filter(
+          (student) => student.status === "ACTIVE" && student.has_transport_card,
+        ).length,
       });
       setError("");
     } catch (e) {
@@ -733,6 +737,7 @@ export default function StudentsPage() {
     const students = currentPaymentFilter
       ? data.items.filter((student) => {
           if (student.status !== "ACTIVE") return false;
+          if (currentPaymentFilter === "card") return student.has_transport_card;
           const currentDue = student.monthly_dues.find(
             (due) =>
               Number(due.month) === today.getMonth() + 1 &&
@@ -974,6 +979,23 @@ export default function StudentsPage() {
           >
             <AnimatedCount value={summary.current_paid_students} />
             <span>{changingStatus === "PAID" && <RefreshCw className="bt-spin" />}Paguar këtë muaj</span>
+          </button>
+          <button
+            className={currentPaymentFilter === "card" ? "active" : ""}
+            disabled={Boolean(changingStatus)}
+            onClick={() => {
+              setChangingStatus("CARD");
+              setCurrentPaymentFilter("card");
+              setFilters({
+                ...filters,
+                search: "",
+                area_id: "",
+                student_status: "ACTIVE",
+              });
+            }}
+          >
+            <span><AnimatedCount value={summary.transport_cards_issued} /> / <AnimatedCount value={summary.active_students} /></span>
+            <span>{changingStatus === "CARD" && <RefreshCw className="bt-spin" />}Kartela të marra</span>
           </button>
         </section>
       )}
