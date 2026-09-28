@@ -6384,3 +6384,18 @@
 
 .bt-mutation-message svg { width: 28px; height: 28px; }
 .bt-mutation-message small { color: #64748b; font-weight: 400; }
+
+.bt-modal-header-actions { display: flex; align-items: center; gap: 10px; }
+.bt-modal > header .bt-modal-delete-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  color: #b42318;
+  font-size: 13px;
+  font-weight: 700;
+}
+.bt-modal > header .bt-modal-delete-action:hover { background: #fef3f2; }
+.bt-modal > header .bt-modal-delete-action:disabled { opacity: .6; cursor: wait; }
+.bt-modal > header .bt-modal-delete-action svg { width: 17px; height: 17px; }

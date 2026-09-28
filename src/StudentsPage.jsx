@@ -434,6 +434,8 @@ export default function StudentsPage() {
   const [editing, setEditing] = useState();
   const [assigning, setAssigning] = useState();
   const [paymentDue, setPaymentDue] = useState(null);
+  const [deletingDue, setDeletingDue] = useState(false);
+  const [deleteDueError, setDeleteDueError] = useState("");
   const [printGroup, setPrintGroup] = useState(null);
   const [currentPaymentFilter, setCurrentPaymentFilter] = useState("");
   const [driverSearch, setDriverSearch] = useState("");
@@ -684,6 +686,7 @@ export default function StudentsPage() {
     }
   }
   async function openMonthlyDue(student, due) {
+    setDeleteDueError("");
     if (due.status !== "PAID") return setPaymentDue({ due, student });
     setPaymentDue({ due, student, loadingPayment: true });
     try {
@@ -702,6 +705,22 @@ export default function StudentsPage() {
       setPaymentDue({ due, student, payment });
     } catch (requestError) {
       setPaymentDue({ due, student, paymentError: requestError.message });
+    }
+  }
+  async function deleteMonthlyDue() {
+    const due = paymentDue?.due;
+    if (!due || !["PENDING", "OVERDUE"].includes(due.status) || deletingDue) return;
+    if (!window.confirm(`A jeni të sigurt që dëshironi ta fshini detyrimin për ${monthSq(due.month, due.month_name)} ${due.calendar_year}?`)) return;
+    setDeletingDue(true);
+    setDeleteDueError("");
+    try {
+      await duesApi.remove(due.id);
+      setPaymentDue(null);
+      await load();
+    } catch (requestError) {
+      setDeleteDueError(requestError.message);
+    } finally {
+      setDeletingDue(false);
     }
   }
   const groups = useMemo(() => {
@@ -1284,7 +1303,19 @@ export default function StudentsPage() {
       {paymentDue && (
         <Modal
           title={`Pagesa · ${paymentDue.student.first_name} ${paymentDue.student.last_name}`}
-          onClose={() => setPaymentDue(null)}
+          onClose={() => { if (!deletingDue) setPaymentDue(null); }}
+          headerActions={["PENDING", "OVERDUE"].includes(paymentDue.due.status) && (
+            <button
+              type="button"
+              className="bt-modal-delete-action"
+              onClick={deleteMonthlyDue}
+              disabled={deletingDue}
+              aria-busy={deletingDue}
+            >
+              {deletingDue ? <RefreshCw className="bt-spin" /> : <Trash2 />}
+              <span>{deletingDue ? "Duke fshirë…" : "Fshi detyrimin"}</span>
+            </button>
+          )}
         >
           <MonthlyDuePaymentForm
             due={paymentDue.due}
@@ -1292,6 +1323,7 @@ export default function StudentsPage() {
             payment={paymentDue.payment}
             loadingPayment={paymentDue.loadingPayment}
             paymentError={paymentDue.paymentError}
+            deleteError={deleteDueError}
             onSaved={() => {
               setPaymentDue(null);
               load();
@@ -1309,6 +1341,7 @@ function MonthlyDuePaymentForm({
   payment,
   loadingPayment,
   paymentError,
+  deleteError,
   onSaved,
 }) {
   const [paymentDate, setPaymentDate] = useState(now());
@@ -1599,7 +1632,7 @@ function MonthlyDuePaymentForm({
           )}
         </section>
       )}
-      {error && <p className="bt-inline-error">{error}</p>}
+      {(error || deleteError) && <p className="bt-inline-error" role="alert">{error || deleteError}</p>}
       <div className="bt-modal-actions">
         {due.status === "PAID" ? (
           <span className="bt-paid-message">Kjo pagesë është regjistruar.</span>
