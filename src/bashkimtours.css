@@ -6358,3 +6358,29 @@
 .bt-shoferat-detail .bt-shoferat-actions { margin-top: 28px; }
 .bt-shoferat-actions button { display: inline-flex; align-items: center; gap: 7px; }
 @media (max-width: 600px) { .bt-shoferat-detail-grid, .bt-shoferat-form { grid-template-columns: 1fr; } }
+.bt-mutation-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  background: rgb(15 23 42 / 24%);
+  cursor: progress;
+}
+
+.bt-mutation-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 22px 30px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 18px 50px rgb(15 23 42 / 20%);
+  color: #172554;
+  font-weight: 700;
+  text-align: center;
+}
+
+.bt-mutation-message svg { width: 28px; height: 28px; }
+.bt-mutation-message small { color: #64748b; font-weight: 400; }

@@ -1904,9 +1904,14 @@ function StudentForm({
     vehicle_id: "",
   });
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const createdStudentId = useRef(null);
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
   async function submit(e) {
     e.preventDefault();
+    if (saving) return;
+    setSaving(true);
+    setError("");
     const body = {
       first_name: form.first_name,
       last_name: form.last_name,
@@ -1923,21 +1928,28 @@ function StudentForm({
       comment: form.comment || null,
     };
     try {
-      if (initial.id) await studentsApi.update(initial.id, body);
+      if (initial.id || createdStudentId.current) {
+        await studentsApi.update(initial.id || createdStudentId.current, body);
+      }
       else {
         const student = await studentsApi.create(body);
-        if (form.vehicle_id) {
-          await studentAssignmentsApi.create({
-            student_id: student.id,
-            vehicle_id: Number(form.vehicle_id),
-            assigned_from: form.start_date,
-            comment: "Caktuar gjatë krijimit të nxënësit",
-          });
-        }
+        createdStudentId.current = student.id;
+      }
+      if (!initial.id && form.vehicle_id) {
+        await studentAssignmentsApi.create({
+          student_id: createdStudentId.current,
+          vehicle_id: Number(form.vehicle_id),
+          assigned_from: form.start_date,
+          comment: "Caktuar gjatë krijimit të nxënësit",
+        });
       }
       onSaved();
     } catch (x) {
-      setError(x.message);
+      setError(createdStudentId.current
+        ? `Nxënësi është regjistruar. Ruajtja nuk përfundoi: ${x.message}`
+        : x.message);
+    } finally {
+      setSaving(false);
     }
   }
   return (
@@ -2019,7 +2031,9 @@ function StudentForm({
       </label>
       {error && <p className="bt-inline-error bt-field-wide">{error}</p>}
       <div className="bt-modal-actions bt-field-wide">
-        <button className="bt-btn-primary">Ruaj</button>
+        <button className="bt-btn-primary" disabled={saving} aria-busy={saving}>
+          {saving ? "Duke ruajtur…" : "Ruaj"}
+        </button>
       </div>
     </form>
   );

@@ -1,4 +1,5 @@
 import { API_BASE_URL, clearToken, getToken } from "../auth";
+import { runMutation } from "./mutationState";
 const message = (data, fallback) =>
   Array.isArray(data?.detail)
     ? data.detail.map((x) => x.msg).join(". ")
@@ -11,6 +12,14 @@ export const query = (params = {}) => {
   return q.size ? `?${q}` : "";
 };
 export async function api(path, options = {}) {
+  const method = (options.method || "GET").toUpperCase();
+  if (method !== "GET" && method !== "HEAD") {
+    return runMutation(`${method}:${path}:${options.body || ""}`, () => request(path, options));
+  }
+  return request(path, options);
+}
+
+async function request(path, options) {
   let response;
   try {
     response = await fetch(`${API_BASE_URL}${path}`, {
