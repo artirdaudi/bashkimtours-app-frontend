@@ -6468,6 +6468,77 @@
 .bt-accounts-tabs button.active { border-bottom-color: var(--bt-blue); color: var(--bt-blue); }
 .bt-accounts-search { display: flex; align-items: center; gap: 10px; max-width: 440px; padding: 10px 13px; border: 1px solid var(--bt-line); border-radius: 9px; background: #fff; color: var(--bt-muted); }
 .bt-accounts-search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--bt-ink); font: inherit; }
+.bt-cash-register-detail { display: grid; gap: 12px; }
+.bt-cash-register-detail h3 { margin: 12px 0 0; font-size: 16px; }
+.bt-cash-register-detail p { margin: 0; }
+.bt-cash-assigned-users { display: grid; gap: 8px; }
+.bt-cash-assigned-users > div { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 9px 12px; border: 1px solid var(--bt-line); border-radius: 8px; }
+.bt-cash-assign-form { display: grid; gap: 8px; margin-top: 10px; }
+.bt-cash-assign-form > div { display: flex; gap: 8px; }
+.bt-cash-assign-form select { flex: 1; min-width: 0; padding: 10px 12px; border: 1px solid var(--bt-line); border-radius: 8px; font: inherit; }
+.bt-maarif-cash-page { display: grid; gap: 20px; }
+.bt-maarif-cash-page .bt-page-header { margin-bottom: 0; }
+.bt-maarif-cash-registers { display: flex; flex-wrap: wrap; gap: 10px; }
+.bt-maarif-cash-registers button { display: grid; gap: 5px; min-width: 160px; padding: 12px 16px; border: 1px solid var(--bt-line); border-radius: 10px; background: #fff; text-align: left; cursor: pointer; }
+.bt-maarif-cash-registers button.active { border-color: var(--bt-blue); background: #eff7fc; }
+.bt-maarif-cash-registers button strong { font-size: 18px; }
+.bt-maarif-cash-balance { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 22px 26px; border: 1px solid var(--bt-line); border-radius: 14px; background: #fff; }
+.bt-maarif-cash-balance > div { display: grid; gap: 5px; }
+.bt-maarif-cash-balance strong { font-size: clamp(30px, 4vw, 42px); line-height: 1.1; }
+.bt-maarif-cash-balance small { color: var(--bt-muted); }
+.bt-maarif-cash-balance svg { color: var(--bt-blue); }
+.bt-maarif-cash-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.bt-maarif-cash-panel { min-width: 0; padding: 20px; border: 1px solid var(--bt-line); border-radius: 14px; background: #fff; }
+.bt-maarif-cash-panel h2 { display: flex; align-items: center; gap: 8px; margin: 0 0 16px; font-size: 19px; }
+.bt-maarif-cash-panel p { color: var(--bt-muted); }
+@media (max-width: 1050px) { .bt-maarif-cash-columns { grid-template-columns: 1fr; } }
+.bt-cash-overview { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.bt-cash-overview .bt-maarif-cash-panel { display: grid; justify-items: start; gap: 8px; }
+.bt-cash-overview .bt-maarif-cash-panel p { margin: 0; }
+.bt-cash-session-status { display: inline-flex; padding: 4px 9px; border-radius: 99px; background: #f2f4f7; color: #667085; font-size: 12px; font-weight: 700; }
+.bt-cash-session-status.open { background: #ecfdf3; color: #067647; }
+.bt-cash-back { display: inline-flex; align-items: center; gap: 7px; justify-self: start; padding: 0; border: 0; background: none; color: var(--bt-blue); font: inherit; font-weight: 700; cursor: pointer; }
+.bt-cash-session-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin: 18px 0; }
+.bt-cash-session-facts > div { display: grid; gap: 5px; }
+.bt-cash-session-facts span { color: var(--bt-muted); font-size: 12px; }
+.bt-cash-session-facts strong { overflow-wrap: anywhere; font-size: 15px; }
+.bt-cash-current-facts { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 34%); gap: 28px; margin: 18px 0; }
+.bt-cash-current-opening { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.bt-cash-current-totals { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; padding-left: 28px; border-left: 1px solid var(--bt-line); }
+.bt-cash-current-facts span { display: block; margin-bottom: 5px; color: var(--bt-muted); font-size: 12px; }
+.bt-cash-current-facts strong { overflow-wrap: anywhere; font-size: 15px; }
+@media (max-width: 900px) { .bt-cash-current-facts { grid-template-columns: 1fr; gap: 16px; } .bt-cash-current-totals { padding: 16px 0 0; border-top: 1px solid var(--bt-line); border-left: 0; } }
+@media (max-width: 650px) { .bt-cash-current-opening { grid-template-columns: 1fr; } }
+.bt-cash-match { color: #067647; }
+.bt-cash-mismatch { color: #b42318; }
+.bt-cash-session-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.bt-cash-close-section { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 12px; padding: 18px 20px; border: 1px solid #f2c7c3; border-radius: 12px; background: #fff8f7; }
+.bt-cash-close-section span { color: #9b2828; font-size: 13px; }
+.bt-cash-close-section .bt-btn-danger { flex: 0 0 auto; background: #b42318; border-color: #b42318; color: #fff; }
+.bt-cash-close-section .bt-btn-danger:hover { background: #912018; }
+.bt-cash-close-modal .bt-modal-actions .bt-btn-danger { background: #b42318; border-color: #b42318; color: #fff; }
+.bt-cash-close-modal .bt-modal-actions .bt-btn-danger:hover { background: #912018; }
+@media (max-width: 650px) { .bt-cash-close-section { align-items: stretch; flex-direction: column; } }
+.bt-cash-history-filters { display: flex; flex-wrap: wrap; gap: 12px; margin: 14px 0 20px; }
+.bt-cash-history-filters label { display: grid; gap: 5px; color: var(--bt-muted); font-size: 13px; }
+.bt-cash-history-filters input, .bt-cash-history-filters select { min-height: 40px; padding: 8px 10px; border: 1px solid var(--bt-line); border-radius: 8px; color: var(--bt-ink); font: inherit; }
+.bt-cash-history-pages { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.bt-cash-history-pages span { margin-right: auto; color: var(--bt-muted); font-size: 13px; }
+.bt-cash-detail-modal { width: min(1100px, calc(100vw - 32px)); }
+.bt-cash-session-detail { display: grid; gap: 18px; }
+.bt-cash-session-detail > .bt-cash-session-status { justify-self: start; }
+@media print {
+  .bt-cash-session-print .bt-print-section { break-inside: avoid; }
+  .bt-cash-session-print table { width: 100%; }
+  .bt-cash-session-print th, .bt-cash-session-print td { overflow-wrap: anywhere; }
+}
+.bt-cash-payment-detail { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.bt-cash-payment-detail > div { display: grid; gap: 5px; }
+.bt-cash-payment-detail span { color: var(--bt-muted); font-size: 13px; }
+.bt-cash-payment-detail strong { overflow-wrap: anywhere; }
+@media (max-width: 650px) { .bt-cash-payment-detail { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .bt-cash-session-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 650px) { .bt-cash-overview, .bt-cash-session-facts { grid-template-columns: 1fr; } }
 
 @media (max-width: 650px) {
   .bt-accounts-section { padding: 18px; }

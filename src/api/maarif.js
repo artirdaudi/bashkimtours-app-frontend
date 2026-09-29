@@ -5,6 +5,21 @@ export const maarifSettingsApi = {
   update: (body) => api("/settings", { method: "PATCH", body: JSON.stringify(body) }),
 };
 
+export const cashRegistersApi = {
+  list: () => api("/maarif/cash-registers"),
+  get: (id) => api(`/maarif/cash-registers/${id}`),
+  create: (body) => api("/maarif/cash-registers", { method: "POST", body: JSON.stringify(body) }),
+  update: (id, body) => api(`/maarif/cash-registers/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
+  remove: (id) => api(`/maarif/cash-registers/${id}`, { method: "DELETE" }),
+  transactions: (id) => api(`/maarif/cash-registers/transactions${query({ cash_register_id: id, limit: 500 })}`),
+  createExpense: (id, body) => api(`/maarif/cash-registers/${id}/expenses`, { method: "POST", body: JSON.stringify(body) }),
+  openSession: (id, body) => api(`/maarif/cash-registers/${id}/open`, { method: "POST", body: JSON.stringify(body) }),
+  closeSession: (id, body) => api(`/maarif/cash-registers/${id}/close`, { method: "POST", body: JSON.stringify(body) }),
+  currentSession: (id) => api(`/maarif/cash-registers/${id}/current-session`),
+  sessions: (id, filters) => api(`/maarif/cash-registers/${id}/sessions${query(filters)}`),
+  session: (id, sessionId) => api(`/maarif/cash-registers/${id}/sessions/${sessionId}`),
+};
+
 export const areasApi = resource("/maarif/areas");
 export const studentsApi = {
   ...resource("/maarif/students"),
@@ -56,6 +71,7 @@ export const duesApi = {
 };
 export const monthlyPaymentsApi = {
   list: (p) => api(`/maarif/monthly-payments${query(p)}`),
+  get: (id) => api(`/maarif/monthly-payments/${id}`),
   create: (id, b) =>
     api(`/maarif/monthly-payments/monthly-dues/${id}`, {
       method: "POST",

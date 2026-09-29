@@ -5,6 +5,7 @@ import {
   Contact,
   CreditCard,
   MapPin,
+  Wallet,
   Users,
 } from "lucide-react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
@@ -13,6 +14,7 @@ import { prepareScanAudio } from "./scanAudio";
 
 const tabs = [
   ["payments", CreditCard, "Pagesat"],
+  ["arka", Wallet, "Arka"],
   ["students", Users, "Nxënësit"],
   ["vehicles", Bus, "Automjetet"],
   ["drivers", Users, "Shoferët"],

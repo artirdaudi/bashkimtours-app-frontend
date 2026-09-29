@@ -13,6 +13,8 @@ import StudentCardsPage from "./StudentCardsPage";
 import PaymentFollowupRulesPage from "./PaymentFollowupRulesPage";
 import MessagesPage from "./MessagesPage";
 import AccountsRolesPage from "./AccountsRolesPage";
+import CashRegistersPage from "./CashRegistersPage";
+import MaarifCashPage from "./MaarifCashPage";
 import MonthlyPaymentsPage from "./MonthlyPaymentsPage";
 import StudentDebtsPage from "./StudentDebtsPage";
 import ScanPage from "./ScanPage";
@@ -54,12 +56,14 @@ export default function BashkimToursApp() {
           <Route path="calendar" element={<AcademicCalendarPage />} />
           <Route path="followup-rules" element={<PaymentFollowupRulesPage />} />
           <Route path="payments" element={<MonthlyPaymentsPage />} />
+          <Route path="arka" element={<MaarifCashPage />} />
         </Route>
         <Route path="account" element={<AccountPage />} />
         <Route path="income" element={<IncomePage />} />
         <Route path="shoferat" element={<ShoferatPage />} />
         <Route path="messages" element={<MessagesPage />} />
         <Route path="settings/accounts-roles" element={<AccountsRolesPage />} />
+        <Route path="settings/cash-registers" element={<CashRegistersPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

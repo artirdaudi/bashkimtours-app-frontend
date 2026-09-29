@@ -1,4 +1,4 @@
-import { Banknote, BellRing, ChevronDown, LogOut, Menu, Settings, ShieldCheck, UserCircle, UsersRound, X } from "lucide-react";
+import { Banknote, BellRing, ChevronDown, LogOut, Menu, Settings, ShieldCheck, UserCircle, UsersRound, Wallet, X } from "lucide-react";
 import { useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { clearToken } from "./auth";
@@ -8,7 +8,7 @@ import maarifLogo from "./assets/maarif_logo.jpeg";
 export default function DashboardLayout() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
-  const inSettings = ["/messages", "/settings/accounts-roles"].includes(location.pathname);
+  const inSettings = ["/messages", "/settings/accounts-roles", "/settings/cash-registers"].includes(location.pathname);
   const [settingsOpen, setSettingsOpen] = useState(inSettings);
   const [loginArrival] = useState(() => {
     const active = sessionStorage.getItem("bt_login_transition") === "1";
@@ -66,6 +66,10 @@ export default function DashboardLayout() {
                 <NavLink to="/settings/accounts-roles" onClick={() => setOpen(false)}>
                   <ShieldCheck />
                   <span>Llogaritë dhe rolet</span>
+                </NavLink>
+                <NavLink to="/settings/cash-registers" onClick={() => setOpen(false)}>
+                  <Wallet />
+                  <span>Arkat</span>
                 </NavLink>
               </div>
             )}

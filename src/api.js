@@ -3,5 +3,5 @@ export { authApi, rolesApi, usersApi, driversApi, shoferiApi, vehiclesApi, trans
 export {
   areasApi, studentsApi, qrApi, calendarApi, duesApi, monthlyPaymentsApi,
   studentAssignmentsApi, driverAssignmentsApi, followupApi, followupRulesApi,
-  maarifReportingApi, maarifSettingsApi, whatsappNotificationsApi,
+  maarifReportingApi, maarifSettingsApi, whatsappNotificationsApi, cashRegistersApi,
 } from "./api/maarif";
