@@ -416,8 +416,7 @@ function refineOverviewSearch(
 }
 export default function StudentsPage() {
   const navigate = useNavigate();
-  const [data, setData] = useState();
-  const [summary, setSummary] = useState();
+  const [overviewData, setOverviewData] = useState();
   const [academicMonths, setAcademicMonths] = useState([]);
   const [academicMonthId, setAcademicMonthId] = useState("");
   const [paymentOverviewOpen, setPaymentOverviewOpen] = useState(false);
@@ -431,6 +430,7 @@ export default function StudentsPage() {
     sort_by: "created_at",
     sort_order: "desc",
   });
+  const [searchInput, setSearchInput] = useState("");
   const [selected, setSelected] = useState();
   const [editing, setEditing] = useState();
   const [assigning, setAssigning] = useState();
@@ -441,7 +441,6 @@ export default function StudentsPage() {
   const [currentPaymentFilter, setCurrentPaymentFilter] = useState("");
   const [driverSearch, setDriverSearch] = useState("");
   const [vehicleSearch, setVehicleSearch] = useState("");
-  const [changingStatus, setChangingStatus] = useState("");
   const [draggedStudentId, setDraggedStudentId] = useState(null);
   const [dragTargetId, setDragTargetId] = useState(null);
   const [reorderingVehicleId, setReorderingVehicleId] = useState(null);
@@ -451,14 +450,9 @@ export default function StudentsPage() {
   const [loading, setLoading] = useState(true);
   const load = useCallback(async () => {
     try {
-      const {
-        student_status: selectedStatus,
-        area_id: selectedArea,
-        ...overviewFilters
-      } = filters;
-      delete overviewFilters.search;
       const response = await studentsApi.overview({
-        ...overviewFilters,
+        sort_by: "created_at",
+        sort_order: "desc",
       });
       const monthsById = new Map();
       response.students.forEach((student) =>
@@ -491,53 +485,38 @@ export default function StudentsPage() {
           ? current
           : String(currentMonth?.id || availableMonths[0]?.id || ""),
       );
-      const overview = refineOverviewSearch(
-        {
-          ...response,
-          students: selectedArea
-            ? response.students.filter(
-                (student) => String(student.area_id) === String(selectedArea),
-              )
-            : response.students,
-        },
-        filters.search,
-        driverAssignments,
-        driverSearch,
-        vehicleSearch,
-      );
-      const today = new Date();
-      const currentPaidStudents = overview.students.filter((student) => {
-        if (student.status !== "ACTIVE") return false;
-        const due = student.monthly_dues.find(
-          (item) =>
-            Number(item.month) === today.getMonth() + 1 &&
-            Number(item.calendar_year) === today.getFullYear(),
-        );
-        return due?.status === "PAID";
-      }).length;
-      setData({
-        items: selectedStatus
-          ? overview.students.filter(
-              (student) => student.status === selectedStatus,
-            )
-          : overview.students,
-        allItems: response.students,
-      });
-      setSummary({
-        ...overview.summary,
-        current_paid_students: currentPaidStudents,
-        transport_cards_issued: overview.students.filter(
-          (student) => student.status === "ACTIVE" && student.has_transport_card,
-        ).length,
-      });
+      setOverviewData(response);
       setError("");
     } catch (e) {
       setError(e.message);
     } finally {
       setLoading(false);
-      setChangingStatus("");
     }
-  }, [filters, driverAssignments, driverSearch, vehicleSearch]);
+  }, []);
+  const overview = useMemo(() => {
+    if (!overviewData) return null;
+    return refineOverviewSearch(
+      {
+        ...overviewData,
+        students: filters.area_id
+          ? overviewData.students.filter(
+              (student) => String(student.area_id) === String(filters.area_id),
+            )
+          : overviewData.students,
+      },
+      filters.search,
+      driverAssignments,
+      driverSearch,
+      vehicleSearch,
+    );
+  }, [overviewData, filters.area_id, filters.search, driverAssignments, driverSearch, vehicleSearch]);
+  const data = useMemo(() => overview && ({
+    items: filters.student_status
+      ? overview.students.filter((student) => student.status === filters.student_status)
+      : overview.students,
+    allItems: overviewData.students,
+  }), [overview, overviewData, filters.student_status]);
+  const summary = overview?.summary;
   const loadSupportingData = useCallback(async () => {
     try {
       const [areaData, capacities, driverData] = await Promise.all([
@@ -668,10 +647,9 @@ export default function StudentsPage() {
           : student;
       });
 
-    setData((current) => ({
+    setOverviewData((current) => ({
       ...current,
-      items: applyOrder(current.items),
-      allItems: applyOrder(current.allItems || current.items),
+      students: applyOrder(current.students),
     }));
     setReorderingVehicleId(dragged.vehicleId);
     setError("");
@@ -920,15 +898,13 @@ export default function StudentsPage() {
                 ? "active"
                 : ""
             }
-            disabled={Boolean(changingStatus)}
             onClick={() => {
-              setChangingStatus("ACTIVE");
               setCurrentPaymentFilter("");
               setFilters({ ...filters, student_status: "ACTIVE" });
             }}
           >
             <AnimatedCount value={summary.active_students} />
-            <span>{changingStatus === "ACTIVE" && <RefreshCw className="bt-spin" />}Aktivë</span>
+            <span>Aktivë</span>
           </button>
           <button
             className={
@@ -936,22 +912,19 @@ export default function StudentsPage() {
                 ? "active"
                 : ""
             }
-            disabled={Boolean(changingStatus)}
             onClick={() => {
-              setChangingStatus("INACTIVE");
               setCurrentPaymentFilter("");
               setFilters({ ...filters, student_status: "INACTIVE" });
             }}
           >
             <AnimatedCount value={summary.inactive_students} />
-            <span>{changingStatus === "INACTIVE" && <RefreshCw className="bt-spin" />}Joaktivë</span>
+            <span>Joaktivë</span>
           </button>
           <button
             className={currentPaymentFilter === "unpaid" ? "active" : ""}
-            disabled={Boolean(changingStatus)}
             onClick={() => {
-              setChangingStatus("UNPAID");
               setCurrentPaymentFilter("unpaid");
+              setSearchInput("");
               setFilters({
                 ...filters,
                 search: "",
@@ -961,14 +934,13 @@ export default function StudentsPage() {
             }}
           >
             <AnimatedCount value={summary.current_unpaid_students} />
-            <span>{changingStatus === "UNPAID" && <RefreshCw className="bt-spin" />}Pa pagesën aktuale</span>
+            <span>Pa pagesën aktuale</span>
           </button>
           <button
             className={currentPaymentFilter === "paid" ? "active" : ""}
-            disabled={Boolean(changingStatus)}
             onClick={() => {
-              setChangingStatus("PAID");
               setCurrentPaymentFilter("paid");
+              setSearchInput("");
               setFilters({
                 ...filters,
                 search: "",
@@ -978,14 +950,13 @@ export default function StudentsPage() {
             }}
           >
             <AnimatedCount value={summary.current_paid_students} />
-            <span>{changingStatus === "PAID" && <RefreshCw className="bt-spin" />}Paguar këtë muaj</span>
+            <span>Paguar këtë muaj</span>
           </button>
           <button
             className={currentPaymentFilter === "card" ? "active" : ""}
-            disabled={Boolean(changingStatus)}
             onClick={() => {
-              setChangingStatus("CARD");
               setCurrentPaymentFilter("card");
+              setSearchInput("");
               setFilters({
                 ...filters,
                 search: "",
@@ -995,7 +966,7 @@ export default function StudentsPage() {
             }}
           >
             <span><AnimatedCount value={summary.transport_cards_issued} /> / <AnimatedCount value={summary.active_students} /></span>
-            <span>{changingStatus === "CARD" && <RefreshCw className="bt-spin" />}Kartela të marra</span>
+            <span>Kartela të marra</span>
           </button>
         </section>
       )}
@@ -1006,10 +977,13 @@ export default function StudentsPage() {
             <div>
               <Search />
               <input
-                value={filters.search}
-                onChange={(e) =>
-                  setFilters({ ...filters, search: e.target.value })
-                }
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    setFilters((current) => ({ ...current, search: searchInput.trim() }));
+                  }
+                }}
                 placeholder="Emër, prind, telefon ose kod…"
               />
             </div>
@@ -1088,7 +1062,6 @@ export default function StudentsPage() {
           <select
             value={filters.student_status}
             onChange={(e) => {
-              setChangingStatus(e.target.value);
               setCurrentPaymentFilter("");
               setFilters({
                 ...filters,
