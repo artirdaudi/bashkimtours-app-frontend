@@ -6,10 +6,22 @@ import bashkimToursLogo from "./assets/bashkimtours_logo.png";
 
 const euro = new Intl.NumberFormat("sq-AL", { style: "currency", currency: "EUR" });
 const money = (value) => value == null ? "—" : euro.format(Number(value));
+const mkd = new Intl.NumberFormat("sq-AL", { maximumFractionDigits: 2 });
+const formatMKD = (value) => value == null ? "—" : `${mkd.format(Number(value))} MKD`;
+const exchangeRate = 61.5;
 const dateTime = (value) => value ? new Intl.DateTimeFormat("sq-MK", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)) : "—";
 const paymentDate = (value) => value ? new Intl.DateTimeFormat("sq-MK", { dateStyle: "medium" }).format(new Date(`${value}T12:00:00`)) : "—";
 const differenceLabel = (value) => value == null ? "—" : Number(value) === 0 ? "Përputhet" : Number(value) > 0 ? `Tepricë: ${money(value)}` : `Mungesë: ${money(Math.abs(Number(value)))}`;
-const emptyAction = () => ({ amount: "", comment: "", expense_type: "PAYMENT" });
+const emptyAction = () => ({ amount: "", comment: "", expense_type: "PAYMENT", currency: "EUR" });
+
+function ExpenseAmount({ transaction }) {
+  if (transaction.currency !== "MKD") return <>-{money(transaction.amount)}</>;
+  return <span className="bt-cash-expense-amount">
+    <strong>-{formatMKD(transaction.amount)}</strong>
+    <small>≈ -{money(transaction.amount_eur)}</small>
+    {transaction.exchange_rate != null && <small>1 EUR = {mkd.format(Number(transaction.exchange_rate))} MKD</small>}
+  </span>;
+}
 
 function Summary({ session, closed = false, current = false }) {
   if (!session) return <p>Arka nuk ka sesion të hapur.</p>;
@@ -64,13 +76,13 @@ function TransactionColumns({ items, loading = false }) {
     <section className="bt-maarif-cash-panel"><h2><ArrowDownRight size={21} /> Të hyrat</h2>
       {loading && <p>Duke ngarkuar…</p>}
       {!loading && !income.length && <p>Nuk ka të hyra në këtë sesion.</p>}
-      {!!income.length && <div className="bt-accounts-table-wrap"><table className="bt-accounts-table"><thead><tr><th>Data e pagesës</th><th>Nxënësi</th><th>Prindi</th><th>Telefoni</th><th>Muaji</th><th>Koment</th><th>Shuma</th><th></th></tr></thead><tbody>{income.map((item) => <tr key={item.id}>{item.payment ? <><td>{paymentDate(item.payment.payment_date)}</td><td><strong>{item.payment.student_first_name} {item.payment.student_last_name}</strong></td><td>{item.payment.parent_name || "—"}</td><td>{item.payment.parent_phone || "—"}</td><td>{item.payment.month_name} {item.payment.calendar_year}</td><td>{item.payment.comment || "—"}</td><td>{money(item.payment.amount)}</td><td><button type="button" className="bt-btn-secondary bt-btn-small" disabled={paymentLoading} onClick={() => showPayment(item.payment.id)}>Detajet</button></td></> : <><td>{dateTime(item.created_at)}</td><td colSpan={5}>Detajet e pagesës nuk janë të disponueshme.</td><td>{money(item.amount)}</td><td>{item.payment_id && <button type="button" className="bt-btn-secondary bt-btn-small" disabled={paymentLoading} onClick={() => showPayment(item.payment_id)}>Detajet</button>}</td></>}</tr>)}</tbody></table></div>}
+      {!!income.length && <div className="bt-accounts-table-wrap"><table className="bt-accounts-table"><thead><tr><th>Data e pagesës</th><th>Nxënësi</th><th>Prindi</th><th>Telefoni</th><th>Muaji</th><th>Koment</th><th>Shuma</th><th></th></tr></thead><tbody>{income.map((item) => <tr key={item.id}>{item.payment ? <><td>{paymentDate(item.payment.payment_date)}</td><td><strong>{item.payment.student_first_name} {item.payment.student_last_name}</strong></td><td>{item.payment.parent_name || "—"}</td><td>{item.payment.parent_phone || "—"}</td><td>{item.payment.month_name} {item.payment.calendar_year}</td><td>{item.payment.comment || "—"}</td><td>+{money(item.amount)}</td><td><button type="button" className="bt-btn-secondary bt-btn-small" disabled={paymentLoading} onClick={() => showPayment(item.payment.id)}>Detajet</button></td></> : <><td>{dateTime(item.created_at)}</td><td colSpan={5}>Detajet e pagesës nuk janë të disponueshme.</td><td>+{money(item.amount)}</td><td>{item.payment_id && <button type="button" className="bt-btn-secondary bt-btn-small" disabled={paymentLoading} onClick={() => showPayment(item.payment_id)}>Detajet</button>}</td></>}</tr>)}</tbody></table></div>}
       {paymentError && <p className="bt-inline-error" role="alert">{paymentError}</p>}
     </section>
     <section className="bt-maarif-cash-panel"><h2><ArrowUpRight size={21} /> Të dalurat</h2>
       {loading && <p>Duke ngarkuar…</p>}
       {!loading && !expenses.length && <p>Nuk ka të dalura në këtë sesion.</p>}
-      {!!expenses.length && <div className="bt-accounts-table-wrap"><table className="bt-accounts-table"><thead><tr><th>Data</th><th>Lloji / Përshkrimi</th><th>Përdoruesi</th><th>Shuma</th></tr></thead><tbody>{expenses.map((item) => <tr key={item.id}><td>{dateTime(item.created_at)}</td><td>{item.expense_type === "WITHDRAWAL" ? "Tërheqje" : "Pagesë"}{item.comment ? ` · ${item.comment}` : ""}</td><td>{item.created_by_username}</td><td>{money(item.amount)}</td></tr>)}</tbody></table></div>}
+      {!!expenses.length && <div className="bt-accounts-table-wrap"><table className="bt-accounts-table"><thead><tr><th>Data</th><th>Lloji / Përshkrimi</th><th>Përdoruesi</th><th>Shuma</th></tr></thead><tbody>{expenses.map((item) => <tr key={item.id}><td>{dateTime(item.created_at)}</td><td>{item.expense_type === "WITHDRAWAL" ? "Tërheqje" : "Pagesë"}{item.comment ? ` · ${item.comment}` : ""}</td><td>{item.created_by_username}</td><td><ExpenseAmount transaction={item} /></td></tr>)}</tbody></table></div>}
     </section>
     {paymentDetail && <Modal title="Detajet e pagesës mujore" onClose={() => setPaymentDetail(null)}><div className="bt-cash-payment-detail">
       <div><span>Nxënësi</span><strong>{paymentDetail.student_first_name} {paymentDetail.student_last_name}</strong></div>
@@ -104,11 +116,11 @@ function SessionPrintSheet({ session }) {
       {session.comment && <tr><th>Koment</th><td colSpan={3}>{session.comment}</td></tr>}
     </tbody></table></section>
     <section className="bt-print-section"><h2>Të hyrat <span>{income.length} pagesa · {money(session.total_income)}</span></h2><table><thead><tr><th>Data</th><th>Nxënësi</th><th>Prindi / Telefoni</th><th>Muaji</th><th>Koment</th><th>Shuma</th></tr></thead><tbody>
-      {income.map((item) => <tr key={item.id}><td>{item.payment ? paymentDate(item.payment.payment_date) : dateTime(item.created_at)}</td><td>{item.payment ? `${item.payment.student_first_name} ${item.payment.student_last_name}` : "—"}</td><td>{item.payment ? `${item.payment.parent_name || "—"} · ${item.payment.parent_phone || "—"}` : "—"}</td><td>{item.payment ? `${item.payment.month_name} ${item.payment.calendar_year}` : "—"}</td><td>{item.payment?.comment || item.comment || "—"}</td><td>{money(item.payment?.amount ?? item.amount)}</td></tr>)}
+      {income.map((item) => <tr key={item.id}><td>{item.payment ? paymentDate(item.payment.payment_date) : dateTime(item.created_at)}</td><td>{item.payment ? `${item.payment.student_first_name} ${item.payment.student_last_name}` : "—"}</td><td>{item.payment ? `${item.payment.parent_name || "—"} · ${item.payment.parent_phone || "—"}` : "—"}</td><td>{item.payment ? `${item.payment.month_name} ${item.payment.calendar_year}` : "—"}</td><td>{item.payment?.comment || item.comment || "—"}</td><td>+{money(item.amount)}</td></tr>)}
       {!income.length && <tr><td colSpan={6}>Nuk ka të hyra në këtë sesion.</td></tr>}
     </tbody></table></section>
     <section className="bt-print-section"><h2>Të dalurat <span>{expenses.length} dalje · {money(session.total_expenses)}</span></h2><table><thead><tr><th>Data</th><th>Lloji</th><th>Koment</th><th>Regjistruar nga</th><th>Shuma</th></tr></thead><tbody>
-      {expenses.map((item) => <tr key={item.id}><td>{dateTime(item.created_at)}</td><td>{item.expense_type === "WITHDRAWAL" ? "Tërheqje" : "Pagesë"}</td><td>{item.comment || "—"}</td><td>{item.created_by_username}</td><td>{money(item.amount)}</td></tr>)}
+      {expenses.map((item) => <tr key={item.id}><td>{dateTime(item.created_at)}</td><td>{item.expense_type === "WITHDRAWAL" ? "Tërheqje" : "Pagesë"}</td><td>{item.comment || "—"}</td><td>{item.created_by_username}</td><td><ExpenseAmount transaction={item} /></td></tr>)}
       {!expenses.length && <tr><td colSpan={5}>Nuk ka të dalura në këtë sesion.</td></tr>}
     </tbody></table></section>
     <footer><span>bashkimtours.com · instagram.com/bashkim_tours_official</span><strong>Bashkim Tours</strong></footer>
@@ -256,7 +268,7 @@ export default function MaarifCashPage() {
       let result;
       if (action === "open") result = await cashRegistersApi.openSession(selected.id, { ...body, opening_balance: actionForm.amount });
       if (action === "close") result = await cashRegistersApi.closeSession(selected.id, { ...body, actual_closing_balance: actionForm.amount });
-      if (action === "expense") result = await cashRegistersApi.createExpense(selected.id, { ...body, amount: actionForm.amount, expense_type: actionForm.expense_type });
+      if (action === "expense") result = await cashRegistersApi.createExpense(selected.id, { ...body, amount: Number(actionForm.amount), expense_type: actionForm.expense_type, currency: actionForm.currency });
       setAction(null);
       if (action === "close") setCloseResult(result);
       await loadOverview();
@@ -328,8 +340,10 @@ export default function MaarifCashPage() {
     </>}
     {action && <Modal title={action === "open" ? "Hap arkën" : action === "close" ? "Mbyll arkën" : "Shto të dalur"} className={action === "close" ? "bt-cash-close-modal" : ""} onClose={() => { if (!saving) setAction(null); }}><form className="bt-role-form" onSubmit={submitAction}>
       {action === "close" && <p>Shkruaj shumën që ke numëruar fizikisht në arkë. Sistemi do ta krahasojë me balancin e pritshëm.</p>}
-      <label>{action === "open" ? "Balanci fizik në hapje" : action === "close" ? "Balanci fizik në mbyllje" : "Shuma"}<input type="number" min={action === "expense" ? "0.01" : "0"} step="0.01" required value={actionForm.amount} onChange={(event) => setActionForm({ ...actionForm, amount: event.target.value })} /></label>
+      <label>{action === "open" ? "Balanci fizik në hapje (EUR)" : action === "close" ? "Balanci fizik në mbyllje (EUR)" : "Shuma"}<input type="number" min={action === "expense" ? "0.01" : "0"} step="0.01" required value={actionForm.amount} onChange={(event) => setActionForm({ ...actionForm, amount: event.target.value })} /></label>
       {action === "expense" && <label>Lloji<select value={actionForm.expense_type} onChange={(event) => setActionForm({ ...actionForm, expense_type: event.target.value })}><option value="PAYMENT">Pagesë</option><option value="WITHDRAWAL">Tërheqje</option></select></label>}
+      {action === "expense" && <label>Monedha<select value={actionForm.currency} onChange={(event) => setActionForm({ ...actionForm, currency: event.target.value })}><option value="EUR">EUR</option><option value="MKD">MKD</option></select></label>}
+      {action === "expense" && actionForm.currency === "MKD" && Number(actionForm.amount) > 0 && <p className="bt-cash-conversion-preview">{formatMKD(actionForm.amount)} ≈ {money(Number(actionForm.amount) / exchangeRate)}<small>Kursi: 1 EUR = 61.5 MKD · Vlera përfundimtare llogaritet nga backend-i.</small></p>}
       <label>Koment (opsional)<textarea rows={3} value={actionForm.comment} onChange={(event) => setActionForm({ ...actionForm, comment: event.target.value })} /></label>
       {error && <p className="bt-inline-error" role="alert">{error}</p>}
       <div className="bt-modal-actions"><button type="submit" className={action === "close" ? "bt-btn-danger" : "bt-btn-primary"} disabled={saving}>{saving ? "Duke ruajtur…" : action === "open" ? "Hap arkën" : action === "close" ? "Konfirmo mbylljen" : "Ruaj të dalurën"}</button></div>
