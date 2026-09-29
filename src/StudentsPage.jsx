@@ -351,8 +351,6 @@ function refineOverviewSearch(
   const terms = searchTerms(search);
   const driverTerms = searchTerms(driverSearch);
   const vehicleTerms = searchTerms(vehicleSearch);
-  if (!terms.length && !driverTerms.length && !vehicleTerms.length)
-    return overview;
   const driverByVehicle = new Map(
     driverAssignments.map((assignment) => [assignment.vehicle_id, assignment]),
   );
