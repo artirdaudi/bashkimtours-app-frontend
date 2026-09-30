@@ -434,7 +434,6 @@ export default function StudentsPage() {
     sort_by: "created_at",
     sort_order: "desc",
   });
-  const [searchInput, setSearchInput] = useState("");
   const [selected, setSelected] = useState();
   const [editing, setEditing] = useState();
   const [assigning, setAssigning] = useState();
@@ -900,7 +899,6 @@ export default function StudentsPage() {
             className={currentPaymentFilter === "unpaid" ? "active" : ""}
             onClick={() => {
               setCurrentPaymentFilter("unpaid");
-              setSearchInput("");
               setFilters({
                 ...filters,
                 search: "",
@@ -915,7 +913,6 @@ export default function StudentsPage() {
             className={currentPaymentFilter === "paid" ? "active" : ""}
             onClick={() => {
               setCurrentPaymentFilter("paid");
-              setSearchInput("");
               setFilters({
                 ...filters,
                 search: "",
@@ -930,7 +927,6 @@ export default function StudentsPage() {
             className={currentPaymentFilter === "card" ? "active" : ""}
             onClick={() => {
               setCurrentPaymentFilter("card");
-              setSearchInput("");
               setFilters({
                 ...filters,
                 search: "",
@@ -950,13 +946,8 @@ export default function StudentsPage() {
             <div>
               <Search />
               <input
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    setFilters((current) => ({ ...current, search: searchInput.trim() }));
-                  }
-                }}
+                value={filters.search}
+                onChange={(e) => setFilters((current) => ({ ...current, search: e.target.value }))}
                 placeholder="Emër, prind, telefon ose kod…"
               />
             </div>
