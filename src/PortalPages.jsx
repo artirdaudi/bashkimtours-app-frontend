@@ -9,6 +9,7 @@ import {
   ChevronLeft,
   ChevronRight,
   MapPin,
+  LogOut,
   Pencil,
   Phone,
   Plus,
@@ -34,6 +35,7 @@ import {
   vehiclesApi,
 } from "./api";
 import { monthSq } from "./locale";
+import { clearToken } from "./auth";
 
 const date = (v) => (v ? v.split("-").reverse().join("/") : "—");
 const euro = new Intl.NumberFormat("sq-AL", {
@@ -964,6 +966,13 @@ export function AccountPage() {
         {msg && <p>{msg}</p>}
         <button className="bt-btn-primary">Ndrysho</button>
       </form>
+      <button
+        type="button"
+        className="bt-pwa-account-logout"
+        onClick={() => { clearToken(); window.location.replace("/"); }}
+      >
+        <LogOut size={19} aria-hidden="true" /> Dil nga llogaria
+      </button>
     </Page>
   );
 }

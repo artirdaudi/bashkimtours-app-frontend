@@ -82,6 +82,24 @@
 
 /* Extra launch/login motion belongs only to standalone PWA windows. */
 .bt-pwa-brand-logo, .bt-pwa-login-arrow { display: none; }
+.bt-pwa-account-logout { display: none; }
+html.bt-pwa-standalone .bt-pwa-account-logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: min(100%, 520px);
+  min-height: 52px;
+  margin-top: 20px;
+  border: 1px solid #edc8c8;
+  border-radius: 12px;
+  background: #fff;
+  color: #a92c36;
+  font: 700 15px "DM Sans", sans-serif;
+  cursor: pointer;
+}
+html.bt-pwa-standalone .bt-pwa-account-logout:active { transform: scale(.98); }
+html.bt-pwa-standalone .bt-pwa-account-logout:focus-visible { outline: 3px solid #a92c36; outline-offset: 3px; }
 .bt-pwa-login-feedback { display: none; }
 html.bt-pwa-standalone .bt-pwa-login-feedback { display: inline-flex; align-items: center; }
 html.bt-pwa-standalone .bt-pwa-login-feedback:empty { display: none; }
