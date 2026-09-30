@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { ArrowDownRight, ArrowLeft, ArrowUpRight, Plus, Printer, RefreshCw, Wallet } from "lucide-react";
+import { ArrowDownRight, ArrowLeft, ArrowUpRight, Pencil, Plus, Printer, RefreshCw, Trash2, Wallet } from "lucide-react";
 import { authApi, cashRegistersApi, monthlyPaymentsApi } from "./api";
 import { Modal } from "./PortalPages";
 import { monthSq } from "./locale";
@@ -94,10 +94,14 @@ function Summary({ session, closed = false, current = false }) {
   </>;
 }
 
-function TransactionColumns({ items, loading = false }) {
+function TransactionColumns({ items, loading = false, expenseRegisterId = null, onExpenseChanged }) {
   const [paymentDetail, setPaymentDetail] = useState(null);
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [paymentError, setPaymentError] = useState("");
+  const [selectedExpense, setSelectedExpense] = useState(null);
+  const [expenseForm, setExpenseForm] = useState(null);
+  const [expenseBusy, setExpenseBusy] = useState(false);
+  const [expenseError, setExpenseError] = useState("");
   const income = groupIncomeTransactions(items.filter((item) => item.transaction_type === "INCOME"));
   const expenses = items.filter((item) => item.transaction_type === "EXPENSE");
 
@@ -115,6 +119,48 @@ function TransactionColumns({ items, loading = false }) {
     }
   }
 
+  function showExpense(item) {
+    setSelectedExpense(item);
+    setExpenseForm({ amount: String(item.amount), currency: item.currency || "EUR", comment: item.comment || "" });
+    setExpenseError("");
+  }
+
+  async function updateExpense(event) {
+    event.preventDefault();
+    if (expenseBusy || !selectedExpense || !expenseRegisterId) return;
+    setExpenseBusy(true);
+    setExpenseError("");
+    try {
+      await cashRegistersApi.updateExpense(expenseRegisterId, selectedExpense.id, {
+        amount: Number(expenseForm.amount),
+        currency: expenseForm.currency,
+        comment: expenseForm.comment.trim() || null,
+      });
+      setSelectedExpense(null);
+      await onExpenseChanged();
+    } catch (requestError) {
+      setExpenseError(requestError.message);
+    } finally {
+      setExpenseBusy(false);
+    }
+  }
+
+  async function deleteExpense() {
+    if (expenseBusy || !selectedExpense || !expenseRegisterId) return;
+    if (!window.confirm(`Të fshihet e dalura #${selectedExpense.id} (${selectedExpense.currency === "MKD" ? formatMKD(selectedExpense.amount) : money(selectedExpense.amount)})? Ky veprim nuk mund të kthehet.`)) return;
+    setExpenseBusy(true);
+    setExpenseError("");
+    try {
+      await cashRegistersApi.removeExpense(expenseRegisterId, selectedExpense.id);
+      setSelectedExpense(null);
+      await onExpenseChanged();
+    } catch (requestError) {
+      setExpenseError(requestError.message);
+    } finally {
+      setExpenseBusy(false);
+    }
+  }
+
   return <div className="bt-maarif-cash-columns">
     <section className="bt-maarif-cash-panel"><h2><ArrowDownRight size={21} /> Të hyrat</h2>
       {loading && <p>Duke ngarkuar…</p>}
@@ -129,7 +175,7 @@ function TransactionColumns({ items, loading = false }) {
     <section className="bt-maarif-cash-panel"><h2><ArrowUpRight size={21} /> Të dalurat</h2>
       {loading && <p>Duke ngarkuar…</p>}
       {!loading && !expenses.length && <p>Nuk ka të dalura në këtë sesion.</p>}
-      {!!expenses.length && <div className="bt-accounts-table-wrap"><table className="bt-accounts-table"><thead><tr><th>Data</th><th>Koment</th><th>Përdoruesi</th><th>Shuma</th></tr></thead><tbody>{expenses.map((item) => <tr key={item.id}><td>{dateTime(item.created_at)}</td><td>{item.comment || "—"}</td><td>{item.created_by_username}</td><td><ExpenseAmount transaction={item} /></td></tr>)}</tbody></table></div>}
+      {!!expenses.length && <div className="bt-accounts-table-wrap"><table className="bt-accounts-table"><thead><tr><th>Data</th><th>Koment</th><th>Përdoruesi</th><th>Shuma</th>{expenseRegisterId != null && <th aria-label="Veprimet" />}</tr></thead><tbody>{expenses.map((item) => <tr key={item.id}><td>{dateTime(item.created_at)}</td><td>{item.comment || "—"}</td><td>{item.created_by_username}</td><td><ExpenseAmount transaction={item} /></td>{expenseRegisterId != null && <td><button type="button" className="bt-cash-expense-edit-icon" aria-label={`Ndrysho të dalurën #${item.id}`} title="Ndrysho të dalurën" onClick={() => showExpense(item)}><Pencil size={16} aria-hidden="true" /></button></td>}</tr>)}</tbody></table></div>}
     </section>
     {paymentDetail && <Modal title="Detajet e pagesës mujore" onClose={() => setPaymentDetail(null)}><div className="bt-cash-payment-details">{paymentDetail.map((payment) => <div className="bt-cash-payment-detail" key={payment.id}>
       <div><span>Nxënësi</span><strong>{payment.student_first_name} {payment.student_last_name}</strong></div>
@@ -144,6 +190,17 @@ function TransactionColumns({ items, loading = false }) {
       <div><span>Regjistruar nga</span><strong>{payment.created_by_username || "—"}</strong></div>
       <div><span>Regjistruar më</span><strong>{dateTime(payment.created_at)}</strong></div>
     </div>)}</div></Modal>}
+    {selectedExpense && <Modal title={`E dalura #${selectedExpense.id}`} onClose={() => { if (!expenseBusy) setSelectedExpense(null); }}><form className="bt-role-form" onSubmit={updateExpense}>
+      <p>Regjistruar më {dateTime(selectedExpense.created_at)} nga {selectedExpense.created_by_username}.</p>
+      <div className="bt-cash-expense-fields">
+        <label>Shuma<input type="number" min="0.01" step="0.01" required value={expenseForm.amount} disabled={expenseBusy} onChange={(event) => setExpenseForm({ ...expenseForm, amount: event.target.value })} /></label>
+        <label>Monedha<select value={expenseForm.currency} disabled={expenseBusy} onChange={(event) => setExpenseForm({ ...expenseForm, currency: event.target.value })}><option value="EUR">EUR</option><option value="MKD">MKD</option></select></label>
+      </div>
+      <label>Koment (opsional)<textarea rows={3} value={expenseForm.comment} disabled={expenseBusy} onChange={(event) => setExpenseForm({ ...expenseForm, comment: event.target.value })} /></label>
+      {expenseError && <p className="bt-inline-error" role="alert">{expenseError}</p>}
+      <div className="bt-modal-actions"><button type="submit" className="bt-btn-primary" disabled={expenseBusy}><Pencil size={16} /> {expenseBusy ? "Duke ruajtur…" : "Ruaj ndryshimet"}</button></div>
+      <div className="bt-cash-expense-delete"><button type="button" className="bt-btn-danger" disabled={expenseBusy} onClick={deleteExpense}><Trash2 size={16} /> Fshi të dalurën</button></div>
+    </form></Modal>}
   </div>;
 }
 
@@ -327,6 +384,11 @@ export default function MaarifCashPage() {
     }
   }
 
+  async function refreshAfterExpenseChange() {
+    await loadOverview();
+    setRefresh((value) => value + 1);
+  }
+
   async function showSessionDetail(id) {
     setSessionDetailLoading(true);
     setError("");
@@ -375,7 +437,7 @@ export default function MaarifCashPage() {
       {section === "current" && !accessDenied && <>
         {detailLoading && <p className="bt-accounts-state"><RefreshCw className="bt-spin" /> Duke ngarkuar sesionin…</p>}
         {!detailLoading && !session && <div className="bt-maarif-cash-panel"><p>Arka nuk ka sesion të hapur.</p>{mayOperate && selected.is_active && <button type="button" className="bt-btn-primary" onClick={() => { setActionForm(emptyAction()); setAction("open"); }}>Hap arkën</button>}</div>}
-        {!detailLoading && open && <><div className="bt-maarif-cash-panel"><h2>Sesioni aktual</h2><Summary session={session} current /><div className="bt-cash-session-actions">{mayOperate && <button type="button" className="bt-btn-primary" onClick={() => { setActionForm(emptyAction()); setAction("expense"); }}><Plus size={17} /> Shto të dalur</button>}</div></div><TransactionColumns items={currentTransactions} />{mayOperate && <div className="bt-cash-close-section"><span>Mbyllja e sesionit bëhet pasi të numërohen paratë në arkë.</span><button type="button" className="bt-btn-danger" onClick={() => { setActionForm(emptyAction()); setAction("close"); }}>Mbyll arkën</button></div>}</>}
+        {!detailLoading && open && <><div className="bt-maarif-cash-panel"><h2>Sesioni aktual</h2><Summary session={session} current /><div className="bt-cash-session-actions">{mayOperate && <button type="button" className="bt-btn-primary" onClick={() => { setActionForm(emptyAction()); setAction("expense"); }}><Plus size={17} /> Shto të dalur</button>}</div></div><TransactionColumns items={currentTransactions} expenseRegisterId={mayOperate ? selected.id : null} onExpenseChanged={refreshAfterExpenseChange} />{mayOperate && <div className="bt-cash-close-section"><span>Mbyllja e sesionit bëhet pasi të numërohen paratë në arkë.</span><button type="button" className="bt-btn-danger" onClick={() => { setActionForm(emptyAction()); setAction("close"); }}>Mbyll arkën</button></div>}</>}
       </>}
       {section === "history" && !accessDenied && <section className="bt-maarif-cash-panel"><h2>Historia e sesioneve</h2>
         <div className="bt-cash-history-filters"><label>Prej datës<input type="date" value={filters.date_from} onChange={(event) => { setPage(1); setFilters({ ...filters, date_from: event.target.value }); }} /></label><label>Deri më<input type="date" value={filters.date_to} onChange={(event) => { setPage(1); setFilters({ ...filters, date_to: event.target.value }); }} /></label><label>Statusi<select value={filters.session_status} onChange={(event) => { setPage(1); setFilters({ ...filters, session_status: event.target.value }); }}><option value="">Të gjitha</option><option value="OPEN">E hapur</option><option value="CLOSED">E mbyllur</option></select></label></div>
