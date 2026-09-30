@@ -266,9 +266,19 @@ export default function MaarifCashPage() {
         ? { maarif_cash_register_id: claims.maarif_cash_register_id ?? null, role: { name: claims.role_name, is_active: true }, is_active: true }
         : await authApi.me();
       setMe(user);
+      if (user.maarif_cash_register_id != null) {
+        const register = await cashRegistersApi.get(user.maarif_cash_register_id);
+        setRegisters([register]);
+        setSelectedId(register.id);
+        setSession(register.current_session);
+        setCurrentTransactions(register.current_session?.transactions || []);
+        setOverviewSessions({});
+        setError("");
+        return;
+      }
       const list = await cashRegistersApi.list();
       setRegisters(list);
-      setSelectedId((current) => user.maarif_cash_register_id ?? (list.some((item) => item.id === current) ? current : null));
+      setSelectedId((current) => list.some((item) => item.id === current) ? current : null);
       setOverviewSessions({});
       setError("");
     } catch (requestError) {
@@ -295,7 +305,7 @@ export default function MaarifCashPage() {
   }, [printSession]);
 
   useEffect(() => {
-    if (selectedId == null) return;
+    if (selectedId == null || me?.maarif_cash_register_id === selectedId) return;
     let active = true;
     const fetchCurrent = async () => {
       setDetailLoading(true);
@@ -303,13 +313,11 @@ export default function MaarifCashPage() {
       setSession(null);
       setCurrentTransactions([]);
       try {
-        const current = await cashRegistersApi.currentSession(selectedId);
+        const register = await cashRegistersApi.get(selectedId);
         if (!active) return;
-        setSession(current);
-        if (current) {
-          const detail = await cashRegistersApi.session(selectedId, current.id);
-          if (active) setCurrentTransactions(detail.transactions || []);
-        }
+        setRegisters((current) => current.map((item) => item.id === selectedId ? register : item));
+        setSession(register.current_session);
+        setCurrentTransactions(register.current_session?.transactions || []);
       } catch (requestError) {
         if (active) {
           if (requestError.status === 404) setSession(null);
@@ -322,7 +330,7 @@ export default function MaarifCashPage() {
     };
     fetchCurrent();
     return () => { active = false; };
-  }, [selectedId, refresh, registers]);
+  }, [selectedId, refresh, me?.maarif_cash_register_id]);
 
   useEffect(() => {
     if (selectedId == null || accessDenied || section !== "history") return;
