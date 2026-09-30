@@ -19,7 +19,6 @@ import {
   X,
 } from "lucide-react";
 import {
-  areasApi,
   driverAssignmentsApi,
   duesApi,
   monthlyPaymentsApi,
@@ -418,12 +417,22 @@ export default function StudentsPage() {
   const [academicMonths, setAcademicMonths] = useState([]);
   const [academicMonthId, setAcademicMonthId] = useState("");
   const [paymentOverviewOpen, setPaymentOverviewOpen] = useState(false);
-  const [areas, setAreas] = useState([]);
-  const [driverAssignments, setDriverAssignments] = useState([]);
+  const driverAssignments = useMemo(() => [...new Map(
+    (overviewData?.students || [])
+      .map((student) => student.current_vehicle)
+      .filter((vehicle) => vehicle?.driver_id)
+      .map((vehicle) => [vehicle.vehicle_id, {
+        vehicle_id: vehicle.vehicle_id,
+        vehicle_plate_number: vehicle.plate_number,
+        driver_id: vehicle.driver_id,
+        driver_first_name: vehicle.driver_first_name,
+        driver_last_name: vehicle.driver_last_name,
+        driver_phone_number: vehicle.driver_phone_number,
+      }]),
+  ).values()], [overviewData]);
   const [vehicleCapacities, setVehicleCapacities] = useState([]);
   const [filters, setFilters] = useState({
     search: "",
-    area_id: "",
     student_status: "ACTIVE",
     sort_by: "created_at",
     sort_order: "desc",
@@ -494,20 +503,19 @@ export default function StudentsPage() {
   const overview = useMemo(() => {
     if (!overviewData) return null;
     return refineOverviewSearch(
-      {
-        ...overviewData,
-        students: filters.area_id
-          ? overviewData.students.filter(
-              (student) => String(student.area_id) === String(filters.area_id),
-            )
-          : overviewData.students,
-      },
+      overviewData,
       filters.search,
       driverAssignments,
       driverSearch,
       vehicleSearch,
     );
-  }, [overviewData, filters.area_id, filters.search, driverAssignments, driverSearch, vehicleSearch]);
+  }, [overviewData, filters.search, driverAssignments, driverSearch, vehicleSearch]);
+  const areas = useMemo(() => [...new Map(
+    (overviewData?.students || []).filter((student) => student.area_id != null).map((student) => [
+      student.area_id,
+      { id: student.area_id, name: student.area_name, base_monthly_price: student.area_base_monthly_price },
+    ]),
+  ).values()].sort((a, b) => a.name.localeCompare(b.name, "sq")), [overviewData]);
   const data = useMemo(() => overview && ({
     items: filters.student_status
       ? overview.students.filter((student) => student.status === filters.student_status)
@@ -515,32 +523,6 @@ export default function StudentsPage() {
     allItems: overviewData.students,
   }), [overview, overviewData, filters.student_status]);
   const summary = overview?.summary;
-  const loadSupportingData = useCallback(async () => {
-    try {
-      const [areaData, capacities, driverData] = await Promise.all([
-        areasApi.list({
-          is_active: true,
-          page: 1,
-          page_size: 100,
-          sort_by: "name",
-          sort_order: "asc",
-        }),
-        studentAssignmentsApi.capacities(),
-        driverAssignmentsApi.list({
-          is_active: true,
-          page: 1,
-          page_size: 100,
-          sort_by: "assigned_from",
-          sort_order: "desc",
-        }),
-      ]);
-      setAreas(areaData.items);
-      setVehicleCapacities(capacities);
-      setDriverAssignments(driverData.items);
-    } catch (requestError) {
-      setError(requestError.message);
-    }
-  }, []);
   const refreshVehicleCapacities = useCallback(async () => {
     try {
       setVehicleCapacities(await studentAssignmentsApi.capacities());
@@ -549,13 +531,12 @@ export default function StudentsPage() {
     }
   }, []);
   useEffect(() => {
+    if (editing || assigning || selected) refreshVehicleCapacities();
+  }, [editing, assigning, selected, refreshVehicleCapacities]);
+  useEffect(() => {
     const request = window.setTimeout(load, 0);
     return () => window.clearTimeout(request);
   }, [load]);
-  useEffect(() => {
-    const request = window.setTimeout(loadSupportingData, 0);
-    return () => window.clearTimeout(request);
-  }, [loadSupportingData]);
   useEffect(() => {
     if (!printGroup) return undefined;
     const finish = () => setPrintGroup(null);
@@ -926,7 +907,6 @@ export default function StudentsPage() {
               setFilters({
                 ...filters,
                 search: "",
-                area_id: "",
                 student_status: "ACTIVE",
               });
             }}
@@ -942,7 +922,6 @@ export default function StudentsPage() {
               setFilters({
                 ...filters,
                 search: "",
-                area_id: "",
                 student_status: "ACTIVE",
               });
             }}
@@ -958,7 +937,6 @@ export default function StudentsPage() {
               setFilters({
                 ...filters,
                 search: "",
-                area_id: "",
                 student_status: "ACTIVE",
               });
             }}
@@ -1027,7 +1005,13 @@ export default function StudentsPage() {
               setVehicleSearch(option.value);
               setDriverSearch(option.driverName || "");
             }}
-            options={vehicleCapacities.map((vehicle) => {
+            options={[...new Map((overviewData?.students || [])
+              .filter((student) => student.current_vehicle)
+              .map((student) => [student.current_vehicle.vehicle_id, {
+                vehicle_id: student.current_vehicle.vehicle_id,
+                vehicle_plate_number: student.current_vehicle.plate_number,
+                vehicle_model: student.current_vehicle.model,
+              }])).values()].map((vehicle) => {
               const assignment = driverAssignments.find(
                 (item) => item.vehicle_id === vehicle.vehicle_id,
               );
@@ -1044,33 +1028,6 @@ export default function StudentsPage() {
               };
             })}
           />
-          <select
-            value={filters.area_id}
-            onChange={(e) =>
-              setFilters({ ...filters, area_id: e.target.value })
-            }
-          >
-            <option value="">Të gjitha zonat</option>
-            {areas.map((a) => (
-              <option value={a.id} key={a.id}>
-                {a.name}
-              </option>
-            ))}
-          </select>
-          <select
-            value={filters.student_status}
-            onChange={(e) => {
-              setCurrentPaymentFilter("");
-              setFilters({
-                ...filters,
-                student_status: e.target.value,
-              });
-            }}
-          >
-            <option value="">Të gjithë</option>
-            <option value="ACTIVE">Aktivë</option>
-            <option value="INACTIVE">Joaktivë</option>
-          </select>
         </div>
         {loading ? (
           <div className="bt-state-message">
