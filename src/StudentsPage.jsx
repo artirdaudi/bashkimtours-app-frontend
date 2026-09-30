@@ -71,6 +71,12 @@ const dueColor = (due) => {
     ? "unpaid"
     : "future";
 };
+const driversDuringAssignment = (assignment, drivers = []) =>
+  drivers.filter((driver) => {
+    const assignmentEnd = assignment.assigned_to || "9999-12-31";
+    const driverEnd = driver.assigned_to || "9999-12-31";
+    return driver.assigned_from <= assignmentEnd && driverEnd >= assignment.assigned_from;
+  });
 function DueWarningSteps({ due, detailed = false }) {
   const steps = [
     ["P1", "Paralajmërimi 1", Boolean(due.first_warning_sent_at)],
@@ -126,15 +132,6 @@ function SemesterDues({ dues, onSelect }) {
     </div>
   );
 }
-const driversDuringAssignment = (assignment, drivers = []) =>
-  drivers.filter((driver) => {
-    const assignmentEnd = assignment.assigned_to || "9999-12-31";
-    const driverEnd = driver.assigned_to || "9999-12-31";
-    return (
-      driver.assigned_from <= assignmentEnd &&
-      driverEnd >= assignment.assigned_from
-    );
-  });
 const empty = {
   first_name: "",
   last_name: "",
@@ -430,7 +427,7 @@ export default function StudentsPage() {
         driver_phone_number: vehicle.driver_phone_number,
       }]),
   ).values()], [overviewData]);
-  const [vehicleCapacities, setVehicleCapacities] = useState([]);
+  const [vehicleCapacities, setVehicleCapacities] = useState(null);
   const [filters, setFilters] = useState({
     search: "",
     student_status: "ACTIVE",
@@ -531,8 +528,8 @@ export default function StudentsPage() {
     }
   }, []);
   useEffect(() => {
-    if (editing || assigning || selected) refreshVehicleCapacities();
-  }, [editing, assigning, selected, refreshVehicleCapacities]);
+    if ((editing && !editing.id) || assigning) refreshVehicleCapacities();
+  }, [editing, assigning, refreshVehicleCapacities]);
   useEffect(() => {
     const request = window.setTimeout(load, 0);
     return () => window.clearTimeout(request);
@@ -865,7 +862,7 @@ export default function StudentsPage() {
           <h1>Nxënësit</h1>
           <p>Çmimet, zonat, transporti dhe detyrimet mujore.</p>
         </div>
-        <button className="bt-btn-primary" onClick={() => setEditing(empty)}>
+        <button className="bt-btn-primary" onClick={() => { setVehicleCapacities(null); setEditing(empty); }}>
           <Plus /> Shto nxënës
         </button>
       </header>
@@ -1179,6 +1176,7 @@ export default function StudentsPage() {
                               disabled={s.status !== "ACTIVE"}
                               onClick={(event) => {
                                 event.stopPropagation();
+                                setVehicleCapacities(null);
                                 setAssigning(s);
                               }}
                             >
@@ -1205,12 +1203,11 @@ export default function StudentsPage() {
           <StudentForm
             initial={editing}
             areas={areas}
-            vehicleCapacities={vehicleCapacities}
+            vehicleCapacities={vehicleCapacities || []}
             driverAssignments={driverAssignments}
             onSaved={() => {
               setEditing();
               load();
-              refreshVehicleCapacities();
             }}
           />
         </Modal>
@@ -1218,18 +1215,16 @@ export default function StudentsPage() {
       {selected && (
         <StudentProfile
           id={selected}
+          overviewStudent={overviewData?.students.find((student) => student.id === selected)}
           areas={areas}
-          vehicleCapacities={vehicleCapacities}
           driverAssignments={driverAssignments}
           onClose={() => setSelected()}
           onChanged={() => {
             load();
-            refreshVehicleCapacities();
           }}
           onDeleted={() => {
             setSelected();
             load();
-            refreshVehicleCapacities();
           }}
         />
       )}
@@ -1238,16 +1233,15 @@ export default function StudentsPage() {
           title={`Cakto automjetin · ${assigning.first_name} ${assigning.last_name}`}
           onClose={() => setAssigning()}
         >
-          <AssignVehicleForm
+          {vehicleCapacities ? <AssignVehicleForm
             student={assigning}
             vehicles={vehicleCapacities}
             driverAssignments={driverAssignments}
             onSaved={() => {
               setAssigning();
               load();
-              refreshVehicleCapacities();
             }}
-          />
+          /> : <p>Duke ngarkuar automjetet…</p>}
         </Modal>
       )}
       {paymentDue && (
@@ -2136,84 +2130,87 @@ function VehicleAssignmentEditor({
 }
 export function StudentProfile({
   id,
+  overviewStudent,
   areas,
-  vehicleCapacities,
   driverAssignments,
   onClose,
   onChanged,
   onDeleted,
 }) {
-  const [student, setStudent] = useState();
+  const student = overviewStudent;
+  const overviewVehicle = overviewStudent?.current_vehicle;
   const [payments, setPayments] = useState([]);
-  const [vehicle, setVehicle] = useState(null);
+  const vehicle = overviewVehicle ? {
+    id: overviewVehicle.assignment_id,
+    vehicle_id: overviewVehicle.vehicle_id,
+    vehicle_type: overviewVehicle.vehicle_type,
+    vehicle_plate_number: overviewVehicle.plate_number,
+    vehicle_model: overviewVehicle.model,
+    assigned_from: overviewVehicle.assigned_from,
+  } : null;
   const [vehicleHistory, setVehicleHistory] = useState([]);
   const [driversByVehicle, setDriversByVehicle] = useState({});
+  const [historyLoaded, setHistoryLoaded] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const [editingProfile, setEditingProfile] = useState(false);
   const [changingVehicle, setChangingVehicle] = useState(false);
+  const [vehicleCapacities, setVehicleCapacities] = useState(null);
+  useEffect(() => {
+    if (!changingVehicle) return undefined;
+    let active = true;
+    setVehicleCapacities(null);
+    studentAssignmentsApi.capacities()
+      .then((capacities) => { if (active) setVehicleCapacities(capacities); })
+      .catch((requestError) => { if (active) setError(requestError.message); });
+    return () => { active = false; };
+  }, [changingVehicle]);
   const [printSection, setPrintSection] = useState("");
   const [receiptPayment, setReceiptPayment] = useState(null);
   const [deletingPaymentGroup, setDeletingPaymentGroup] = useState("");
   const [error, setError] = useState("");
   const load = useCallback(
     () =>
-      Promise.all([
-        studentsApi.get(id),
-        monthlyPaymentsApi.list({
+      monthlyPaymentsApi.list({
           student_id: id,
           page: 1,
           page_size: 100,
           sort_by: "payment_date",
           sort_order: "desc",
-        }),
-        studentAssignmentsApi.current(id).catch(() => null),
-        studentAssignmentsApi.list({
-          student_id: id,
-          page: 1,
-          page_size: 100,
-          sort_by: "assigned_from",
-          sort_order: "desc",
-        }),
-      ])
-        .then(async ([s, p, v, history]) => {
-          const vehicleIds = [
-            ...new Set(
-              [
-                ...history.items.map((item) => item.vehicle_id),
-                v?.vehicle_id,
-              ].filter(Boolean),
-            ),
-          ];
-          const driverHistory = await Promise.all(
-            vehicleIds.map(async (vehicleId) => [
-              vehicleId,
-              await driverAssignmentsApi.list({
-                vehicle_id: vehicleId,
-                page: 1,
-                page_size: 100,
-                sort_by: "assigned_from",
-                sort_order: "desc",
-              }),
-            ]),
-          );
-          setStudent(s);
-          setPayments(p.items);
-          setVehicle(v);
-          setVehicleHistory(history.items);
-          setDriversByVehicle(
-            Object.fromEntries(
-              driverHistory.map(([vehicleId, response]) => [
-                vehicleId,
-                response.items,
-              ]),
-            ),
-          );
         })
+        .then((response) => setPayments(response.items))
         .catch((e) => setError(e.message)),
     [id],
   );
   useEffect(() => {
-    load();
+    const request = window.setTimeout(load, 0);
+    return () => window.clearTimeout(request);
   }, [load]);
+  async function loadVehicleHistory() {
+    if (historyLoading) return;
+    setHistoryLoading(true);
+    setError("");
+    try {
+      const history = await studentAssignmentsApi.list({
+        student_id: id, page: 1, page_size: 100,
+        sort_by: "assigned_from", sort_order: "desc",
+      });
+      const vehicleIds = [...new Set(history.items.map((item) => item.vehicle_id))];
+      const driverHistory = await Promise.all(vehicleIds.map(async (vehicleId) => [
+        vehicleId,
+        await driverAssignmentsApi.list({
+          vehicle_id: vehicleId, page: 1, page_size: 100,
+          sort_by: "assigned_from", sort_order: "desc",
+        }),
+      ]));
+      setVehicleHistory(history.items);
+      setDriversByVehicle(Object.fromEntries(driverHistory.map(([vehicleId, response]) => [vehicleId, response.items])));
+      setHistoryLoaded(true);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setHistoryLoading(false);
+    }
+  }
   useEffect(() => {
     if (!printSection) return undefined;
     const finish = () => setPrintSection("");
@@ -2234,11 +2231,11 @@ export function StudentProfile({
       window.removeEventListener("afterprint", finish);
     };
   }, [receiptPayment]);
-  const currentDriver = vehicle
-    ? (driversByVehicle[vehicle.vehicle_id] || []).find(
-        (item) => item.is_active,
-      )
-    : null;
+  const currentDriver = overviewVehicle?.driver_id ? {
+    driver_first_name: overviewVehicle.driver_first_name,
+    driver_last_name: overviewVehicle.driver_last_name,
+    driver_phone_number: overviewVehicle.driver_phone_number,
+  } : null;
   const paymentGroups = useMemo(() => groupRelatedMonthlyPayments(payments), [payments]);
   async function deletePaymentGroup(group) {
     const months = group.payments
@@ -2327,7 +2324,7 @@ export function StudentProfile({
               <StudentForm
                 initial={student}
                 areas={areas}
-                vehicleCapacities={vehicleCapacities}
+                vehicleCapacities={vehicleCapacities || []}
                 driverAssignments={driverAssignments}
                 onSaved={() => {
                   setEditingProfile(false);
@@ -2391,9 +2388,7 @@ export function StudentProfile({
                 )}
                 {vehicle &&
                   (() => {
-                    const driver = (
-                      driversByVehicle[vehicle.vehicle_id] || []
-                    ).find((item) => item.is_active);
+                    const driver = currentDriver;
                     return driver ? (
                       <span className="bt-current-driver">
                         Shoferi:{" "}
@@ -2424,7 +2419,7 @@ export function StudentProfile({
                   : "Cakto automjet"}
             </button>
           </section>
-          {changingVehicle && (
+          {changingVehicle && vehicleCapacities && (
             <VehicleAssignmentEditor
               student={student}
               current={vehicle}
@@ -2433,19 +2428,23 @@ export function StudentProfile({
               onSaved={() => {
                 setChangingVehicle(false);
                 load();
+                if (historyLoaded) loadVehicleHistory();
                 onChanged();
               }}
             />
           )}
-          <StudentCardDetails studentId={student.id} onChanged={onChanged} />
+          <StudentCardDetails studentId={student.id} hasTransportCard={student.has_transport_card} onChanged={onChanged} />
           <section className="bt-vehicle-history-section">
             <div className="bt-section-heading">
               <div>
                 <h3>Historiku i automjeteve</h3>
-                <p>{vehicleHistory.length} caktime gjithsej</p>
+                {historyLoaded && <p>{vehicleHistory.length} caktime gjithsej</p>}
               </div>
+              {!historyLoaded && <button type="button" className="bt-btn-secondary" disabled={historyLoading} onClick={loadVehicleHistory}>
+                {historyLoading ? "Duke ngarkuar…" : "Shiko historikun e automjeteve"}
+              </button>}
             </div>
-            {vehicleHistory.length ? (
+            {historyLoaded && (vehicleHistory.length ? (
               <div className="bt-history-table-wrap">
                 <table className="bt-history-table">
                   <thead>
@@ -2519,7 +2518,7 @@ export function StudentProfile({
               <p className="bt-empty-inline">
                 Ky nxënës nuk ka histori të caktimit në automjete.
               </p>
-            )}
+            ))}
           </section>
           {error && <p className="bt-inline-error">{error}</p>}
           <div className="bt-section-heading">
@@ -2604,7 +2603,7 @@ export function StudentProfile({
               student={student}
               vehicle={vehicle}
               currentDriver={currentDriver}
-              vehicleHistory={vehicleHistory}
+              vehicleHistory={historyLoaded ? vehicleHistory : null}
               driversByVehicle={driversByVehicle}
               payments={payments}
             />
@@ -2704,7 +2703,7 @@ function StudentPrintSheet({
           )}
         </>
       )}
-      {(type === "profile" || type === "vehicles") && (
+      {(type === "profile" || type === "vehicles") && vehicleHistory && (
         <section className="bt-print-section">
           {type === "profile" && (
             <h2>

@@ -1,12 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, BadgeEuro, RefreshCw, UserRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import {
-  areasApi,
-  driverAssignmentsApi,
-  studentAssignmentsApi,
-  studentsApi,
-} from "./api";
+import { studentsApi } from "./api";
 import { monthSq } from "./locale";
 import { StudentProfile } from "./StudentsPage";
 
@@ -29,8 +24,18 @@ export default function StudentDebtsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedStudentId, setSelectedStudentId] = useState(null);
-  const [profileLoading, setProfileLoading] = useState(false);
-  const [profileData, setProfileData] = useState(null);
+  const areas = useMemo(() => [...new Map(students.map((student) => [student.area_id, {
+    id: student.area_id, name: student.area_name,
+    base_monthly_price: student.area_base_monthly_price,
+  }])).values()].sort((a, b) => a.name.localeCompare(b.name, "sq")), [students]);
+  const driverAssignments = useMemo(() => [...new Map(students
+    .map((student) => student.current_vehicle)
+    .filter((vehicle) => vehicle?.driver_id)
+    .map((vehicle) => [vehicle.vehicle_id, {
+      vehicle_id: vehicle.vehicle_id,
+      driver_first_name: vehicle.driver_first_name,
+      driver_last_name: vehicle.driver_last_name,
+    }])).values()], [students]);
 
   const loadStudents = useCallback(async () => {
     try {
@@ -52,44 +57,7 @@ export default function StudentDebtsPage() {
     return () => window.clearTimeout(request);
   }, [loadStudents]);
 
-  async function openStudentProfile(studentId) {
-    if (profileLoading) return;
-    setProfileLoading(true);
-    setError("");
-    try {
-      let supportingData = profileData;
-      if (!supportingData) {
-        const [areaResponse, vehicleCapacities, driverResponse] =
-          await Promise.all([
-            areasApi.list({
-              page: 1,
-              page_size: 100,
-              sort_by: "name",
-              sort_order: "asc",
-            }),
-            studentAssignmentsApi.capacities(),
-            driverAssignmentsApi.list({
-              is_active: true,
-              page: 1,
-              page_size: 100,
-              sort_by: "assigned_from",
-              sort_order: "desc",
-            }),
-          ]);
-        supportingData = {
-          areas: areaResponse.items,
-          vehicleCapacities,
-          driverAssignments: driverResponse.items,
-        };
-        setProfileData(supportingData);
-      }
-      setSelectedStudentId(studentId);
-    } catch (requestError) {
-      setError(requestError.message);
-    } finally {
-      setProfileLoading(false);
-    }
-  }
+  function openStudentProfile(studentId) { setSelectedStudentId(studentId); }
 
   const debts = useMemo(
     () =>
@@ -212,17 +180,12 @@ export default function StudentDebtsPage() {
           <p>Të gjithë nxënësit i kanë pagesat në rregull.</p>
         </div>
       )}
-      {profileLoading && (
-        <div className="bt-debt-profile-loading">
-          <RefreshCw className="bt-spin" /> Duke hapur profilin…
-        </div>
-      )}
-      {selectedStudentId && profileData && (
+      {selectedStudentId && (
         <StudentProfile
           id={selectedStudentId}
-          areas={profileData.areas}
-          vehicleCapacities={profileData.vehicleCapacities}
-          driverAssignments={profileData.driverAssignments}
+          overviewStudent={students.find((student) => student.id === selectedStudentId)}
+          areas={areas}
+          driverAssignments={driverAssignments}
           onClose={() => setSelectedStudentId(null)}
           onChanged={loadStudents}
           onDeleted={() => {
