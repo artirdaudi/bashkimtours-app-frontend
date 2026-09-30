@@ -2,6 +2,19 @@ const TOKEN_KEY = "bashkimtours_access_token";
 
 export const getToken = () => localStorage.getItem(TOKEN_KEY);
 
+export const getTokenClaims = () => {
+  try {
+    const payload = getToken()?.split(".")[1];
+    if (!payload) return null;
+    const claims = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/")));
+    if (!Number.isInteger(Number(claims.sub)) || Number(claims.sub) <= 0 || !Number.isInteger(claims.exp) || claims.exp * 1000 <= Date.now()) return null;
+    if (claims.maarif_cash_register_id != null && (!Number.isInteger(claims.maarif_cash_register_id) || claims.maarif_cash_register_id <= 0)) return null;
+    return claims;
+  } catch {
+    return null;
+  }
+};
+
 export const saveToken = (token) => localStorage.setItem(TOKEN_KEY, token);
 
 export const clearToken = () => localStorage.removeItem(TOKEN_KEY);
