@@ -9,55 +9,21 @@ export default function PwaSupport() {
   const [installPrompt, setInstallPrompt] = useState(null);
   const [installed, setInstalled] = useState(isStandalone);
   const [dismissed, setDismissed] = useState(false);
+  const [updateDismissed, setUpdateDismissed] = useState(false);
   const [error, setError] = useState("");
-  useRegisterSW({
-    onNeedReload: () => window.location.reload(),
+  const { needRefresh: [needRefresh], updateServiceWorker } = useRegisterSW({
     onRegisterError: () => isStandalone() && setError("Përditësimi automatik nuk është gati. Rifreskoni faqen për të provuar përsëri."),
   });
   const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
   useEffect(() => {
     const displayMode = window.matchMedia("(display-mode: standalone)");
-    const viewport = document.querySelector('meta[name="viewport"]');
-    const originalViewport = viewport?.getAttribute("content");
-    const syncZoomMode = () => {
-      const standalone = isStandalone();
-      document.documentElement.classList.toggle("bt-pwa-fixed-zoom", standalone);
-      document.documentElement.classList.toggle("bt-pwa-standalone", standalone);
-      if (viewport) viewport.setAttribute("content", standalone
-        ? "width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no"
-        : originalViewport);
-    };
-    const preventGesture = (event) => {
-      if (isStandalone()) event.preventDefault();
-    };
-    const preventPinch = (event) => {
-      if (isStandalone() && event.touches.length > 1) event.preventDefault();
-    };
-    const preventWheelZoom = (event) => {
-      if (isStandalone() && event.ctrlKey) event.preventDefault();
-    };
-    const preventKeyboardZoom = (event) => {
-      if (isStandalone() && (event.ctrlKey || event.metaKey) && ["+", "=", "-", "0"].includes(event.key)) {
-        event.preventDefault();
-      }
-    };
-    syncZoomMode();
-    displayMode.addEventListener("change", syncZoomMode);
-    document.addEventListener("gesturestart", preventGesture, { passive: false });
-    document.addEventListener("gesturechange", preventGesture, { passive: false });
-    document.addEventListener("touchmove", preventPinch, { passive: false });
-    window.addEventListener("wheel", preventWheelZoom, { passive: false });
-    window.addEventListener("keydown", preventKeyboardZoom);
+    const syncDisplayMode = () => document.documentElement.classList.toggle("bt-pwa-standalone", isStandalone());
+    syncDisplayMode();
+    displayMode.addEventListener("change", syncDisplayMode);
     return () => {
-      displayMode.removeEventListener("change", syncZoomMode);
-      document.removeEventListener("gesturestart", preventGesture);
-      document.removeEventListener("gesturechange", preventGesture);
-      document.removeEventListener("touchmove", preventPinch);
-      window.removeEventListener("wheel", preventWheelZoom);
-      window.removeEventListener("keydown", preventKeyboardZoom);
-      document.documentElement.classList.remove("bt-pwa-fixed-zoom", "bt-pwa-standalone");
-      if (viewport && originalViewport !== null) viewport.setAttribute("content", originalViewport);
+      displayMode.removeEventListener("change", syncDisplayMode);
+      document.documentElement.classList.remove("bt-pwa-standalone");
     };
   }, []);
 
@@ -132,19 +98,22 @@ export default function PwaSupport() {
         <img src="/icons/icon-192.png" width="96" height="96" alt="Bashkim Tours" />
         <h1 id="bt-offline-title">Nuk ka lidhje interneti</h1>
         <p id="bt-offline-description">Pagesat, të dhënat e nxënësve dhe verifikimi i kartelave kërkojnë internet. Rilidhuni për të vazhduar. Të dhënat e formularit mbeten në këtë dritare.</p>
+        <button type="button" onClick={() => { if (navigator.onLine) setOffline(false); }}>Provo përsëri</button>
       </section>
     </div>
   );
 
-  if (!error && (installed || dismissed || (!installPrompt && !ios))) return null;
+  const showUpdate = needRefresh && !updateDismissed;
+  if (!showUpdate && !error && (installed || dismissed || (!installPrompt && !ios))) return null;
   return (
     <aside className="bt-pwa-notice" aria-label="Bashkim Tours aplikacioni">
+      {showUpdate && <><strong>Version i ri është gati</strong><p>Përditësojeni pasi të përfundoni punën në formularin e hapur.</p><button type="button" onClick={() => updateServiceWorker(true)}>Përditëso</button></>}
       {error && <p role="alert">{error}</p>}
         {!installed && !dismissed && <>
           <strong>Instalo Bashkim Tours</strong>
           {installPrompt ? <><p>Hapeni aplikacionin direkt nga ekrani kryesor.</p><button type="button" onClick={install}>Instalo</button></> : ios ? <p>Në Safari, hapni menynë “Share”, zgjidhni “Add to Home Screen”, pastaj “Add”.</p> : null}
         </>}
-      <button type="button" onClick={() => { setDismissed(true); setError(""); }}>Mbyll</button>
+      <button type="button" onClick={() => { setDismissed(true); setUpdateDismissed(true); setError(""); }}>Mbyll</button>
     </aside>
   );
 }

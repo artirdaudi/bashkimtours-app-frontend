@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { confirmAction } from "./confirmAction";
 import { Pencil, Plus, RefreshCw, Trash2, Wallet } from "lucide-react";
 import { cashRegistersApi, usersApi } from "./api";
 import { Modal } from "./PortalPages";
@@ -58,7 +59,7 @@ export default function CashRegistersPage() {
   }
 
   async function removeRegister(register) {
-    if (busy || !window.confirm(`Të fshihet arka ${register.name}?`)) return;
+    if (busy || !await confirmAction(`Të fshihet arka ${register.name}?`)) return;
     setBusy(true);
     setError("");
     try {
@@ -101,7 +102,7 @@ export default function CashRegistersPage() {
       {error && !userRegister && !form && <p className="bt-inline-error" role="alert">{error}</p>}
       {loading && <p className="bt-accounts-state" role="status"><RefreshCw className="bt-spin" /> Duke ngarkuar…</p>}
       {!loading && !error && !registers.length && <p className="bt-accounts-state">Nuk ka arka të regjistruara.</p>}
-      {!!registers.length && <div className="bt-accounts-table-wrap"><table className="bt-accounts-table">
+      {!!registers.length && <div className="bt-accounts-table-wrap"><table className="bt-accounts-table bt-mobile-registers-table">
         <thead><tr><th>Arka</th><th>Gjendja</th><th>Statusi</th><th>Përdoruesit</th><th>Veprimet</th></tr></thead>
         <tbody>{registers.map((register) => <tr key={register.id}>
           <td><strong>{register.name}</strong></td>

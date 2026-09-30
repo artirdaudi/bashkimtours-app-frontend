@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { confirmAction } from "./confirmAction";
 import {
   Bus,
   Pencil,
@@ -176,7 +177,7 @@ export default function VehiclesManagementPage() {
                           disabled={deletingId !== null}
                           onClick={async () => {
                             if (
-                              !window.confirm(
+                              !await confirmAction(
                                 `A jeni të sigurt që dëshironi ta fshini automjetin ${vehicle.plate_number}? Ky veprim nuk mund të kthehet.`,
                               )
                             )

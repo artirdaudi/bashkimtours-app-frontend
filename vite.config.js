@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, cwd(), "");
   return {
     plugins: [react(), tailwindcss(), VitePWA({
-      registerType: "autoUpdate",
+      registerType: "prompt",
       manifest: {
         id: "/",
         name: "Bashkim Tours",
@@ -34,7 +34,7 @@ export default defineConfig(({ mode }) => {
         runtimeCaching: [{
           urlPattern: ({ request, url, sameOrigin }) => sameOrigin && request.mode === "navigate" && (
             /^\/$/.test(url.pathname) ||
-            /^\/(students|debts|cards|skano|areas|vehicles|drivers|calendar|followup-rules|payments|account|income|messages|shoferat|settings\/accounts-roles)\/?$/.test(url.pathname) ||
+            /^\/(students|debts|cards|skano|areas|vehicles|drivers|calendar|followup-rules|payments|arka|account|income|messages|shoferat|settings\/(accounts-roles|cash-registers))\/?$/.test(url.pathname) ||
             /^\/student\/[^/]+\/?$/.test(url.pathname)
           ),
           handler: "NetworkFirst",

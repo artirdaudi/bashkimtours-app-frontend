@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CalendarDays, ChevronLeft, ChevronRight, LoaderCircle, Pencil, Plus, Search, Trash2, UsersRound, X } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, LoaderCircle, Pencil, Plus, Search, UsersRound, X } from "lucide-react";
 import { shoferiApi } from "./api";
 import { Modal } from "./PortalPages";
 
@@ -98,14 +98,6 @@ export default function ShoferatPage() {
     finally { setSaving(false); }
   }
 
-  async function removeDriver() {
-    if (!window.confirm(`Të fshihet shoferi ${selected.emri}?`)) return;
-    setSaving(true);
-    try { await shoferiApi.remove(selected.id); setSelected(null); setRefresh((value) => value + 1); }
-    catch (requestError) { setFormError(requestError.message); }
-    finally { setSaving(false); }
-  }
-
   function changePage(nextPage) {
     if (loading || nextPage < 1 || nextPage > (data?.pages ?? 1)) return;
     setLoading(true);
@@ -129,7 +121,7 @@ export default function ShoferatPage() {
       {items.map((driver) => <tr key={driver.id}><td><button className="bt-shoferat-name" onClick={() => openDriver(driver.id)}>{driver.emri}</button></td><td>{driver.telefoni || "—"}</td><td>{driver.embg}</td><td>{driver.llogaria}</td><td>{hiddenSalary(driver.rroga)}</td><td>{formatDate(driver.cd)}</td><td>{formatDate(driver.licenca_transport_nderkombtar)}</td><td><button className="bt-shoferat-icon" onClick={() => openDriver(driver.id)} aria-label={`Hap ${driver.emri}`}><Pencil size={17} /></button></td></tr>)}
     </tbody></table>{!loading && !items.length && !error && <div className="bt-shoferat-empty">Nuk u gjet asnjë shofer.</div>}{loading && <div className="bt-shoferat-empty bt-shoferat-loading" role="status"><LoaderCircle size={22} /> Duke ngarkuar shoferët…</div>}</div>
     {data && data.pages > 1 && <nav className="bt-shoferat-pages" aria-label="Faqet e shoferëve"><button type="button" aria-label="Faqja e mëparshme" disabled={loading || page <= 1} onClick={() => changePage(page - 1)}><ChevronLeft size={19} /></button><span>Faqja {page} nga {data.pages}</span><button type="button" aria-label="Faqja tjetër" disabled={loading || page >= data.pages} onClick={() => changePage(page + 1)}><ChevronRight size={19} /></button></nav>}
-    {selected && !form && <Modal title={selected.emri} onClose={() => setSelected(null)}><div className="bt-shoferat-detail"><div className="bt-shoferat-detail-grid">{fields.map((field) => <div key={field.key}><span>{field.label}</span><strong>{field.key === "rroga" ? hiddenSalary(selected[field.key]) : field.type === "date" ? formatDate(selected[field.key]) : selected[field.key] || "—"}</strong></div>)}</div>{formError && <p className="bt-inline-error">{formError}</p>}<div className="bt-shoferat-actions"><button className="bt-btn-primary" onClick={() => startEdit(selected)}><Pencil size={17} /> Ndrysho</button><button className="bt-btn-secondary" disabled={saving} onClick={removeDriver}><Trash2 size={17} /> Fshi</button></div></div></Modal>}
-    {form && <Modal title={form.id ? "Ndrysho shoferin" : "Shto shofer"} onClose={() => { if (!saving) setForm(null); }}><form className="bt-shoferat-form" onSubmit={save}>{fields.map((field) => <label key={field.key}><span>{field.type === "date" && <CalendarDays size={15} />}{field.label}</span><input className={field.key === "licenca_transport_nderkombtar" && !form[field.key] ? "bt-shoferat-license-empty" : undefined} type={field.key === "rroga" ? "password" : field.type || "text"} inputMode={field.key === "rroga" ? "decimal" : undefined} autoComplete={field.key === "rroga" ? "off" : undefined} step={field.step} value={form[field.key]} required={field.required} onChange={(event) => setForm({ ...form, [field.key]: event.target.value })} />{field.key === "licenca_transport_nderkombtar" && form.id && <small>Data ekzistuese: {formatDate(form.existingLicense)}. Zgjidhni datë vetëm nëse doni ta ndryshoni.</small>}</label>)}{formError && <p className="bt-inline-error" role="alert">{formError}</p>}<div className="bt-shoferat-actions"><button className="bt-btn-primary" disabled={saving}>{saving ? "Duke ruajtur…" : "Ruaj"}</button><button type="button" className="bt-btn-secondary" disabled={saving} onClick={() => setForm(null)}>Anulo</button></div></form></Modal>}
+    {selected && !form && <Modal title={selected.emri} onClose={() => setSelected(null)}><div className="bt-shoferat-detail"><div className="bt-shoferat-detail-grid">{fields.map((field) => <div key={field.key}><span>{field.label}</span><strong>{field.key === "rroga" ? hiddenSalary(selected[field.key]) : field.type === "date" ? formatDate(selected[field.key]) : selected[field.key] || "—"}</strong></div>)}</div>{formError && <p className="bt-inline-error">{formError}</p>}<div className="bt-shoferat-actions"><button className="bt-btn-primary" onClick={() => startEdit(selected)}><Pencil size={17} /> Ndrysho</button></div></div></Modal>}
+    {form && <Modal title={form.id ? "Ndrysho shoferin" : "Shto shofer"} onClose={() => { if (!saving) setForm(null); }}><form className="bt-shoferat-form" onSubmit={save}>{fields.map((field) => <label key={field.key}><span>{field.type === "date" && <CalendarDays size={15} />}{field.label}</span><input className={field.key === "licenca_transport_nderkombtar" && !form[field.key] ? "bt-shoferat-license-empty" : undefined} type={field.key === "rroga" ? "password" : field.type || "text"} inputMode={field.key === "rroga" ? "decimal" : field.key === "telefoni" ? "tel" : undefined} enterKeyHint="next" autoComplete={field.key === "rroga" ? "off" : undefined} step={field.step} value={form[field.key]} required={field.required} onChange={(event) => setForm({ ...form, [field.key]: event.target.value })} />{field.key === "licenca_transport_nderkombtar" && form.id && <small>Data ekzistuese: {formatDate(form.existingLicense)}. Zgjidhni datë vetëm nëse doni ta ndryshoni.</small>}</label>)}{formError && <p className="bt-inline-error" role="alert">{formError}</p>}<div className="bt-shoferat-actions"><button className="bt-btn-primary" disabled={saving}>{saving ? "Duke ruajtur…" : "Ruaj"}</button><button type="button" className="bt-btn-secondary" disabled={saving} onClick={() => setForm(null)}>Anulo</button></div></form></Modal>}
   </div>;
 }

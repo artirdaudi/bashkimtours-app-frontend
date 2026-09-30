@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { confirmAction } from "./confirmAction";
 import { useNavigate } from "react-router-dom";
 import {
   Bus,
@@ -527,7 +528,9 @@ export default function StudentsPage() {
     }
   }, []);
   useEffect(() => {
-    if ((editing && !editing.id) || assigning) refreshVehicleCapacities();
+    if (!((editing && !editing.id) || assigning)) return undefined;
+    const request = window.setTimeout(refreshVehicleCapacities, 0);
+    return () => window.clearTimeout(request);
   }, [editing, assigning, refreshVehicleCapacities]);
   useEffect(() => {
     const request = window.setTimeout(load, 0);
@@ -667,7 +670,7 @@ export default function StudentsPage() {
   async function deleteMonthlyDue() {
     const due = paymentDue?.due;
     if (!due || !["PENDING", "OVERDUE"].includes(due.status) || deletingDue) return;
-    if (!window.confirm(`A jeni të sigurt që dëshironi ta fshini detyrimin për ${monthSq(due.month, due.month_name)} ${due.calendar_year}?`)) return;
+    if (!await confirmAction(`A jeni të sigurt që dëshironi ta fshini detyrimin për ${monthSq(due.month, due.month_name)} ${due.calendar_year}?`)) return;
     setDeletingDue(true);
     setDeleteDueError("");
     try {
@@ -1931,7 +1934,7 @@ function StudentForm({
       ].map(([k, l]) => (
         <label key={k}>
           <span>{l}</span>
-          <input value={form[k]} onChange={set(k)} required />
+          <input value={form[k]} onChange={set(k)} type={k === "parent_phone" ? "tel" : "text"} inputMode={k === "parent_phone" ? "tel" : undefined} enterKeyHint="next" required />
         </label>
       ))}
       <label>
@@ -1949,6 +1952,7 @@ function StudentForm({
         <span>Çmimi personal (bosh=zona, 0=pa pagesë)</span>
         <input
           type="number"
+          inputMode="decimal"
           min="0"
           value={form.custom_monthly_price}
           onChange={set("custom_monthly_price")}
@@ -2146,19 +2150,20 @@ export function StudentProfile({
   const [editingProfile, setEditingProfile] = useState(false);
   const [changingVehicle, setChangingVehicle] = useState(false);
   const [vehicleCapacities, setVehicleCapacities] = useState(null);
+  const [error, setError] = useState("");
   useEffect(() => {
     if (!changingVehicle) return undefined;
     let active = true;
-    setVehicleCapacities(null);
-    studentAssignmentsApi.capacities()
-      .then((capacities) => { if (active) setVehicleCapacities(capacities); })
-      .catch((requestError) => { if (active) setError(requestError.message); });
-    return () => { active = false; };
+    const request = window.setTimeout(() => {
+      studentAssignmentsApi.capacities()
+        .then((capacities) => { if (active) setVehicleCapacities(capacities); })
+        .catch((requestError) => { if (active) setError(requestError.message); });
+    }, 0);
+    return () => { active = false; window.clearTimeout(request); };
   }, [changingVehicle]);
   const [printSection, setPrintSection] = useState("");
   const [receiptPayment, setReceiptPayment] = useState(null);
   const [deletingPaymentGroup, setDeletingPaymentGroup] = useState("");
-  const [error, setError] = useState("");
   const load = useCallback(
     () =>
       monthlyPaymentsApi.list({
@@ -2232,7 +2237,7 @@ export function StudentProfile({
     const months = group.payments
       .map((payment) => monthSq(payment.month, payment.month_name))
       .join(", ");
-    const confirmed = window.confirm(
+    const confirmed = await confirmAction(
       `A jeni të sigurt që dëshironi ta fshini këtë pagesë${group.payments.length > 1 ? ` me ${group.payments.length} muaj` : ""}?\n\nMuajt: ${months}\nShuma: ${money(group.totalAmount)}\n\nPas fshirjes, detyrimet mujore përkatëse do të rikthehen në statusin Në pritje.`,
     );
     if (!confirmed) return;
@@ -2288,7 +2293,7 @@ export function StudentProfile({
                 className="bt-btn-danger"
                 onClick={async () => {
                   if (
-                    !window.confirm(
+                    !await confirmAction(
                       `A jeni të sigurt që dëshironi ta fshini nxënësin ${student.first_name} ${student.last_name}? Ky veprim nuk mund të kthehet.`,
                     )
                   )
@@ -2400,7 +2405,7 @@ export function StudentProfile({
             <button
               className="bt-btn-secondary"
               disabled={student.status !== "ACTIVE" && !vehicle}
-              onClick={() => setChangingVehicle(!changingVehicle)}
+              onClick={() => { if (!changingVehicle) setVehicleCapacities(null); setChangingVehicle(!changingVehicle); }}
             >
               <Bus />{" "}
               {student.status !== "ACTIVE" && vehicle

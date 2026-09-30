@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { confirmAction } from "./confirmAction";
 import { Pencil, Plus, RefreshCw, Search, ShieldCheck, UserCircle } from "lucide-react";
 import { authApi, rolesApi, usersApi } from "./api";
 import { Modal } from "./PortalPages";
@@ -110,7 +111,7 @@ export default function AccountsRolesPage() {
   }
 
   async function toggleUser(user) {
-    if (actionId || (user.is_active && !window.confirm(`Të çaktivizohet llogaria ${user.username}?`))) return;
+    if (actionId || (user.is_active && !await confirmAction(`Të çaktivizohet llogaria ${user.username}?`))) return;
     setActionId(`user-${user.id}`);
     setError("");
     try {
@@ -124,7 +125,7 @@ export default function AccountsRolesPage() {
   }
 
   async function deactivateRole(role) {
-    if (busy || actionId || !window.confirm(`Të çaktivizohet roli ${role.name}?`)) return;
+    if (busy || actionId || !await confirmAction(`Të çaktivizohet roli ${role.name}?`)) return;
     setActionId(`role-${role.id}`);
     setError("");
     try {
@@ -168,7 +169,7 @@ export default function AccountsRolesPage() {
     {tab === "accounts" && <section className="bt-accounts-section" role="tabpanel">
       <h2><UserCircle size={21} /> Llogaritë</h2>
       {!loading && !shownUsers.length && <p className="bt-accounts-state">{search ? "Nuk u gjet asnjë llogari." : "Nuk ka llogari të regjistruara."}</p>}
-      {!!shownUsers.length && <div className="bt-accounts-table-wrap"><table className="bt-accounts-table">
+      {!!shownUsers.length && <div className="bt-accounts-table-wrap"><table className="bt-accounts-table bt-mobile-users-table">
         <thead><tr><th>Përdoruesi</th><th>Roli</th><th>Statusi</th><th>Koment</th><th>Veprimet</th></tr></thead>
         <tbody>{shownUsers.map((user) => <tr key={user.id}>
           <td><strong>{user.username}</strong></td>

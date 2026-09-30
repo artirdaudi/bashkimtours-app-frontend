@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { confirmAction } from "./confirmAction";
 import {
   CalendarDays,
   Printer,
@@ -146,7 +147,7 @@ export default function MonthlyPaymentsPage() {
           monthNames[Number(payment.month) - 1] || payment.month_name,
       )
       .join(", ");
-    const confirmed = window.confirm(
+    const confirmed = await confirmAction(
       `A jeni të sigurt që dëshironi ta fshini këtë pagesë${group.payments.length > 1 ? ` me ${group.payments.length} muaj` : ""}?\n\nMuajt: ${months}\nShuma: ${money(group.totalAmount)}\n\nPas fshirjes, detyrimet mujore përkatëse do të rikthehen në statusin Në pritje.`,
     );
     if (!confirmed) return;

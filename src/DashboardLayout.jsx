@@ -1,9 +1,10 @@
-import { Banknote, BellRing, ChevronDown, LogOut, Menu, Settings, ShieldCheck, UserCircle, UsersRound, Wallet, X } from "lucide-react";
+import { Banknote, BellRing, ChevronDown, CreditCard, LogOut, Menu, ScanLine, Settings, ShieldCheck, UserCircle, UsersRound, Wallet, X } from "lucide-react";
 import { useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { clearToken } from "./auth";
 import logo from "./assets/bashkimtours_logo.png";
 import maarifLogo from "./assets/maarif_logo.jpeg";
+import { prepareScanAudio } from "./scanAudio";
 
 export default function DashboardLayout() {
   const [open, setOpen] = useState(false);
@@ -36,6 +37,14 @@ export default function DashboardLayout() {
             <img className="bt-menu-logo" src={maarifLogo} alt="" />
             <span>Maarif</span>
           </NavLink>
+          <div className="bt-mobile-module-links" aria-label="Modulet Maarif">
+            {[
+              ["/vehicles", "Automjetet"], ["/drivers", "Shoferët Maarif"],
+              ["/areas", "Zonat"], ["/calendar", "Kalendari"],
+              ["/cards", "Kartelat"], ["/debts", "Borxhet"],
+              ["/followup-rules", "Rregullat e pagesave"],
+            ].map(([path, label]) => <NavLink key={path} to={path} onClick={() => setOpen(false)}>{label}</NavLink>)}
+          </div>
           <NavLink to="/income" onClick={() => setOpen(false)}>
             <Banknote />
             <span>Të hyrat</span>
@@ -94,6 +103,13 @@ export default function DashboardLayout() {
       <main className="bt-main">
         <Outlet />
       </main>
+      <nav className="bt-mobile-bottom-nav" aria-label="Navigimi kryesor">
+        <NavLink to="/students"><UsersRound /><span>Nxënësit</span></NavLink>
+        <NavLink to="/payments"><CreditCard /><span>Pagesat</span></NavLink>
+        <NavLink to="/arka"><Wallet /><span>Arka</span></NavLink>
+        <NavLink to="/skano" onClick={prepareScanAudio}><ScanLine /><span>Skano</span></NavLink>
+        <button type="button" className={open || !["/students", "/payments", "/arka", "/skano"].includes(location.pathname) ? "active" : ""} onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-label="Më shumë faqe"><Menu /><span>Më shumë</span></button>
+      </nav>
     </div>
   );
 }

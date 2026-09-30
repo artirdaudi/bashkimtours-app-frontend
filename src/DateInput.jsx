@@ -36,6 +36,7 @@ export default function DateInput({ value, onChange, required, ...props }) {
       ref={inputRef}
       type="text"
       inputMode="numeric"
+      enterKeyHint="next"
       placeholder="DD/MM/YYYY"
       defaultValue={formatDate(value)}
       required={required}
@@ -49,7 +50,7 @@ export default function DateInput({ value, onChange, required, ...props }) {
         else if (!masked) onChange("");
       }}
       onBlur={(event) => {
-        event.target.value = formatDate(value);
+        if (parseDate(event.target.value) || !event.target.value) event.target.value = formatDate(value);
       }}
     />
   );

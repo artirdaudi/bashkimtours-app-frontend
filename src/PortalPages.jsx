@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { confirmAction } from "./confirmAction";
 import {
   AlertTriangle,
   Banknote,
@@ -40,15 +41,73 @@ const euro = new Intl.NumberFormat("sq-AL", {
   currency: "EUR",
 });
 const money = (v) => euro.format(Number(v || 0));
+let openModalCount = 0;
+let previousBodyOverflow = "";
 export function Modal({ title, onClose, children, className = "", headerActions }) {
+  const dialogRef = useRef(null);
+  const onCloseRef = useRef(onClose);
+  useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
+  const titleId = useId();
+  useEffect(() => {
+    const dialogNode = dialogRef.current;
+    const previousFocus = document.activeElement;
+    if (openModalCount++ === 0) {
+      previousBodyOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+    }
+    dialogNode?.querySelector('button[aria-label="Mbyll"]')?.focus();
+    const viewport = window.visualViewport;
+    const updateViewport = () => {
+      const height = viewport?.height || window.innerHeight;
+      dialogNode?.style.setProperty("--bt-visible-height", `${height}px`);
+      const backdrop = dialogNode?.parentElement;
+      if (backdrop) {
+        backdrop.style.top = `${viewport?.offsetTop || 0}px`;
+        backdrop.style.height = `${height}px`;
+        backdrop.style.bottom = "auto";
+      }
+      const active = document.activeElement;
+      if (active && dialogNode?.contains(active) && active.matches("input, textarea, select")) {
+        window.setTimeout(() => active.scrollIntoView({ block: "nearest", behavior: "smooth" }), 80);
+      }
+    };
+    const keepFocusedFieldVisible = (event) => {
+      if (event.target.matches("input, textarea, select")) {
+        window.setTimeout(() => event.target.scrollIntoView({ block: "nearest", behavior: "smooth" }), 120);
+      }
+    };
+    const onKeyDown = (event) => {
+      if (document.querySelector("dialog[open]")) return;
+      if (event.key === "Escape") { event.stopPropagation(); onCloseRef.current(); return; }
+      if (event.key !== "Tab") return;
+      const focusables = [...dialogNode.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])')];
+      if (!focusables.length) return;
+      const first = focusables[0], last = focusables[focusables.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
+    updateViewport();
+    viewport?.addEventListener("resize", updateViewport);
+    viewport?.addEventListener("scroll", updateViewport);
+    dialogNode?.addEventListener("focusin", keepFocusedFieldVisible);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      viewport?.removeEventListener("resize", updateViewport);
+      viewport?.removeEventListener("scroll", updateViewport);
+      dialogNode?.removeEventListener("focusin", keepFocusedFieldVisible);
+      document.removeEventListener("keydown", onKeyDown);
+      if (--openModalCount === 0) document.body.style.overflow = previousBodyOverflow;
+      previousFocus?.focus?.();
+    };
+  }, []);
   return createPortal(
     <div
       className="bt-modal-backdrop"
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
-      <section className={`bt-modal bt-modal--wide ${className}`}>
+      <section ref={dialogRef} className={`bt-modal bt-modal--wide ${className}`} role="dialog" aria-modal="true" aria-labelledby={titleId}>
         <header>
-          <h2>{title}</h2>
+          <h2 id={titleId}>{title}</h2>
           <div className="bt-modal-header-actions">
             {headerActions}
             <button type="button" onClick={onClose} aria-label="Mbyll">
@@ -280,7 +339,7 @@ function ResourcePage({ type }) {
                           title="Fshije"
                           onClick={async () => {
                             if (
-                              !window.confirm(
+                              !await confirmAction(
                                 `A jeni të sigurt që dëshironi ta fshini këtë ${c.singular}? Ky veprim nuk mund të kthehet.`,
                               )
                             )

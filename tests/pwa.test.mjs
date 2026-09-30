@@ -48,13 +48,13 @@ test('only app assets are precached and live APIs have no runtime cache', () => 
   const allowed = (path, mode = 'navigate', sameOrigin = true) => routes[0].match({ request: { mode }, url: new URL(path, 'https://app.bashkimtours.com'), sameOrigin });
   assert(!allowed('/students', 'cors'));
   assert(!allowed('/students', 'navigate', false));
-  for (const path of ['/', '/students', '/skano', '/payments', '/student/test-token']) assert(allowed(path), path);
+  for (const path of ['/', '/students', '/skano', '/payments', '/arka', '/settings/cash-registers', '/student/test-token']) assert(allowed(path), path);
   for (const path of ['/api/auth/me', '/api/maarif/monthly-payments', '/api/maarif/qr/test-token', '/auth/login', '/health']) assert(!allowed(path), path);
 });
 
-test('new service worker activates and claims clients without user acceptance', () => {
-  assert.equal(skipped, true);
-  assert.equal(claimed, true);
+test('new service worker waits for user acceptance before activating', () => {
+  assert.equal(skipped, false);
+  assert.equal(claimed, false);
 });
 
 function launchHarness(standalone, reduced = false) {
@@ -91,7 +91,7 @@ test('installed launch fades away after app readiness and releases interaction',
   assert(launch.classes.has('bt-pwa-launch'));
   launch.events.get('bt-app-ready')();
   assert(launch.timers[0].cancelled);
-  assert.equal(launch.timers[1].delay, 950);
+  assert.equal(launch.timers[1].delay, 300);
   launch.timers[1].callback();
   launch.timers[2].callback();
   assert(launch.removed());

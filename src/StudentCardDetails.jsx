@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { confirmAction } from "./confirmAction";
 import { cardPaymentsApi, maarifSettingsApi, transportCardsApi } from "./api";
 import { formatDateTime } from "./dateUtils";
 
@@ -73,7 +74,7 @@ export default function StudentCardDetails({ studentId, hasTransportCard, onChan
         if (!Number.isFinite(amount) || amount <= 0) {
           throw new Error("Vendosni fillimisht çmimin e kartelës së re te skeda Kartelat.");
         }
-        if (!window.confirm(`Të regjistrohet pagesa ${money(amount)} dhe të lëshohet kartelë e re?`)) return;
+        if (!await confirmAction(`Të regjistrohet pagesa ${money(amount)} dhe të lëshohet kartelë e re?`, { destructive: false })) return;
         const payment = await cardPaymentsApi.create(studentId, {
           amount,
           paid_at: new Date().toISOString(),

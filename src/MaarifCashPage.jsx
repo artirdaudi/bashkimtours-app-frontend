@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { confirmAction } from "./confirmAction";
 import { ArrowDownRight, ArrowLeft, ArrowUpRight, Pencil, Plus, Printer, RefreshCw, Trash2, Wallet } from "lucide-react";
 import { authApi, cashRegistersApi, monthlyPaymentsApi } from "./api";
 import { getTokenClaims } from "./auth";
@@ -148,7 +149,7 @@ function TransactionColumns({ items, loading = false, expenseRegisterId = null, 
 
   async function deleteExpense() {
     if (expenseBusy || !selectedExpense || !expenseRegisterId) return;
-    if (!window.confirm(`Të fshihet e dalura #${selectedExpense.id} (${selectedExpense.currency === "MKD" ? formatMKD(selectedExpense.amount) : money(selectedExpense.amount)})? Ky veprim nuk mund të kthehet.`)) return;
+    if (!await confirmAction(`Të fshihet e dalura #${selectedExpense.id} (${selectedExpense.currency === "MKD" ? formatMKD(selectedExpense.amount) : money(selectedExpense.amount)})? Ky veprim nuk mund të kthehet.`)) return;
     setExpenseBusy(true);
     setExpenseError("");
     try {

@@ -21,6 +21,6 @@
   const failsafe = window.setTimeout(finish, 8000);
   document.addEventListener('bt-app-ready', () => {
     window.clearTimeout(failsafe);
-    window.setTimeout(finish, Math.max(0, (reducedMotion ? 0 : 950) - (performance.now() - started)));
+    window.setTimeout(finish, Math.max(0, (reducedMotion ? 0 : 300) - (performance.now() - started)));
   }, { once: true });
 })();

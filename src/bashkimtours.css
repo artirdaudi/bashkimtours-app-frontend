@@ -724,7 +724,7 @@
 .bt-modal {
   overflow: hidden;
   width: min(620px, 100%);
-  max-height: calc(100vh - 44px);
+  max-height: calc(var(--bt-visible-height, 100dvh) - 44px);
   background: #fff;
   border-radius: 15px;
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.22);
@@ -760,7 +760,7 @@
 }
 .bt-modal-body {
   overflow-y: auto;
-  max-height: calc(100vh - 125px);
+  max-height: calc(var(--bt-visible-height, 100dvh) - 125px);
   padding: 23px;
 }
 .bt-form-grid {
@@ -1052,11 +1052,12 @@
   }
   .bt-modal {
     width: 100%;
-    max-height: 92vh;
+    max-height: calc(var(--bt-visible-height, 100dvh) - env(safe-area-inset-top) - 8px);
     border-radius: 16px 16px 0 0;
   }
   .bt-modal-body {
-    max-height: calc(92vh - 78px);
+    max-height: calc(var(--bt-visible-height, 100dvh) - env(safe-area-inset-top) - 86px);
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
   }
   .bt-form-grid {
     grid-template-columns: 1fr;
@@ -6633,3 +6634,130 @@
   .bt-accounts-section { padding: 18px; }
   .bt-accounts-self { grid-template-columns: 1fr; }
 }
+
+/* Installed-app navigation and keyboard-safe forms. */
+.bt-mobile-bottom-nav { display: none; }
+.bt-mobile-module-links { display: none; }
+@media (max-width: 800px) {
+  .bt-mobile-module-links { display: grid; gap: 2px; margin: -2px 0 12px 17px; padding-left: 9px; border-left: 2px solid var(--bt-line); }
+  .bt-sidebar-new .bt-mobile-module-links a { width: 100%; min-height: 40px; padding: 8px 10px; font-size: 13px; }
+  .bt-mobile-menu { display: none; }
+  .bt-maarif-tabs { display: none; }
+  .bt-mobile-bottom-nav {
+    position: fixed;
+    z-index: 60;
+    inset: auto 0 0;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    min-height: 60px;
+    padding: 5px max(6px, env(safe-area-inset-right)) max(5px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left));
+    background: rgb(255 255 255 / 96%);
+    border-top: 1px solid var(--bt-line);
+    box-shadow: 0 -5px 22px rgb(16 35 65 / 7%);
+    backdrop-filter: blur(12px);
+  }
+  .bt-mobile-bottom-nav :is(a, button) {
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 3px;
+    min-width: 0;
+    min-height: 48px;
+    padding: 3px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: #657184;
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .bt-mobile-bottom-nav :is(a, button).active { color: var(--bt-blue); background: #eaf2fc; }
+  .bt-mobile-bottom-nav svg { width: 21px; height: 21px; }
+  .bt-main { padding-bottom: calc(60px + env(safe-area-inset-bottom)); }
+  .bt-dashboard:has(.bt-maarif-shell--scan),
+  .bt-main:has(> .bt-maarif-shell--scan),
+  .bt-maarif-shell--scan { height: calc(100dvh - 60px - env(safe-area-inset-bottom)); }
+  .bt-main:has(> .bt-maarif-shell--scan) { padding-bottom: 0; }
+  .bt-modal-actions { position: sticky; bottom: 0; z-index: 1; padding: 10px 0 max(8px, env(safe-area-inset-bottom)); background: #fff; }
+  :is(.bt-modal input, .bt-modal textarea, .bt-modal select, .bt-login-page input, .bt-admin-filters input) { font-size: max(16px, 1em); }
+}
+
+@media (max-width: 700px) {
+  /* Dense desktop tables become readable records in the everyday mobile flows. */
+  :is(.bt-payments-table, .bt-shoferat-table, .bt-maarif-cash-columns .bt-accounts-table) { display: block; width: 100%; min-width: 0; }
+  :is(.bt-payments-table, .bt-shoferat-table, .bt-maarif-cash-columns .bt-accounts-table) thead { display: none; }
+  :is(.bt-payments-table, .bt-shoferat-table, .bt-maarif-cash-columns .bt-accounts-table) tbody { display: grid; gap: 10px; padding: 8px; }
+  :is(.bt-payments-table, .bt-shoferat-table, .bt-maarif-cash-columns .bt-accounts-table) tbody tr { display: grid; gap: 0; padding: 8px 12px; border: 1px solid var(--bt-line); border-radius: 12px; background: #fff; }
+  :is(.bt-payments-table, .bt-shoferat-table, .bt-maarif-cash-columns .bt-accounts-table) tbody td { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; width: 100%; padding: 8px 0; border: 0; white-space: normal; text-align: right; overflow-wrap: anywhere; }
+  :is(.bt-payments-table, .bt-shoferat-table, .bt-maarif-cash-columns .bt-accounts-table) tbody td + td { border-top: 1px solid #edf1f5; }
+  :is(.bt-payments-table, .bt-shoferat-table, .bt-maarif-cash-columns .bt-accounts-table) tbody td::before { flex: 0 0 36%; color: var(--bt-muted); font-size: 12px; font-weight: 600; text-align: left; }
+  .bt-payments-table tbody td:nth-child(1)::before { content: "Data"; }
+  .bt-payments-table tbody td:nth-child(2)::before { content: "Nxënësi"; }
+  .bt-payments-table tbody td:nth-child(3)::before { content: "Prindi"; }
+  .bt-payments-table tbody td:nth-child(4)::before { content: "Zona"; }
+  .bt-payments-table tbody td:nth-child(5)::before { content: "Muaji"; }
+  .bt-payments-table tbody td:nth-child(6)::before { content: "Shuma"; }
+  .bt-payments-table tbody td:nth-child(7)::before { content: "Regjistruar"; }
+  .bt-payments-table tbody td:nth-child(8)::before { content: "Koment"; }
+  .bt-payments-table tbody td:nth-child(9)::before { content: "Veprimet"; }
+  .bt-shoferat-table tbody td:nth-child(1)::before { content: "Shoferi"; }
+  .bt-shoferat-table tbody td:nth-child(2)::before { content: "Telefoni"; }
+  .bt-shoferat-table tbody td:nth-child(3)::before { content: "EMBG"; }
+  .bt-shoferat-table tbody td:nth-child(4)::before { content: "Llogaria"; }
+  .bt-shoferat-table tbody td:nth-child(5)::before { content: "Rroga"; }
+  .bt-shoferat-table tbody td:nth-child(6)::before { content: "CD"; }
+  .bt-shoferat-table tbody td:nth-child(7)::before { content: "Licenca"; }
+  .bt-shoferat-table tbody td:nth-child(8)::before { content: "Detajet"; }
+  .bt-maarif-cash-columns > section:first-child .bt-accounts-table td:nth-child(1)::before { content: "Data"; }
+  .bt-maarif-cash-columns > section:first-child .bt-accounts-table td:nth-child(2)::before { content: "Nxënësi"; }
+  .bt-maarif-cash-columns > section:first-child .bt-accounts-table td:nth-child(3)::before { content: "Muaji"; }
+  .bt-maarif-cash-columns > section:first-child .bt-accounts-table td:nth-child(4)::before { content: "Koment"; }
+  .bt-maarif-cash-columns > section:first-child .bt-accounts-table td:nth-child(5)::before { content: "Shuma"; }
+  .bt-maarif-cash-columns > section:nth-child(2) .bt-accounts-table td:nth-child(1)::before { content: "Data"; }
+  .bt-maarif-cash-columns > section:nth-child(2) .bt-accounts-table td:nth-child(2)::before { content: "Koment"; }
+  .bt-maarif-cash-columns > section:nth-child(2) .bt-accounts-table td:nth-child(3)::before { content: "Përdoruesi"; }
+  .bt-maarif-cash-columns > section:nth-child(2) .bt-accounts-table td:nth-child(4)::before { content: "Shuma"; }
+  .bt-maarif-cash-columns > section:nth-child(2) .bt-accounts-table td:nth-child(5)::before { content: "Veprimet"; }
+  .bt-shoferat-table-wrap, .bt-history-table-wrap, .bt-maarif-cash-columns .bt-accounts-table-wrap { overflow-x: visible; }
+  :is(.bt-history-row-actions button, .bt-shoferat-table button, .bt-cash-expense-edit-icon) { min-width: 44px; min-height: 44px; }
+  :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-wa-table) { display: block; width: 100%; min-width: 0; }
+  :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-wa-table) thead { display: none; }
+  :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-wa-table) tbody { display: grid; gap: 10px; padding: 8px; }
+  :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-wa-table) tbody tr:not(.bt-wa-table-detail-row) { display: grid; padding: 8px 12px; border: 1px solid var(--bt-line); border-radius: 12px; background: #fff; }
+  :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-wa-table) tbody tr:not(.bt-wa-table-detail-row) td { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; width: 100%; padding: 8px 0; border: 0; text-align: right; overflow-wrap: anywhere; }
+  :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-wa-table) tbody tr:not(.bt-wa-table-detail-row) td + td { border-top: 1px solid #edf1f5; }
+  :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-wa-table) tbody tr:not(.bt-wa-table-detail-row) td::before { flex: 0 0 36%; color: var(--bt-muted); font-size: 12px; font-weight: 600; text-align: left; }
+  .bt-mobile-users-table td:nth-child(1)::before { content: "Përdoruesi"; }
+  .bt-mobile-users-table td:nth-child(2)::before { content: "Roli"; }
+  .bt-mobile-users-table td:nth-child(3)::before { content: "Statusi"; }
+  .bt-mobile-users-table td:nth-child(4)::before { content: "Koment"; }
+  .bt-mobile-users-table td:nth-child(5)::before { content: "Veprimet"; }
+  .bt-roles-table td:nth-child(1)::before { content: "Roli"; }
+  .bt-roles-table td:nth-child(2)::before { content: "Përshkrimi"; }
+  .bt-roles-table td:nth-child(3)::before { content: "Statusi"; }
+  .bt-roles-table td:nth-child(4)::before { content: "Veprimet"; }
+  .bt-mobile-registers-table td:nth-child(1)::before { content: "Arka"; }
+  .bt-mobile-registers-table td:nth-child(2)::before { content: "Gjendja"; }
+  .bt-mobile-registers-table td:nth-child(3)::before { content: "Statusi"; }
+  .bt-mobile-registers-table td:nth-child(4)::before { content: "Përdoruesit"; }
+  .bt-mobile-registers-table td:nth-child(5)::before { content: "Veprimet"; }
+  .bt-wa-table tr:not(.bt-wa-table-detail-row) td:nth-child(1)::before { content: "Marrësi"; }
+  .bt-wa-table tr:not(.bt-wa-table-detail-row) td:nth-child(2)::before { content: "Numri"; }
+  .bt-wa-table tr:not(.bt-wa-table-detail-row) td:nth-child(3)::before { content: "Statusi"; }
+  .bt-wa-table tr:not(.bt-wa-table-detail-row) td:nth-child(4)::before { content: "Detajet"; }
+  .bt-wa-table-detail-row { display: block; margin-top: -10px; }
+  .bt-wa-table-detail-row td { display: block; width: 100%; padding: 12px; }
+  :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-wa-table) .bt-role-actions { justify-content: flex-end; flex-wrap: wrap; }
+  :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-wa-table) button { min-height: 44px; }
+  .bt-accounts-table-wrap:has(> :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-wa-table)) { overflow-x: visible; }
+}
+.bt-confirm-dialog { width: min(440px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 24px; border: 0; border-radius: 16px; box-shadow: 0 24px 70px rgb(15 23 42 / 28%); color: var(--bt-ink); }
+.bt-confirm-dialog::backdrop { background: rgb(9 21 38 / 58%); backdrop-filter: blur(4px); }
+.bt-confirm-dialog h2 { margin: 0 0 12px; font-size: 20px; }
+.bt-confirm-dialog p { margin: 0; white-space: pre-line; line-height: 1.5; overflow-wrap: anywhere; }
+.bt-confirm-dialog > div { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+.bt-confirm-dialog button { min-height: 44px; padding: 9px 16px; border-radius: 9px; font: inherit; font-weight: 700; }
+@media (max-width: 600px) { .bt-confirm-dialog { margin: auto 16px max(16px, env(safe-area-inset-bottom)); width: calc(100vw - 32px); } .bt-confirm-dialog > div button { flex: 1; } }

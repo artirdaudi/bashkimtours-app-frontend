@@ -9,14 +9,10 @@
 .bt-pwa-offline img { border-radius: 20px; }
 .bt-pwa-offline h1 { font-size: 26px; margin: 20px 0 12px; }
 .bt-pwa-offline p { line-height: 1.6; }
+.bt-pwa-offline button { min-height: 44px; margin-top: 12px; padding: 10px 20px; border: 0; border-radius: 10px; background: #073878; color: #fff; font: inherit; font-weight: 700; }
 @media print { .bt-pwa-notice, .bt-pwa-offline { display: none !important; } }
-/* Keep scrolling available while suppressing touch zoom in installed windows. */
-html.bt-pwa-fixed-zoom,
-html.bt-pwa-fixed-zoom body { touch-action: pan-x pan-y; }
 @media (pointer: coarse) {
-  html.bt-pwa-fixed-zoom input,
-  html.bt-pwa-fixed-zoom select,
-  html.bt-pwa-fixed-zoom textarea { font-size: max(16px, 1em); }
+  input, select, textarea { font-size: max(16px, 1em); }
 }
 
 /* Installed-app form sizing. Keep table/card canvases and tab scrolling intact. */
