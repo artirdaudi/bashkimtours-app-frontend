@@ -81,6 +81,7 @@
 }
 
 /* Extra launch/login motion belongs only to standalone PWA windows. */
+.bt-pwa-brand-logo, .bt-pwa-login-arrow { display: none; }
 .bt-pwa-login-feedback { display: none; }
 html.bt-pwa-standalone .bt-pwa-login-feedback { display: inline-flex; align-items: center; }
 html.bt-pwa-standalone .bt-pwa-login-feedback:empty { display: none; }
@@ -99,6 +100,102 @@ html.bt-pwa-standalone .bt-login-page.is-exiting .bt-submit { background: #15803
 @keyframes bt-pwa-login-reveal { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 @keyframes bt-pwa-login-exit { to { opacity: 0; transform: translateY(-8px); } }
 @keyframes bt-pwa-login-spin { to { transform: rotate(360deg); } }
+@media (max-width: 800px) {
+  html.bt-pwa-standalone .bt-login-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+    overflow: visible;
+    background: #f7f9fe;
+  }
+  html.bt-pwa-standalone .bt-login-brand {
+    display: flex;
+    isolation: isolate;
+    flex: 0 0 39svh;
+    min-height: 280px;
+    align-items: flex-end;
+    padding: max(28px, env(safe-area-inset-top)) 28px 78px;
+    background: radial-gradient(circle at 76% 51%, #2b72bc 0 12%, transparent 38%), linear-gradient(155deg, #051c45 0%, #073878 55%, #0e6da1 100%);
+  }
+  html.bt-pwa-standalone .bt-login-brand::before {
+    width: 330px;
+    height: 330px;
+    top: 18%;
+    left: -100px;
+    border: 1px solid rgb(255 255 255 / 14%);
+    background: radial-gradient(circle, rgb(111 180 226 / 20%), transparent 66%);
+    animation: bt-pwa-orbit 11s ease-in-out infinite alternate;
+  }
+  html.bt-pwa-standalone .bt-login-brand::after {
+    width: 230px;
+    height: 230px;
+    top: 20%;
+    right: -95px;
+    left: auto;
+    border-color: rgb(255 255 255 / 10%);
+    animation: bt-pwa-orbit 14s ease-in-out infinite alternate-reverse;
+  }
+  html.bt-pwa-standalone .bt-pwa-brand-logo {
+    position: absolute;
+    z-index: 2;
+    top: max(25px, env(safe-area-inset-top));
+    left: 26px;
+    display: block;
+    width: 130px;
+    height: auto;
+    padding: 7px 10px;
+    border-radius: 9px;
+    background: rgb(255 255 255 / 94%);
+    box-shadow: 0 8px 28px rgb(0 10 40 / 16%);
+    animation: bt-pwa-login-reveal .65s .08s both;
+  }
+  html.bt-pwa-standalone .bt-brand-copy { max-width: 310px; }
+  html.bt-pwa-standalone .bt-eyebrow { margin-bottom: 8px; color: #b6dff3; font-size: 10px; }
+  html.bt-pwa-standalone .bt-brand-copy h1 { margin: 0; font-size: clamp(27px, 7.5vw, 37px); line-height: 1.1; letter-spacing: -.035em; }
+  html.bt-pwa-standalone .bt-brand-copy p { display: none; }
+  html.bt-pwa-standalone .bt-login-panel {
+    position: relative;
+    z-index: 1;
+    display: block;
+    flex: 1;
+    width: 100%;
+    min-height: calc(61svh + 34px);
+    margin-top: -54px;
+    padding: 91px 28px max(28px, env(safe-area-inset-bottom));
+    clip-path: polygon(0 54px, 100% 0, 100% 100%, 0 100%);
+    background: #f7f9fe;
+    animation: bt-pwa-panel-enter .7s .06s cubic-bezier(.2,.8,.2,1) both;
+  }
+  html.bt-pwa-standalone .bt-login-card { max-width: 410px; margin: 0 auto; animation: bt-pwa-login-reveal .55s .22s both; }
+  html.bt-pwa-standalone .bt-login-logo { width: 142px; margin: 0 auto 23px; }
+  html.bt-pwa-standalone .bt-form-heading { margin-bottom: 23px; text-align: center; }
+  html.bt-pwa-standalone .bt-form-heading h2 { margin-bottom: 5px; font-size: 23px; }
+  html.bt-pwa-standalone .bt-form-heading p { font-size: 13px; }
+  html.bt-pwa-standalone .bt-field { margin-bottom: 13px; }
+  html.bt-pwa-standalone .bt-field > span:first-child { margin-bottom: 6px; font-size: 12px; }
+  html.bt-pwa-standalone .bt-input-wrap { height: 54px; border-color: #dce4f0; border-radius: 14px; background: #fff; box-shadow: 0 3px 13px rgb(18 49 93 / 5%); }
+  html.bt-pwa-standalone .bt-input-wrap:focus-within { border-color: #4089c7; box-shadow: 0 0 0 4px rgb(64 137 199 / 13%); }
+  html.bt-pwa-standalone .bt-input-wrap input { font-size: 16px; }
+  html.bt-pwa-standalone .bt-password-toggle { min-width: 40px; min-height: 40px; }
+  html.bt-pwa-standalone .bt-submit {
+    position: relative;
+    height: 56px;
+    margin-top: 18px;
+    padding: 0 60px;
+    border-radius: 30px;
+    background: linear-gradient(105deg, #0a4a96, #1688bf);
+    box-shadow: 0 9px 23px rgb(10 74 150 / 25%);
+    font-size: 16px;
+  }
+  html.bt-pwa-standalone .bt-submit:hover { background: linear-gradient(105deg, #073878, #0c72a8); }
+  html.bt-pwa-standalone .bt-pwa-login-arrow { position: absolute; top: 7px; right: 7px; display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%; background: #fff; color: #0a5fa7; transition: transform .2s ease; }
+  html.bt-pwa-standalone .bt-submit:active .bt-pwa-login-arrow { transform: translateX(3px); }
+  html.bt-pwa-standalone .bt-help { margin-top: 18px; font-size: 11px; }
+  html.bt-pwa-standalone .bt-login-page.is-exiting .bt-login-brand,
+  html.bt-pwa-standalone .bt-login-page.is-exiting .bt-login-panel { animation: bt-pwa-login-exit .45s ease-in both; }
+}
+@keyframes bt-pwa-orbit { to { transform: translate(15px, -12px) scale(1.08); } }
+@keyframes bt-pwa-panel-enter { from { opacity: 0; transform: translateY(36px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) {
   html.bt-pwa-standalone .bt-login-page *,
   html.bt-pwa-standalone .bt-login-page.is-exiting .bt-login-brand,

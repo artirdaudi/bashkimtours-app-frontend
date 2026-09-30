@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Eye, EyeOff, LockKeyhole, UserRound, Check, LoaderCircle } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, LockKeyhole, UserRound, Check, LoaderCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { login } from "./auth";
 import logo from "./assets/bashkimtours_logo.png";
@@ -33,6 +33,7 @@ export default function LoginPage() {
   return (
     <main className={`bt-login-page ${exiting ? "is-exiting" : ""}`}>
       <section className="bt-login-brand" aria-label="Bashkim Tours">
+        <img className="bt-pwa-brand-logo" src={logo} alt="" aria-hidden="true" />
         <div className="bt-brand-copy">
           <span className="bt-eyebrow">Mirë se vini</span>
           <h1>Udhëtimi juaj fillon këtu.</h1>
@@ -70,7 +71,8 @@ export default function LoginPage() {
           {error && <p className="bt-error" role="alert">{error}</p>}
           <button className="bt-submit" type="submit" disabled={loading} aria-busy={loading}>
             <span className="bt-pwa-login-feedback" aria-hidden="true">{exiting ? <Check size={20} /> : loading ? <LoaderCircle size={20} className="bt-pwa-login-spinner" /> : null}</span>
-            {loading ? "Duke u kyçur…" : "Kyçu"}
+            <span>{loading ? "Duke u kyçur…" : "Kyçu"}</span>
+            <span className="bt-pwa-login-arrow" aria-hidden="true"><ArrowRight size={20} /></span>
           </button>
           <p className="bt-help">Për ndihmë me llogarinë, kontaktoni administratorin.</p>
         </form>
