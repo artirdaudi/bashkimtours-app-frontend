@@ -266,14 +266,9 @@ export default function MaarifCashPage() {
         ? { maarif_cash_register_id: claims.maarif_cash_register_id ?? null, role: { name: claims.role_name, is_active: true }, is_active: true }
         : await authApi.me();
       setMe(user);
-      const list = user.maarif_cash_register_id != null
-        ? [await cashRegistersApi.get(user.maarif_cash_register_id)]
-        : await cashRegistersApi.list();
+      const list = await cashRegistersApi.list();
       setRegisters(list);
       setSelectedId((current) => user.maarif_cash_register_id ?? (list.some((item) => item.id === current) ? current : null));
-      const selectedRegister = list.find((item) => item.id === user.maarif_cash_register_id);
-      setSession(selectedRegister?.current_session ?? null);
-      setCurrentTransactions(selectedRegister?.current_session?.transactions ?? []);
       setOverviewSessions({});
       setError("");
     } catch (requestError) {
@@ -298,6 +293,36 @@ export default function MaarifCashPage() {
       window.removeEventListener("afterprint", finish);
     };
   }, [printSession]);
+
+  useEffect(() => {
+    if (selectedId == null) return;
+    let active = true;
+    const fetchCurrent = async () => {
+      setDetailLoading(true);
+      setAccessDenied(false);
+      setSession(null);
+      setCurrentTransactions([]);
+      try {
+        const current = await cashRegistersApi.currentSession(selectedId);
+        if (!active) return;
+        setSession(current);
+        if (current) {
+          const detail = await cashRegistersApi.session(selectedId, current.id);
+          if (active) setCurrentTransactions(detail.transactions || []);
+        }
+      } catch (requestError) {
+        if (active) {
+          if (requestError.status === 404) setSession(null);
+          else if (requestError.status === 403) setAccessDenied(true);
+          else setError(requestError.message);
+        }
+      } finally {
+        if (active) setDetailLoading(false);
+      }
+    };
+    fetchCurrent();
+    return () => { active = false; };
+  }, [selectedId, refresh, registers]);
 
   useEffect(() => {
     if (selectedId == null || accessDenied || section !== "history") return;
@@ -325,26 +350,7 @@ export default function MaarifCashPage() {
   const mayOperate = Boolean(me?.is_active && selected && (me.maarif_cash_register_id === selected.id || ((roleName === "OWNER" || roleName === "ADMIN") && me.role?.is_active)));
   const open = Boolean(session?.status === "OPEN");
 
-  async function loadRegister(id) {
-    setDetailLoading(true);
-    try {
-      const register = await cashRegistersApi.get(id);
-      setRegisters((current) => current.map((item) => item.id === id ? register : item));
-      setSession(register.current_session ?? null);
-      setCurrentTransactions(register.current_session?.transactions ?? []);
-      setAccessDenied(false);
-      return true;
-    } catch (requestError) {
-      if (requestError.status === 403) setAccessDenied(true);
-      else setError(requestError.message);
-      return false;
-    } finally {
-      setDetailLoading(false);
-    }
-  }
-
-  async function chooseRegister(id) {
-    if (!await loadRegister(id)) return;
+  function chooseRegister(id) {
     setSelectedId(id);
     setSection("current");
     setPage(1);
@@ -366,7 +372,7 @@ export default function MaarifCashPage() {
       if (action === "expense") result = await cashRegistersApi.createExpense(selected.id, { ...body, amount: Number(actionForm.amount), expense_type: "WITHDRAWAL", currency: actionForm.currency });
       setAction(null);
       if (action === "close") setCloseResult(result);
-      await loadRegister(selected.id);
+      await loadOverview();
       setRefresh((value) => value + 1);
     } catch (requestError) {
       setError(requestError.message);
@@ -376,7 +382,7 @@ export default function MaarifCashPage() {
   }
 
   async function refreshAfterExpenseChange() {
-    await loadRegister(selectedId);
+    await loadOverview();
     setRefresh((value) => value + 1);
   }
 
