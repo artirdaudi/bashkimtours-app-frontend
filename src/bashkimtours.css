@@ -6352,8 +6352,10 @@
 .bt-wa-stat-card span { color: #62717d; font-size: 13px; font-weight: 700; }
 .bt-wa-stat-card strong { color: #153c58; font-size: 26px; }
 .bt-wa-stat-card strong small { color: #82919b; font-size: 14px; font-weight: 500; }
-.bt-wa-stat-failed.active { border-color: #ae302b; background: #fff4f3; box-shadow: 0 0 0 2px #ae302b1c; }
-.bt-wa-stat-failed strong { color: #ae302b; }
+.bt-wa-stat-failed { border-color: #e9b4b1; background: #fff0ef; }
+.bt-wa-stat-failed span, .bt-wa-stat-failed strong { color: #ae302b; }
+.bt-wa-stat-failed strong small { color: #bd6763; }
+.bt-wa-stat-failed:hover, .bt-wa-stat-failed.active { border-color: #ae302b; background: #ffe7e5; box-shadow: 0 0 0 2px #ae302b1c; }
 .bt-wa-stat-delivered strong, .bt-wa-stat-read strong { color: #187443; }
 .bt-wa-manager h3 small { color: #62717d; font-size: 14px; font-weight: 500; }
 .bt-wa-batches { display: grid; gap: 9px; }

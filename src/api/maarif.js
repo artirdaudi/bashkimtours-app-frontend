@@ -163,7 +163,6 @@ export const whatsappNotificationsApi = {
   sendTest: (body) => api("/whatsapp/whatsapp/test-message", { method: "POST", body: JSON.stringify(body) }),
   batches: (params) => api(`/whatsapp/batches${query(params)}`),
   batch: (id) => api(`/whatsapp/batches/${id}`),
-  batchMessages: (id, params) => api(`/whatsapp/batches/${id}/messages${query(params)}`),
   messageEvents: (id, params) => api(`/whatsapp/messages/${id}/events${query(params)}`),
 };
 export const maarifReportingApi = {
