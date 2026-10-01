@@ -66,6 +66,15 @@ export default function WhatsAppManager() {
   const [refresh, setRefresh] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  useEffect(() => {
+    if (loading) return;
+    const timer = window.setTimeout(() => {
+      setError("");
+      setLoading(true);
+      setRefresh((value) => value + 1);
+    }, 5000);
+    return () => window.clearTimeout(timer);
+  }, [loading, refresh]);
   const statistics = useMemo(() => summarizeBatchMessages(batch?.messages || []), [batch]);
   const messages = useMemo(() => {
     if (!batch) return null;
@@ -110,7 +119,7 @@ export default function WhatsAppManager() {
       .then((page) => { if (active) setEvents(page); })
       .catch((requestError) => { if (active) setEventsError(requestError.message); });
     return () => { active = false; };
-  }, [expanded, eventPage]);
+  }, [expanded, eventPage, refresh]);
 
   function selectBatch(id) {
     setLoading(true);

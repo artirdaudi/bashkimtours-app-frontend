@@ -6359,9 +6359,13 @@
 .bt-wa-stat-delivered strong, .bt-wa-stat-read strong { color: #187443; }
 .bt-wa-manager h3 small { color: #62717d; font-size: 14px; font-weight: 500; }
 .bt-wa-batches { display: grid; gap: 9px; }
-.bt-wa-batches > button { display: flex; justify-content: space-between; gap: 16px; width: 100%; padding: 16px; border: 1px solid #dce5eb; border-radius: 13px; background: #fff; text-align: left; color: inherit; cursor: pointer; }
+.bt-wa-batches > button { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; padding: 16px; border: 1px solid #dce5eb; border-radius: 13px; background: #fff; text-align: left; color: inherit; cursor: pointer; }
 .bt-wa-batches > button:hover { border-color: #1872a3; background: #f4f9fc; }
-.bt-wa-batches > button > span { display: grid; gap: 6px; }
+.bt-wa-batches > button > span:not(.bt-wa-status) { display: grid; gap: 6px; min-width: 0; }
+.bt-wa-batches > button > .bt-wa-status { display: inline-flex; align-items: center; flex: 0 0 auto; gap: 7px; width: auto; padding: 7px 10px; border: 1px solid #dce5eb; background: #fff; line-height: 1; white-space: nowrap; }
+.bt-wa-batches > button > .bt-wa-status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.bt-wa-batches > button > .bt-wa-status-completed { border-color: #cfe5d9; }
+.bt-wa-batches > button > .bt-wa-status-failed { border-color: #efd3d0; }
 .bt-wa-batches small { color: #62717d; }
 .bt-wa-status { display: inline-block; width: max-content; padding: 4px 9px; border-radius: 999px; background: #edf2f6; color: #465d6d; font-size: 12px; font-weight: 700; }
 .bt-wa-status-read, .bt-wa-status-delivered, .bt-wa-status-completed { background: #e5f5eb; color: #187443; }
