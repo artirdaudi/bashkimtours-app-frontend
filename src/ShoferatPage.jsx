@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight, LoaderCircle, Pencil, Plus, Search, UsersRound, X } from "lucide-react";
 import { shoferiApi } from "./api";
 import { Modal } from "./PortalPages";
+import DriverDocuments from "./DriverDocuments";
 
 const emptyForm = { emri: "", telefoni: "", embg: "", llogaria: "", rroga: "", cd: "", licenca_transport_nderkombtar: "" };
 const fields = [
@@ -19,8 +20,6 @@ const hiddenSalary = (value) => value == null || value === "" ? "—" : "••�
 export default function ShoferatPage() {
   const [search, setSearch] = useState("");
   const [queryText, setQueryText] = useState("");
-  const [sortBy, setSortBy] = useState("id");
-  const [sortOrder, setSortOrder] = useState("asc");
   const [page, setPage] = useState(1);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -48,7 +47,7 @@ export default function ShoferatPage() {
 
   useEffect(() => {
     let active = true;
-    shoferiApi.list({ page, page_size: 20, search: queryText, sort_by: sortBy === "id" ? undefined : sortBy, sort_order: sortOrder === "asc" ? undefined : sortOrder })
+    shoferiApi.list({ page, page_size: 20, search: queryText })
       .then((result) => { if (active) { setData(result); setError(""); } })
       .catch(async (requestError) => {
         if (requestError.status === 422) {
@@ -62,7 +61,7 @@ export default function ShoferatPage() {
       })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [page, queryText, sortBy, sortOrder, refresh]);
+  }, [page, queryText, refresh]);
 
   async function openDriver(id) {
     setFormError("");
@@ -111,17 +110,15 @@ export default function ShoferatPage() {
     <div className="bt-shoferat-notice" role="note">Faqja ende është në përpunim.</div>
     <section className="bt-shoferat-toolbar">
       <label className="bt-shoferat-search"><Search size={19} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Kërko sipas emrit, telefonit, EMBG…" aria-label="Kërko shoferët" />{search && <button type="button" onClick={() => setSearch("")} aria-label="Pastro kërkimin"><X size={16} /></button>}</label>
-      <label>Rendit sipas <select value={sortBy} onChange={(event) => { setSortBy(event.target.value); setPage(1); }}><option value="emri">Emrit</option><option value="rroga">Rrogës</option><option value="cd">Afatit CD</option><option value="licenca_transport_nderkombtar">Licenca Transport Nderkombtar</option><option value="id">ID</option></select></label>
-      <button className="bt-btn-secondary" onClick={() => setSortOrder((value) => value === "asc" ? "desc" : "asc")}>{sortOrder === "asc" ? "Rritës" : "Zbritës"}</button>
     </section>
     {queryText && suggestions.length > 0 && <div className="bt-shoferat-suggestions"><span>Hap shpejt:</span>{suggestions.map((driver) => <button key={driver.id} onClick={() => openDriver(driver.id)}>{driver.emri}</button>)}</div>}
     {error && <p className="bt-inline-error" role="alert">{error} <button type="button" onClick={() => { setLoading(true); setRefresh((value) => value + 1); }}>Provo përsëri</button></p>}
     <div className="bt-shoferat-summary"><UsersRound size={20} /><strong>{data?.total ?? 0}</strong> shoferë në regjistër</div>
-    <div className="bt-shoferat-table-wrap" aria-busy={loading}><table className="bt-shoferat-table"><thead><tr><th>Shoferi</th><th>Telefoni</th><th>EMBG</th><th>Llogaria</th><th>Rroga</th><th>CD</th><th>Licenca Transport Nderkombtar</th><th></th></tr></thead><tbody>
-      {items.map((driver) => <tr key={driver.id}><td><button className="bt-shoferat-name" onClick={() => openDriver(driver.id)}>{driver.emri}</button></td><td>{driver.telefoni || "—"}</td><td>{driver.embg}</td><td>{driver.llogaria}</td><td>{hiddenSalary(driver.rroga)}</td><td>{formatDate(driver.cd)}</td><td>{formatDate(driver.licenca_transport_nderkombtar)}</td><td><button className="bt-shoferat-icon" onClick={() => openDriver(driver.id)} aria-label={`Hap ${driver.emri}`}><Pencil size={17} /></button></td></tr>)}
+    <div className="bt-shoferat-table-wrap" aria-busy={loading}><table className="bt-shoferat-table"><thead><tr><th>Shoferi</th><th>Telefoni</th><th>EMBG</th><th>Llogaria</th><th>Rroga</th><th>CD</th><th>Licenca Transport Nderkombtar</th><th>Dokumenta</th><th></th></tr></thead><tbody>
+      {items.map((driver) => <tr key={driver.id} className="bt-shoferat-row" onClick={() => openDriver(driver.id)}><td><button type="button" className="bt-shoferat-name" onClick={(event) => { event.stopPropagation(); openDriver(driver.id); }}>{driver.emri}</button></td><td>{driver.telefoni || "—"}</td><td>{driver.embg}</td><td>{driver.llogaria}</td><td>{hiddenSalary(driver.rroga)}</td><td>{formatDate(driver.cd)}</td><td>{formatDate(driver.licenca_transport_nderkombtar)}</td><td onClick={(event) => event.stopPropagation()}><DriverDocuments driver={driver} /></td><td><button type="button" className="bt-shoferat-icon" onClick={(event) => { event.stopPropagation(); openDriver(driver.id); }} aria-label={`Hap profilin e ${driver.emri}`}><Pencil size={17} /></button></td></tr>)}
     </tbody></table>{!loading && !items.length && !error && <div className="bt-shoferat-empty">Nuk u gjet asnjë shofer.</div>}{loading && <div className="bt-shoferat-empty bt-shoferat-loading" role="status"><LoaderCircle size={22} /> Duke ngarkuar shoferët…</div>}</div>
     {data && data.pages > 1 && <nav className="bt-shoferat-pages" aria-label="Faqet e shoferëve"><button type="button" aria-label="Faqja e mëparshme" disabled={loading || page <= 1} onClick={() => changePage(page - 1)}><ChevronLeft size={19} /></button><span>Faqja {page} nga {data.pages}</span><button type="button" aria-label="Faqja tjetër" disabled={loading || page >= data.pages} onClick={() => changePage(page + 1)}><ChevronRight size={19} /></button></nav>}
-    {selected && !form && <Modal title={selected.emri} onClose={() => setSelected(null)}><div className="bt-shoferat-detail"><div className="bt-shoferat-detail-grid">{fields.map((field) => <div key={field.key}><span>{field.label}</span><strong>{field.key === "rroga" ? hiddenSalary(selected[field.key]) : field.type === "date" ? formatDate(selected[field.key]) : selected[field.key] || "—"}</strong></div>)}</div>{formError && <p className="bt-inline-error">{formError}</p>}<div className="bt-shoferat-actions"><button className="bt-btn-primary" onClick={() => startEdit(selected)}><Pencil size={17} /> Ndrysho</button></div></div></Modal>}
-    {form && <Modal title={form.id ? "Ndrysho shoferin" : "Shto shofer"} onClose={() => { if (!saving) setForm(null); }}><form className="bt-shoferat-form" onSubmit={save}>{fields.map((field) => <label key={field.key}><span>{field.type === "date" && <CalendarDays size={15} />}{field.label}</span><input className={field.key === "licenca_transport_nderkombtar" && !form[field.key] ? "bt-shoferat-license-empty" : undefined} type={field.key === "rroga" ? "password" : field.type || "text"} inputMode={field.key === "rroga" ? "decimal" : field.key === "telefoni" ? "tel" : undefined} enterKeyHint="next" autoComplete={field.key === "rroga" ? "off" : undefined} step={field.step} value={form[field.key]} required={field.required} onChange={(event) => setForm({ ...form, [field.key]: event.target.value })} />{field.key === "licenca_transport_nderkombtar" && form.id && <small>Data ekzistuese: {formatDate(form.existingLicense)}. Zgjidhni datë vetëm nëse doni ta ndryshoni.</small>}</label>)}{formError && <p className="bt-inline-error" role="alert">{formError}</p>}<div className="bt-shoferat-actions"><button className="bt-btn-primary" disabled={saving}>{saving ? "Duke ruajtur…" : "Ruaj"}</button><button type="button" className="bt-btn-secondary" disabled={saving} onClick={() => setForm(null)}>Anulo</button></div></form></Modal>}
+    {selected && !form && <Modal title={selected.emri} onClose={() => setSelected(null)}><div className="bt-shoferat-detail"><h3>Të dhënat e shoferit</h3><div className="bt-shoferat-detail-grid">{fields.map((field) => <div key={field.key}><span>{field.label}</span><strong>{field.key === "rroga" ? hiddenSalary(selected[field.key]) : field.type === "date" ? formatDate(selected[field.key]) : selected[field.key] || "—"}</strong></div>)}</div><section className="bt-shoferat-profile-documents"><h3>Dokumentet</h3><DriverDocuments driver={selected} /></section>{formError && <p className="bt-inline-error">{formError}</p>}<div className="bt-shoferat-actions"><button className="bt-btn-primary" onClick={() => startEdit(selected)}><Pencil size={17} /> Ndrysho</button></div></div></Modal>}
+    {form && <Modal title={form.id ? "Ndrysho shoferin" : "Shto shofer"} onClose={() => { if (!saving) setForm(null); }}><form className="bt-shoferat-form" onSubmit={save}>{fields.map((field) => <label key={field.key}><span>{field.type === "date" && <CalendarDays size={15} />}{field.label}</span><input className={field.type === "date" && !form[field.key] ? "bt-shoferat-date-empty" : undefined} type={field.key === "rroga" ? "password" : field.type || "text"} inputMode={field.key === "rroga" ? "decimal" : field.key === "telefoni" ? "tel" : undefined} enterKeyHint="next" autoComplete={field.key === "rroga" ? "off" : undefined} step={field.step} value={form[field.key]} required={field.required} onChange={(event) => setForm({ ...form, [field.key]: event.target.value })} />{field.key === "licenca_transport_nderkombtar" && form.id && <small>Data ekzistuese: {formatDate(form.existingLicense)}. Zgjidhni datë vetëm nëse doni ta ndryshoni.</small>}</label>)}{formError && <p className="bt-inline-error" role="alert">{formError}</p>}<div className="bt-shoferat-actions"><button className="bt-btn-primary" disabled={saving}>{saving ? "Duke ruajtur…" : "Ruaj"}</button><button type="button" className="bt-btn-secondary" disabled={saving} onClick={() => setForm(null)}>Anulo</button></div></form></Modal>}
   </div>;
 }

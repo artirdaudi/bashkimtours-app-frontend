@@ -14,7 +14,7 @@ export const query = (params = {}) => {
 export async function api(path, options = {}) {
   const method = (options.method || "GET").toUpperCase();
   if (method !== "GET" && method !== "HEAD") {
-    return runMutation(`${method}:${path}:${options.body || ""}`, () => request(path, options));
+    return runMutation(`${method}:${path}:${options.body instanceof FormData ? crypto.randomUUID() : options.body || ""}`, () => request(path, options));
   }
   return request(path, options);
 }
@@ -26,7 +26,7 @@ async function request(path, options) {
       ...options,
       cache: "no-store",
       headers: {
-        ...(options.body ? { "Content-Type": "application/json" } : {}),
+        ...(options.body && !(options.body instanceof FormData) ? { "Content-Type": "application/json" } : {}),
         Authorization: `Bearer ${getToken()}`,
         ...options.headers,
       },
@@ -39,8 +39,8 @@ async function request(path, options) {
     window.location.replace("/");
     throw new Error("Sesioni ka skaduar.");
   }
-  const data =
-    response.status === 204 ? null : await response.json().catch(() => ({}));
+  const data = response.status === 204 ? null : options.responseType === "blob" && response.ok
+    ? await response.blob() : await response.json().catch(() => ({}));
   if (!response.ok) {
     const fallback = response.status === 409
       ? "Veprimi bie ndesh me të dhënat ekzistuese."

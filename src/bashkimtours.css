@@ -6425,9 +6425,47 @@
 .bt-shoferat-summary strong { color: #152e42; font-size: 20px; }
 .bt-shoferat-table-wrap { overflow-x: auto; border: 1px solid #dce5eb; border-radius: 14px; background: #fff; }
 .bt-shoferat-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
-.bt-shoferat-table th { padding: 14px 16px; background: #f5f8fa; color: #526675; text-align: left; font-size: 12px; font-weight: 700; }
-.bt-shoferat-table td { padding: 15px 16px; border-top: 1px solid #edf1f4; font-size: 14px; }
+.bt-shoferat-table th { padding: clamp(6px, .7vw, 9px) clamp(6px, .8vw, 10px); background: #f5f8fa; color: #526675; text-align: left; font-size: clamp(10px, .85vw, 11px); font-weight: 700; }
+.bt-shoferat-table th:nth-child(7) { white-space: normal; min-width: 100px; max-width: 155px; }
+.bt-shoferat-table td { padding: clamp(6px, .65vw, 8px) clamp(6px, .8vw, 10px); border-top: 1px solid #edf1f4; font-size: clamp(12px, .95vw, 13px); }
 .bt-shoferat-table tbody tr:hover { background: #f8fbfc; }
+.bt-shoferat-row { cursor: pointer; }
+.bt-shoferat-table td:has(.bt-driver-documents) { white-space: normal; min-width: clamp(150px, 16vw, 180px); max-width: 240px; }
+.bt-driver-documents { display: grid; gap: 5px; justify-items: start; font-size: 12px; }
+.bt-driver-documents ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; width: 100%; }
+.bt-driver-documents li { display: grid; gap: 2px; padding-bottom: 5px; border-bottom: 1px solid #edf1f4; }
+.bt-driver-documents li > div:first-child { display: flex; align-items: center; gap: 5px; min-width: 0; }
+.bt-driver-document-link { border: 0; background: none; padding: 0; color: #185a88; text-align: left; overflow-wrap: anywhere; cursor: pointer; }
+.bt-driver-document-link:disabled { opacity: .6; cursor: wait; }
+.bt-document-operation-status { color: #526675; font-size: 12px; }
+.bt-document-spinner { flex: none; animation: bt-shoferat-spin 1s linear infinite; }
+.bt-driver-documents small { color: #637582; overflow-wrap: anywhere; }
+.bt-driver-document-actions { display: flex; gap: 3px; }
+.bt-driver-document-actions button { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border: 1px solid #dce5eb; border-radius: 7px; background: #fff; color: #526675; cursor: pointer; }
+.bt-driver-document-actions button:disabled { opacity: .5; cursor: default; }
+.bt-driver-type-field { position: relative; display: grid; gap: 7px; }
+.bt-driver-type-field > label { font-size: 14px; font-weight: 600; }
+.bt-driver-type-list { position: absolute; z-index: 5; top: 100%; left: 0; right: 0; max-height: 220px; overflow-y: auto; padding: 4px; border: 1px solid var(--bt-line); border-radius: 8px; background: #fff; box-shadow: 0 8px 24px #152e4226; }
+.bt-driver-type-list button, .bt-driver-type-list span { display: block; width: 100%; padding: 9px 10px; border: 0; border-radius: 5px; background: transparent; color: #152e42; text-align: left; font: inherit; }
+.bt-driver-type-list button { cursor: pointer; }
+.bt-driver-type-list button:hover, .bt-driver-type-list button:focus-visible { background: #eaf2fc; }
+.bt-document-viewer-modal { width: min(1100px, 100%); }
+.bt-document-viewer-modal .bt-modal-body { padding: 0; }
+.bt-document-viewer-toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 9px 14px; border-bottom: 1px solid var(--bt-line); }
+.bt-document-viewer-actions, .bt-document-zoom { display: flex; align-items: center; gap: 6px; }
+.bt-document-viewer-actions { margin-left: auto; }
+.bt-document-viewer-toolbar button, .bt-document-viewer-toolbar a { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 34px; padding: 6px 9px; border: 1px solid var(--bt-line); border-radius: 7px; background: #fff; color: #185a88; font: inherit; font-size: 12px; text-decoration: none; cursor: pointer; }
+.bt-document-viewer-toolbar button:disabled { opacity: .45; cursor: default; }
+.bt-document-zoom span { min-width: 42px; text-align: center; font-size: 12px; }
+.bt-document-viewer-content { display: grid; place-items: center; height: min(70dvh, 780px); overflow: auto; background: #eef2f5; }
+.bt-document-viewer-content iframe { width: 100%; height: 100%; border: 0; }
+.bt-document-viewer-content img { max-width: none; height: auto; align-self: start; }
+.bt-document-viewer-content p { padding: 20px; text-align: center; }
+.bt-document-upload-preview { display: grid; gap: 7px; padding: 12px; border: 1px solid var(--bt-line); border-radius: 9px; background: #f8fbfc; font-size: 13px; }
+.bt-document-upload-preview > span { color: #637582; overflow-wrap: anywhere; }
+.bt-document-upload-preview img { max-width: 100%; max-height: 260px; justify-self: center; object-fit: contain; }
+.bt-document-upload-preview iframe { width: 100%; height: 300px; border: 1px solid var(--bt-line); border-radius: 6px; background: #fff; }
+.bt-document-upload-preview p { margin: 0; color: #637582; }
 .bt-shoferat-name { border: 0; background: transparent; padding: 0; color: #185a88; font: inherit; font-weight: 700; cursor: pointer; }
 .bt-shoferat-empty { padding: 35px 16px; text-align: center; color: #637582; }
 .bt-shoferat-loading { display: flex; align-items: center; justify-content: center; gap: 10px; }
@@ -6437,13 +6475,19 @@
 .bt-shoferat-pages button { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border: 1px solid #dce5eb; border-radius: 9px; background: #fff; cursor: pointer; }
 .bt-shoferat-pages button:disabled { opacity: .45; cursor: default; }
 .bt-shoferat-detail-grid, .bt-shoferat-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.bt-shoferat-detail h3 { margin: 0 0 14px; font-size: 15px; color: #152e42; }
+.bt-shoferat-profile-documents { margin-top: 24px; padding-top: 20px; border-top: 1px solid #edf1f4; }
+.bt-shoferat-profile-documents .bt-driver-documents { gap: 12px; }
+.bt-shoferat-profile-documents .bt-driver-documents li { grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 5px 12px; }
+.bt-shoferat-profile-documents .bt-driver-documents small { grid-column: 1; }
+.bt-shoferat-profile-documents .bt-driver-document-actions { grid-column: 2; grid-row: 1 / 3; }
 .bt-shoferat-detail-grid > div, .bt-shoferat-form label { display: grid; gap: 6px; min-width: 0; }
 .bt-shoferat-detail-grid span, .bt-shoferat-form label span { display: flex; align-items: center; gap: 5px; color: #637582; font-size: 13px; }
 .bt-shoferat-detail-grid strong { overflow-wrap: anywhere; }
 .bt-shoferat-form input { width: 100%; padding: 10px 12px; border: 1px solid #dce5eb; border-radius: 9px; font: inherit; }
-.bt-shoferat-form input.bt-shoferat-license-empty { color: transparent; }
-.bt-shoferat-form input.bt-shoferat-license-empty::-webkit-datetime-edit { color: transparent; }
-.bt-shoferat-form input.bt-shoferat-license-empty::-webkit-calendar-picker-indicator { opacity: 1; cursor: pointer; }
+.bt-shoferat-form input.bt-shoferat-date-empty { color: transparent; }
+.bt-shoferat-form input.bt-shoferat-date-empty::-webkit-datetime-edit { color: transparent; }
+.bt-shoferat-form input.bt-shoferat-date-empty::-webkit-calendar-picker-indicator { opacity: 1; cursor: pointer; }
 .bt-shoferat-actions { display: flex; gap: 10px; grid-column: 1 / -1; margin-top: 20px; }
 .bt-shoferat-detail .bt-shoferat-actions { margin-top: 28px; }
 .bt-shoferat-actions button { display: inline-flex; align-items: center; gap: 7px; }
@@ -6716,7 +6760,11 @@
   .bt-shoferat-table tbody td:nth-child(5)::before { content: "Rroga"; }
   .bt-shoferat-table tbody td:nth-child(6)::before { content: "CD"; }
   .bt-shoferat-table tbody td:nth-child(7)::before { content: "Licenca"; }
-  .bt-shoferat-table tbody td:nth-child(8)::before { content: "Detajet"; }
+  .bt-shoferat-table tbody td:nth-child(8)::before { content: "Dokumenta"; }
+  .bt-shoferat-table tbody td:nth-child(9)::before { content: "Detajet"; }
+  .bt-shoferat-table tbody td:has(.bt-driver-documents) { min-width: 0; max-width: none; }
+  .bt-driver-documents { justify-items: end; text-align: left; }
+  .bt-driver-documents ul { min-width: 0; }
   .bt-maarif-cash-columns > section:first-child .bt-accounts-table td:nth-child(1)::before { content: "Data"; }
   .bt-maarif-cash-columns > section:first-child .bt-accounts-table td:nth-child(2)::before { content: "Nxënësi"; }
   .bt-maarif-cash-columns > section:first-child .bt-accounts-table td:nth-child(3)::before { content: "Muaji"; }

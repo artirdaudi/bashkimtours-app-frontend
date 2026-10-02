@@ -23,6 +23,13 @@ export const documentTypesApi = {
   create: (body) => api("/documents/document-types", { method: "POST", body: JSON.stringify(body) }),
   update: (id, body) => api(`/documents/document-types/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
 };
+export const documentsApi = {
+  list: (params) => api(`/documents${query(params)}`),
+  upload: (formData) => api("/documents", { method: "POST", body: formData }),
+  remove: (id) => api(`/documents/${id}`, { method: "DELETE" }),
+  view: (id) => api(`/documents/${id}/view`, { responseType: "blob" }),
+  download: (id) => api(`/documents/${id}/download`, { responseType: "blob" }),
+};
 export const vehiclesApi = resource("/vehicles");
 export const driversApi = resource("/drivers");
 export const shoferiApi = {
