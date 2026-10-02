@@ -1,4 +1,4 @@
-import { Banknote, BellRing, ChevronDown, CreditCard, LogOut, Menu, ScanLine, Settings, ShieldCheck, UserCircle, UsersRound, Wallet, X } from "lucide-react";
+import { Banknote, BellRing, ChevronDown, CreditCard, FileText, LogOut, Menu, ScanLine, Settings, ShieldCheck, UserCircle, UsersRound, Wallet, X } from "lucide-react";
 import { useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { clearToken } from "./auth";
@@ -9,7 +9,7 @@ import { prepareScanAudio } from "./scanAudio";
 export default function DashboardLayout() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
-  const inSettings = ["/messages", "/settings/accounts-roles", "/settings/cash-registers"].includes(location.pathname);
+  const inSettings = ["/messages", "/settings/accounts-roles", "/settings/cash-registers", "/settings/document-types"].includes(location.pathname);
   const [settingsOpen, setSettingsOpen] = useState(inSettings);
   const [loginArrival] = useState(() => {
     const active = sessionStorage.getItem("bt_login_transition") === "1";
@@ -79,6 +79,10 @@ export default function DashboardLayout() {
                 <NavLink to="/settings/cash-registers" onClick={() => setOpen(false)}>
                   <Wallet />
                   <span>Arkat</span>
+                </NavLink>
+                <NavLink to="/settings/document-types" onClick={() => setOpen(false)}>
+                  <FileText />
+                  <span>Llojet e Dokumentave</span>
                 </NavLink>
               </div>
             )}

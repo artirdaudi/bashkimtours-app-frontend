@@ -6729,13 +6729,13 @@
   .bt-maarif-cash-columns > section:nth-child(2) .bt-accounts-table td:nth-child(5)::before { content: "Veprimet"; }
   .bt-shoferat-table-wrap, .bt-history-table-wrap, .bt-maarif-cash-columns .bt-accounts-table-wrap { overflow-x: visible; }
   :is(.bt-history-row-actions button, .bt-shoferat-table button, .bt-cash-expense-edit-icon) { min-width: 44px; min-height: 44px; }
-  :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-wa-table) { display: block; width: 100%; min-width: 0; }
-  :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-wa-table) thead { display: none; }
-  :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-wa-table) tbody { display: grid; gap: 10px; padding: 8px; }
-  :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-wa-table) tbody tr:not(.bt-wa-table-detail-row) { display: grid; padding: 8px 12px; border: 1px solid var(--bt-line); border-radius: 12px; background: #fff; }
-  :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-wa-table) tbody tr:not(.bt-wa-table-detail-row) td { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; width: 100%; padding: 8px 0; border: 0; text-align: right; overflow-wrap: anywhere; }
-  :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-wa-table) tbody tr:not(.bt-wa-table-detail-row) td + td { border-top: 1px solid #edf1f5; }
-  :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-wa-table) tbody tr:not(.bt-wa-table-detail-row) td::before { flex: 0 0 36%; color: var(--bt-muted); font-size: 12px; font-weight: 600; text-align: left; }
+  :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-document-types-table, .bt-wa-table) { display: block; width: 100%; min-width: 0; }
+  :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-document-types-table, .bt-wa-table) thead { display: none; }
+  :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-document-types-table, .bt-wa-table) tbody { display: grid; gap: 10px; padding: 8px; }
+  :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-document-types-table, .bt-wa-table) tbody tr:not(.bt-wa-table-detail-row) { display: grid; padding: 8px 12px; border: 1px solid var(--bt-line); border-radius: 12px; background: #fff; }
+  :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-document-types-table, .bt-wa-table) tbody tr:not(.bt-wa-table-detail-row) td { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; width: 100%; padding: 8px 0; border: 0; text-align: right; overflow-wrap: anywhere; }
+  :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-document-types-table, .bt-wa-table) tbody tr:not(.bt-wa-table-detail-row) td + td { border-top: 1px solid #edf1f5; }
+  :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-document-types-table, .bt-wa-table) tbody tr:not(.bt-wa-table-detail-row) td::before { flex: 0 0 36%; color: var(--bt-muted); font-size: 12px; font-weight: 600; text-align: left; }
   .bt-mobile-users-table td:nth-child(1)::before { content: "Përdoruesi"; }
   .bt-mobile-users-table td:nth-child(2)::before { content: "Roli"; }
   .bt-mobile-users-table td:nth-child(3)::before { content: "Statusi"; }
@@ -6750,15 +6750,18 @@
   .bt-mobile-registers-table td:nth-child(3)::before { content: "Statusi"; }
   .bt-mobile-registers-table td:nth-child(4)::before { content: "Përdoruesit"; }
   .bt-mobile-registers-table td:nth-child(5)::before { content: "Veprimet"; }
+  .bt-document-types-table td:nth-child(1)::before { content: "Emri"; }
+  .bt-document-types-table td:nth-child(2)::before { content: "Koment"; }
+  .bt-document-types-table td:nth-child(3)::before { content: "Veprimet"; }
   .bt-wa-table tr:not(.bt-wa-table-detail-row) td:nth-child(1)::before { content: "Marrësi"; }
   .bt-wa-table tr:not(.bt-wa-table-detail-row) td:nth-child(2)::before { content: "Numri"; }
   .bt-wa-table tr:not(.bt-wa-table-detail-row) td:nth-child(3)::before { content: "Statusi"; }
   .bt-wa-table tr:not(.bt-wa-table-detail-row) td:nth-child(4)::before { content: "Detajet"; }
   .bt-wa-table-detail-row { display: block; margin-top: -10px; }
   .bt-wa-table-detail-row td { display: block; width: 100%; padding: 12px; }
-  :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-wa-table) .bt-role-actions { justify-content: flex-end; flex-wrap: wrap; }
-  :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-wa-table) button { min-height: 44px; }
-  .bt-accounts-table-wrap:has(> :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-wa-table)) { overflow-x: visible; }
+  :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-document-types-table, .bt-wa-table) .bt-role-actions { justify-content: flex-end; flex-wrap: wrap; }
+  :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-document-types-table, .bt-wa-table) button { min-height: 44px; }
+  .bt-accounts-table-wrap:has(> :is(.bt-mobile-users-table, .bt-roles-table, .bt-mobile-registers-table, .bt-document-types-table, .bt-wa-table)) { overflow-x: visible; }
 }
 .bt-confirm-dialog { width: min(440px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 24px; border: 0; border-radius: 16px; box-shadow: 0 24px 70px rgb(15 23 42 / 28%); color: var(--bt-ink); }
 .bt-confirm-dialog::backdrop { background: rgb(9 21 38 / 58%); backdrop-filter: blur(4px); }

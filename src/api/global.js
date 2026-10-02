@@ -18,6 +18,11 @@ export const usersApi = {
   update: (id, body) => api(`/auth/users/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
   assignRole: (id, roleId) => api(`/auth/users/${id}/role`, { method: "PATCH", body: JSON.stringify({ role_id: roleId }) }),
 };
+export const documentTypesApi = {
+  list: () => api("/documents/document-types?include_inactive=true"),
+  create: (body) => api("/documents/document-types", { method: "POST", body: JSON.stringify(body) }),
+  update: (id, body) => api(`/documents/document-types/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
+};
 export const vehiclesApi = resource("/vehicles");
 export const driversApi = resource("/drivers");
 export const shoferiApi = {
