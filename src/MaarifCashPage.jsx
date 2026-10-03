@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from "react";
 import { confirmAction } from "./confirmAction";
 import { ArrowDownRight, ArrowLeft, ArrowUpRight, Pencil, Plus, Printer, RefreshCw, Trash2, Wallet } from "lucide-react";
 import { authApi, cashRegistersApi, monthlyPaymentsApi } from "./api";
-import { getTokenClaims } from "./auth";
 import { Modal } from "./PortalPages";
 import { monthSq } from "./locale";
 import { groupRelatedMonthlyPayments } from "./monthlyPaymentGrouping";
@@ -262,13 +261,11 @@ export default function MaarifCashPage() {
   const loadOverview = useCallback(async () => {
     setLoading(true);
     try {
-      const claims = getTokenClaims();
-      const user = claims
-        ? { maarif_cash_register_id: claims.maarif_cash_register_id ?? null, role: { name: claims.role_name, is_active: true }, is_active: true }
-        : await authApi.me();
+      const user = await authApi.me();
       setMe(user);
-      if (user.maarif_cash_register_id != null) {
-        const register = await cashRegistersApi.get(user.maarif_cash_register_id);
+      const maarifAssignment = user.cash_register_assignments?.find((assignment) => assignment.register_type === "MAARIF");
+      if (maarifAssignment != null) {
+        const register = await cashRegistersApi.get(maarifAssignment.cash_register_id);
         setRegisters([register]);
         setSelectedId(register.id);
         setSession(register.current_session);
@@ -278,8 +275,8 @@ export default function MaarifCashPage() {
         return;
       }
       const list = await cashRegistersApi.list();
-      setRegisters(list);
-      setSelectedId((current) => list.some((item) => item.id === current) ? current : null);
+      setRegisters(list.filter((register) => register.register_type === "MAARIF"));
+      setSelectedId((current) => list.some((item) => item.id === current && item.register_type === "MAARIF") ? current : null);
       setOverviewSessions({});
       setError("");
     } catch (requestError) {
@@ -306,7 +303,7 @@ export default function MaarifCashPage() {
   }, [printSession]);
 
   useEffect(() => {
-    if (selectedId == null || me?.maarif_cash_register_id === selectedId) return;
+    if (selectedId == null || me?.cash_register_assignments?.some((assignment) => assignment.register_type === "MAARIF" && assignment.cash_register_id === selectedId)) return;
     let active = true;
     const fetchCurrent = async () => {
       setDetailLoading(true);
@@ -331,7 +328,7 @@ export default function MaarifCashPage() {
     };
     fetchCurrent();
     return () => { active = false; };
-  }, [selectedId, refresh, me?.maarif_cash_register_id]);
+  }, [selectedId, refresh, me?.cash_register_assignments]);
 
   useEffect(() => {
     if (selectedId == null || accessDenied || section !== "history") return;
@@ -356,7 +353,7 @@ export default function MaarifCashPage() {
 
   const selected = registers.find((item) => item.id === selectedId);
   const roleName = me?.role?.name?.toUpperCase();
-  const mayOperate = Boolean(me?.is_active && selected && (me.maarif_cash_register_id === selected.id || ((roleName === "OWNER" || roleName === "ADMIN") && me.role?.is_active)));
+  const mayOperate = Boolean(me?.is_active && selected && (me.cash_register_assignments?.some((assignment) => assignment.register_type === "MAARIF" && assignment.cash_register_id === selected.id) || ((roleName === "OWNER" || roleName === "ADMIN") && me.role?.is_active)));
   const open = Boolean(session?.status === "OPEN");
 
   function chooseRegister(id) {
@@ -424,7 +421,7 @@ export default function MaarifCashPage() {
     <header className="bt-page-header"><div><span className="bt-eyebrow">Maarif</span><h1>Arka</h1><p>Balanci dhe sesionet ditore të arkës.</p></div></header>
     {error && !action && <p className="bt-inline-error" role="alert">{error}</p>}
     {loading && <p className="bt-accounts-state" role="status"><RefreshCw className="bt-spin" /> Duke ngarkuar…</p>}
-    {!loading && me?.maarif_cash_register_id == null && selectedId == null && <>
+    {!loading && !me?.cash_register_assignments?.some((assignment) => assignment.register_type === "MAARIF") && selectedId == null && <>
       {!registers.length && <p className="bt-accounts-state">Nuk ka arka të regjistruara.</p>}
       {!!registers.length && <div className="bt-cash-overview">{registers.map((register) => <article className="bt-maarif-cash-panel" key={register.id}>
         <h2><Wallet size={21} /> {register.name}</h2>
@@ -435,7 +432,7 @@ export default function MaarifCashPage() {
       </article>)}</div>}
     </>}
     {selected && <>
-      {me?.maarif_cash_register_id == null && <button type="button" className="bt-cash-back" onClick={() => setSelectedId(null)}><ArrowLeft size={17} /> Të gjitha arkat</button>}
+      {!me?.cash_register_assignments?.some((assignment) => assignment.register_type === "MAARIF") && <button type="button" className="bt-cash-back" onClick={() => setSelectedId(null)}><ArrowLeft size={17} /> Të gjitha arkat</button>}
       <section className="bt-maarif-cash-balance"><div><span>{selected.name} <span className={`bt-cash-session-status ${selected.has_open_session ? "open" : ""}`}>{selected.has_open_session ? "E hapur" : "E mbyllur"}</span></span><strong>{money(selected.balance)}</strong><small>Gjendja aktuale</small></div><Wallet size={34} /></section>
       <div className="bt-accounts-tabs" role="tablist" aria-label="Seksionet e arkës"><button type="button" role="tab" aria-selected={section === "current"} className={section === "current" ? "active" : ""} onClick={() => setSection("current")}>Gjendja aktuale</button><button type="button" role="tab" aria-selected={section === "history"} className={section === "history" ? "active" : ""} onClick={() => setSection("history")}>Historia</button></div>
       {accessDenied && <p className="bt-inline-error" role="status">API-ja nuk lejon shikimin e detajeve ose historisë së sesioneve të kësaj arke për këtë përdorues.</p>}

@@ -16,6 +16,9 @@ export const usersApi = {
   get: (id) => api(`/auth/users/${id}`),
   create: (body) => api("/auth/users", { method: "POST", body: JSON.stringify(body) }),
   update: (id, body) => api(`/auth/users/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
+  cashRegisterAssignments: (id) => api(`/auth/users/${id}/cash-register-assignments`),
+  createCashRegisterAssignment: (id, body) => api(`/auth/users/${id}/cash-register-assignments`, { method: "POST", body: JSON.stringify(body) }),
+  deleteCashRegisterAssignment: (id, assignmentId) => api(`/auth/users/${id}/cash-register-assignments/${assignmentId}`, { method: "DELETE" }),
   assignRole: (id, roleId) => api(`/auth/users/${id}/role`, { method: "PATCH", body: JSON.stringify({ role_id: roleId }) }),
 };
 export const documentTypesApi = {

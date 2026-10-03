@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { confirmAction } from "./confirmAction";
 import { Pencil, Plus, RefreshCw, Search, ShieldCheck, UserCircle } from "lucide-react";
-import { authApi, rolesApi, usersApi } from "./api";
+import { authApi, cashRegistersApi, rolesApi, usersApi } from "./api";
 import { Modal } from "./PortalPages";
 
 const emptyRole = { name: "", description: "", is_active: true };
@@ -13,6 +13,10 @@ export default function AccountsRolesPage() {
   const [me, setMe] = useState(null);
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
+  const [registers, setRegisters] = useState([]);
+  const [assignmentUser, setAssignmentUser] = useState(null);
+  const [assignmentRegisterId, setAssignmentRegisterId] = useState("");
+  const [newUserRegisterId, setNewUserRegisterId] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [roleEdit, setRoleEdit] = useState(null);
@@ -25,12 +29,13 @@ export default function AccountsRolesPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [current, userList, roleList] = await Promise.all([
-        authApi.me(), usersApi.list(), rolesApi.list(),
+      const [current, userList, roleList, registerList] = await Promise.all([
+        authApi.me(), usersApi.list(), rolesApi.list(), cashRegistersApi.list(),
       ]);
       setMe(current);
       setUsers(userList);
       setRoles(roleList);
+      setRegisters(registerList);
       setError("");
     } catch (requestError) {
       setError(requestError.message);
@@ -53,6 +58,7 @@ export default function AccountsRolesPage() {
   function openUser(user = null) {
     setError("");
     setUserEdit(user || {});
+    setNewUserRegisterId("");
     setUserForm(user ? {
       username: user.username,
       password: "",
@@ -95,14 +101,59 @@ export default function AccountsRolesPage() {
         const roleId = Number(userForm.role_id);
         if (roleId && roleId !== userEdit.role?.id) await usersApi.assignRole(userEdit.id, roleId);
       } else {
-        await usersApi.create({
+        const created = await usersApi.create({
           username: userForm.username.trim(), password: userForm.password,
           role_id: userForm.role_id ? Number(userForm.role_id) : null,
           comment: userForm.comment.trim(), is_active: userForm.is_active,
         });
+        if (newUserRegisterId) {
+          try {
+            await usersApi.createCashRegisterAssignment(created.id, { cash_register_id: Number(newUserRegisterId) });
+          } catch (assignmentError) {
+            setUserEdit(null);
+            await load();
+            throw new Error(`Llogaria ${created.username} u krijua, por caktimi i arkës dështoi: ${assignmentError.message}`, { cause: assignmentError });
+          }
+        }
       }
       setUserEdit(null);
       await load();
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function refreshAssignments(userId) {
+    const assignments = await usersApi.cashRegisterAssignments(userId);
+    setUsers((current) => current.map((user) => user.id === userId ? { ...user, cash_register_assignments: assignments } : user));
+    setAssignmentUser((current) => current?.id === userId ? { ...current, cash_register_assignments: assignments } : current);
+  }
+
+  async function addAssignment(event) {
+    event.preventDefault();
+    if (busy || !assignmentUser || !assignmentRegisterId) return;
+    setBusy(true);
+    setError("");
+    try {
+      await usersApi.createCashRegisterAssignment(assignmentUser.id, { cash_register_id: Number(assignmentRegisterId) });
+      setAssignmentRegisterId("");
+      await refreshAssignments(assignmentUser.id);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function removeAssignment(assignment) {
+    if (busy || !assignmentUser) return;
+    setBusy(true);
+    setError("");
+    try {
+      await usersApi.deleteCashRegisterAssignment(assignmentUser.id, assignment.id);
+      await refreshAssignments(assignmentUser.id);
     } catch (requestError) {
       setError(requestError.message);
     } finally {
@@ -170,13 +221,15 @@ export default function AccountsRolesPage() {
       <h2><UserCircle size={21} /> Llogaritë</h2>
       {!loading && !shownUsers.length && <p className="bt-accounts-state">{search ? "Nuk u gjet asnjë llogari." : "Nuk ka llogari të regjistruara."}</p>}
       {!!shownUsers.length && <div className="bt-accounts-table-wrap"><table className="bt-accounts-table bt-mobile-users-table">
-        <thead><tr><th>Përdoruesi</th><th>Roli</th><th>Statusi</th><th>Koment</th><th>Veprimet</th></tr></thead>
+        <thead><tr><th>Përdoruesi</th><th>Roli</th><th>Statusi</th><th>Koment</th><th>Arkat</th><th>Veprimet</th></tr></thead>
         <tbody>{shownUsers.map((user) => <tr key={user.id}>
           <td><strong>{user.username}</strong></td>
           <td>{user.role?.name || "Pa rol"}</td>
           <td><span className={`bt-role-status ${user.is_active ? "active" : ""}`}>{user.is_active ? "Aktive" : "Joaktive"}</span></td>
           <td>{user.comment || "—"}</td>
+          <td>{user.cash_register_assignments?.map((assignment) => `${assignment.register_type}: ${assignment.cash_register_name}`).join(", ") || "—"}</td>
           <td><div className="bt-role-actions">
+            <button type="button" className="bt-btn-secondary" onClick={() => { setError(""); setAssignmentUser(user); setAssignmentRegisterId(""); }}>Arkat</button>
             <button type="button" className="bt-btn-secondary" onClick={() => openUser(user)}><Pencil size={16} /> Ndrysho</button>
             <button type="button" className={user.is_active ? "bt-btn-danger" : "bt-btn-secondary"} disabled={actionId === `user-${user.id}` || (user.is_active && user.id === me?.id)} onClick={() => toggleUser(user)}>
               {actionId === `user-${user.id}` && <RefreshCw size={16} className="bt-spin" />}{user.is_active ? "Çaktivizo" : "Aktivizo"}
@@ -208,11 +261,20 @@ export default function AccountsRolesPage() {
         <option value="" disabled={Boolean(userEdit.id && userEdit.role)}>Pa rol</option>
         {roles.filter((role) => role.is_active || role.id === userEdit.role?.id).map((role) => <option value={role.id} key={role.id}>{role.name}{role.is_active ? "" : " (joaktiv)"}</option>)}
       </select></label>
+      {!userEdit.id && <label>Arka (opsionale)<select value={newUserRegisterId} onChange={(event) => setNewUserRegisterId(event.target.value)}><option value="">Pa arkë</option>{registers.filter((register) => register.is_active).map((register) => <option value={register.id} key={register.id}>{register.register_type} · {register.name}</option>)}</select></label>}
       <label>Koment<textarea value={userForm.comment} rows={3} onChange={(event) => setUserForm({ ...userForm, comment: event.target.value })} /></label>
       <label className="bt-role-checkbox"><input type="checkbox" checked={userForm.is_active} disabled={userEdit.id === me?.id && userForm.is_active} onChange={(event) => setUserForm({ ...userForm, is_active: event.target.checked })} /> Llogari aktive</label>
       {error && <p className="bt-inline-error" role="alert">{error}</p>}
       <div className="bt-modal-actions"><button type="submit" className="bt-btn-primary" disabled={busy}>{busy ? "Duke ruajtur…" : "Ruaj llogarinë"}</button></div>
     </form></Modal>}
+
+    {assignmentUser && <Modal title={`Arkat · ${assignmentUser.username}`} onClose={() => { if (!busy) setAssignmentUser(null); }}><div className="bt-cash-register-detail">
+      {error && <p className="bt-inline-error" role="alert">{error}</p>}
+      <h3>Arkat e caktuara</h3>
+      {!assignmentUser.cash_register_assignments?.length && <p>Asnjë arkë e caktuar.</p>}
+      {(assignmentUser.cash_register_assignments || []).map((assignment) => <div className="bt-cash-assigned-users" key={assignment.id}><div><strong>{assignment.register_type} · {assignment.cash_register_name}</strong><button type="button" className="bt-btn-secondary bt-btn-small" disabled={busy} onClick={() => removeAssignment(assignment)}>Hiq</button></div></div>)}
+      <form className="bt-cash-assign-form" onSubmit={addAssignment}><label htmlFor="bt-account-register-select">Cakto arkë</label><div><select id="bt-account-register-select" value={assignmentRegisterId} onChange={(event) => setAssignmentRegisterId(event.target.value)} disabled={busy}><option value="">Zgjidh arkën…</option>{registers.filter((register) => register.is_active && !(assignmentUser.cash_register_assignments || []).some((assignment) => assignment.register_type === register.register_type)).map((register) => <option key={register.id} value={register.id}>{register.register_type} · {register.name}</option>)}</select><button type="submit" className="bt-btn-primary" disabled={busy || !assignmentRegisterId}>{busy ? "Duke ruajtur…" : "Cakto"}</button></div></form>
+    </div></Modal>}
 
     {roleEdit && <Modal title={roleEdit.id ? "Ndrysho rolin" : "Shto rol"} onClose={() => { if (!busy) setRoleEdit(null); }}><form className="bt-role-form" onSubmit={saveRole}>
       <label>Emri i rolit<input value={roleForm.name} maxLength={50} required onChange={(event) => setRoleForm({ ...roleForm, name: event.target.value })} /></label>
