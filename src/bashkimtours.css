@@ -6413,6 +6413,7 @@
 @media (max-width: 850px) { .bt-messages-detail { grid-template-columns: minmax(0, 1fr); } .bt-messages-detail-heading { align-items: flex-start; } }
 
 .bt-shoferat-notice { margin: 0 0 22px; padding: 14px 18px; border: 1px solid #f1d68d; border-radius: 12px; background: #fff8e5; color: #735615; font-weight: 700; }
+.bt-autobusat-page .bt-accounts-tabs { margin-bottom: 16px; }
 .bt-shoferat-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
 .bt-shoferat-search { display: flex; align-items: center; gap: 9px; flex: 1; min-width: 240px; max-width: 460px; padding: 10px 13px; border: 1px solid #dce5eb; border-radius: 11px; background: #fff; }
 .bt-shoferat-search input { flex: 1; min-width: 0; border: 0; outline: 0; font: inherit; }
@@ -6427,6 +6428,7 @@
 .bt-document-types-back { justify-self: start; font-size: 13px; font-weight: 700; }
 .bt-shoferat-table-wrap { overflow-x: auto; border: 1px solid #dce5eb; border-radius: 14px; background: #fff; }
 .bt-shoferat-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+.bt-autobusat-table { width: max-content; min-width: 100%; }
 .bt-shoferat-table th { padding: clamp(6px, .7vw, 9px) clamp(6px, .8vw, 10px); background: #f5f8fa; color: #526675; text-align: left; font-size: clamp(10px, .85vw, 11px); font-weight: 700; }
 .bt-shoferat-table th:nth-child(7) { white-space: normal; min-width: 100px; max-width: 155px; }
 .bt-shoferat-table td { padding: clamp(6px, .65vw, 8px) clamp(6px, .8vw, 10px); border-top: 1px solid #edf1f4; font-size: clamp(12px, .95vw, 13px); }
@@ -6764,6 +6766,7 @@
   .bt-shoferat-table tbody td:nth-child(7)::before { content: "Licenca"; }
   .bt-shoferat-table tbody td:nth-child(8)::before { content: "Dokumenta"; }
   .bt-shoferat-table tbody td:nth-child(9)::before { content: "Detajet"; }
+  .bt-autobusat-table tbody td:nth-child(n)::before { content: attr(data-label); }
   .bt-shoferat-table tbody td:has(.bt-driver-documents) { min-width: 0; max-width: none; }
   .bt-driver-documents { justify-items: end; text-align: left; }
   .bt-driver-documents ul { min-width: 0; }

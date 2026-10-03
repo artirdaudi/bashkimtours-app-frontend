@@ -1,4 +1,4 @@
-import { Banknote, BellRing, ChevronDown, CreditCard, FileText, LogOut, Menu, ScanLine, Settings, ShieldCheck, UserCircle, UsersRound, Wallet, X } from "lucide-react";
+import { Banknote, BellRing, Bus, ChevronDown, CreditCard, FileText, LogOut, Menu, ScanLine, Settings, ShieldCheck, UserCircle, UsersRound, Wallet, X } from "lucide-react";
 import { useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { clearToken } from "./auth";
@@ -48,6 +48,10 @@ export default function DashboardLayout() {
           <NavLink to="/income" onClick={() => setOpen(false)}>
             <Banknote />
             <span>Të hyrat</span>
+          </NavLink>
+          <NavLink to="/autobusat" onClick={() => setOpen(false)}>
+            <Bus />
+            <span>Autobusët</span>
           </NavLink>
           <NavLink to="/shoferat" onClick={() => setOpen(false)}>
             <UsersRound />

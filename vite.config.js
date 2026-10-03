@@ -34,7 +34,7 @@ export default defineConfig(({ mode }) => {
         runtimeCaching: [{
           urlPattern: ({ request, url, sameOrigin }) => sameOrigin && request.mode === "navigate" && (
             /^\/$/.test(url.pathname) ||
-            /^\/(students|debts|cards|skano|areas|vehicles|drivers|calendar|followup-rules|payments|arka|account|income|messages|shoferat|settings\/(accounts-roles|cash-registers))\/?$/.test(url.pathname) ||
+            /^\/(students|debts|cards|skano|areas|autobusat|vehicles|drivers|calendar|followup-rules|payments|arka|account|income|messages|shoferat|settings\/(accounts-roles|cash-registers))\/?$/.test(url.pathname) ||
             /^\/student\/[^/]+\/?$/.test(url.pathname)
           ),
           handler: "NetworkFirst",

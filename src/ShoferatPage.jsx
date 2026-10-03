@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import { CalendarDays, ChevronLeft, ChevronRight, LoaderCircle, Pencil, Plus, Search, UsersRound, X } from "lucide-react";
 import { documentsApi, shoferiApi } from "./api";
 import { Modal } from "./PortalPages";
@@ -141,7 +140,6 @@ export default function ShoferatPage() {
     <div className="bt-shoferat-notice" role="note">Faqja ende është në përpunim.</div>
     <section className="bt-shoferat-toolbar">
       <label className="bt-shoferat-search"><Search size={19} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Kërko sipas emrit, telefonit, EMBG…" aria-label="Kërko shoferët" />{search && <button type="button" onClick={() => setSearch("")} aria-label="Pastro kërkimin"><X size={16} /></button>}</label>
-      <Link className="bt-btn-secondary bt-shoferat-types-link" to="/settings/document-types">Llojet e dokumenteve</Link>
     </section>
     {queryText && suggestions.length > 0 && <div className="bt-shoferat-suggestions"><span>Hap shpejt:</span>{suggestions.map((driver) => <button key={driver.id} onClick={() => openDriver(driver)}>{driver.emri}</button>)}</div>}
     {error && <p className="bt-inline-error" role="alert">{error} <button type="button" onClick={() => { setLoading(true); setRefresh((value) => value + 1); }}>Provo përsëri</button></p>}

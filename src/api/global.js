@@ -34,6 +34,18 @@ export const documentsApi = {
   download: (id) => api(`/documents/${id}/download`, { responseType: "blob" }),
 };
 export const vehiclesApi = resource("/vehicles");
+export const autobusiApi = {
+  list: (params) => api(`/autobusi${query(params)}`),
+  create: (body) => api("/autobusi", { method: "POST", body: JSON.stringify(body) }),
+  update: (id, body) => api(`/autobusi/${id}`, { method: "PUT", body: JSON.stringify(body) }),
+  remove: (id) => api(`/autobusi/${id}`, { method: "DELETE" }),
+};
+export const busExtApi = {
+  list: (params) => api(`/busext${query(params)}`),
+  create: (body) => api("/busext", { method: "POST", body: JSON.stringify(body) }),
+  update: (id, body) => api(`/busext/${id}`, { method: "PUT", body: JSON.stringify(body) }),
+  remove: (id) => api(`/busext/${id}`, { method: "DELETE" }),
+};
 export const driversApi = resource("/drivers");
 export const shoferiApi = {
   ...resource("/shoferi"),
