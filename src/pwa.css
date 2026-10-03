@@ -219,3 +219,81 @@ html.bt-pwa-standalone .bt-login-page.is-exiting .bt-submit { background: #15803
   html.bt-pwa-standalone .bt-login-page.is-exiting .bt-login-brand,
   html.bt-pwa-standalone .bt-login-page.is-exiting .bt-login-panel { animation: none !important; transition: none !important; transform: none !important; }
 }
+
+/* Shoferat, dokumentet dhe llojet e dokumenteve në aplikacionin e instaluar. */
+@media screen and (max-width: 800px) {
+  html.bt-pwa-standalone :is(.bt-shoferat-table, .bt-document-types-table) { display: block; width: 100%; min-width: 0; }
+  html.bt-pwa-standalone :is(.bt-shoferat-table, .bt-document-types-table) thead { display: none; }
+  html.bt-pwa-standalone :is(.bt-shoferat-table, .bt-document-types-table) tbody { display: grid; }
+  html.bt-pwa-standalone :is(.bt-shoferat-table, .bt-document-types-table) tbody tr { display: grid; background: #fff; }
+  html.bt-pwa-standalone :is(.bt-shoferat-table, .bt-document-types-table) tbody td { display: flex; width: 100%; white-space: normal; overflow-wrap: anywhere; }
+  html.bt-pwa-standalone :is(.bt-shoferat-table, .bt-document-types-table) tbody td::before { color: #637582; font-size: 12px; font-weight: 600; }
+  html.bt-pwa-standalone .bt-shoferat-table tbody td:nth-child(2)::before { content: "Telefoni"; }
+  html.bt-pwa-standalone .bt-shoferat-table tbody td:nth-child(6)::before { content: "CD"; }
+  html.bt-pwa-standalone .bt-shoferat-table tbody td:nth-child(7)::before { content: "Licenca"; }
+  html.bt-pwa-standalone .bt-document-types-table tbody td:nth-child(2)::before { content: "Koment"; flex: 0 0 76px; }
+  html.bt-pwa-standalone :is(.bt-shoferat-page, .bt-document-types-page) { padding: 18px 14px calc(84px + env(safe-area-inset-bottom)); }
+  html.bt-pwa-standalone :is(.bt-shoferat-page, .bt-document-types-page) .bt-page-header { align-items: center; gap: 12px; margin-bottom: 16px; }
+  html.bt-pwa-standalone :is(.bt-shoferat-page, .bt-document-types-page) .bt-page-header h1 { font-size: clamp(22px, 6vw, 27px); }
+  html.bt-pwa-standalone :is(.bt-shoferat-page, .bt-document-types-page) .bt-page-header > button { flex: none; width: 48px; height: 48px; min-height: 48px; margin: 0; padding: 0; border-radius: 14px; font-size: 0; }
+  html.bt-pwa-standalone .bt-shoferat-notice { margin-bottom: 14px; padding: 10px 12px; font-size: 12px; }
+  html.bt-pwa-standalone .bt-shoferat-toolbar { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  html.bt-pwa-standalone .bt-shoferat-search,
+  html.bt-pwa-standalone .bt-accounts-search { width: 100%; max-width: none; min-width: 0; min-height: 48px; }
+  html.bt-pwa-standalone .bt-shoferat-types-link { min-height: 44px; justify-self: start; }
+  html.bt-pwa-standalone .bt-shoferat-summary { margin: 12px 0; font-size: 13px; }
+  html.bt-pwa-standalone .bt-shoferat-table-wrap { border: 0; background: transparent; }
+  html.bt-pwa-standalone .bt-shoferat-table tbody { gap: 11px; padding: 0; }
+  html.bt-pwa-standalone .bt-shoferat-table tbody tr { position: relative; gap: 2px; padding: 14px 16px; border-radius: 16px; box-shadow: 0 5px 18px rgb(16 35 65 / 5%); }
+  html.bt-pwa-standalone .bt-shoferat-table tbody td { justify-content: flex-start; align-items: center; min-height: 28px; padding: 3px 0; border: 0; text-align: left; }
+  html.bt-pwa-standalone .bt-shoferat-table tbody td:first-child { padding-right: 32px; }
+  html.bt-pwa-standalone .bt-shoferat-table tbody td:first-child::before { display: none; }
+  html.bt-pwa-standalone .bt-shoferat-table .bt-shoferat-name { min-height: 40px; color: #152e42; font-size: 16px; text-align: left; }
+  html.bt-pwa-standalone .bt-shoferat-table tbody td:nth-child(2)::before,
+  html.bt-pwa-standalone .bt-shoferat-table tbody td:nth-child(6)::before,
+  html.bt-pwa-standalone .bt-shoferat-table tbody td:nth-child(7)::before { flex: 0 0 76px; }
+  html.bt-pwa-standalone .bt-shoferat-table tbody td:nth-child(3),
+  html.bt-pwa-standalone .bt-shoferat-table tbody td:nth-child(4),
+  html.bt-pwa-standalone .bt-shoferat-table tbody td:nth-child(5),
+  html.bt-pwa-standalone .bt-shoferat-table tbody td:nth-child(8),
+  html.bt-pwa-standalone .bt-shoferat-table tbody td:nth-child(9) { display: none; }
+  html.bt-pwa-standalone .bt-shoferat-table tbody tr::after { content: "›"; position: absolute; top: 19px; right: 17px; color: #8ca0ae; font-size: 27px; line-height: 1; }
+  html.bt-pwa-standalone .bt-shoferat-pages button { width: 44px; height: 44px; }
+
+  html.bt-pwa-standalone .bt-document-types-page { gap: 14px; }
+  html.bt-pwa-standalone .bt-document-types-page .bt-accounts-section { padding: 0; border: 0; background: transparent; }
+  html.bt-pwa-standalone .bt-document-types-page .bt-accounts-section h2 { margin: 3px 0 12px; font-size: 16px; }
+  html.bt-pwa-standalone .bt-document-types-table tbody { gap: 11px; padding: 0; }
+  html.bt-pwa-standalone .bt-document-types-table tbody tr { padding: 14px 16px; border-radius: 16px; box-shadow: 0 5px 18px rgb(16 35 65 / 5%); }
+  html.bt-pwa-standalone .bt-document-types-table tbody td { justify-content: flex-start !important; text-align: left !important; }
+  html.bt-pwa-standalone .bt-document-types-table tbody td:first-child::before { display: none; }
+  html.bt-pwa-standalone .bt-document-types-table tbody td:first-child strong { font-size: 16px; }
+  html.bt-pwa-standalone .bt-document-types-table tbody td:last-child::before { display: none; }
+  html.bt-pwa-standalone .bt-document-types-table .bt-role-actions { width: 100%; }
+  html.bt-pwa-standalone .bt-document-types-table .bt-role-actions button { width: 100%; }
+
+  html.bt-pwa-standalone .bt-modal-backdrop:has(:is(.bt-shoferat-profile-modal, .bt-shoferat-form-modal, .bt-document-upload-modal, .bt-document-viewer-modal, .bt-document-type-modal)) { align-items: stretch; padding: 0; }
+  html.bt-pwa-standalone :is(.bt-shoferat-profile-modal, .bt-shoferat-form-modal, .bt-document-upload-modal, .bt-document-viewer-modal, .bt-document-type-modal) { display: flex; flex-direction: column; width: 100%; height: var(--bt-visible-height, 100dvh); max-height: var(--bt-visible-height, 100dvh); border-radius: 0; }
+  html.bt-pwa-standalone :is(.bt-shoferat-profile-modal, .bt-shoferat-form-modal, .bt-document-upload-modal, .bt-document-viewer-modal, .bt-document-type-modal) > header { flex: none; align-items: center; gap: 10px; padding: max(14px, env(safe-area-inset-top)) 16px 14px; }
+  html.bt-pwa-standalone :is(.bt-shoferat-profile-modal, .bt-shoferat-form-modal, .bt-document-upload-modal, .bt-document-viewer-modal, .bt-document-type-modal) > header h2 { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 18px; }
+  html.bt-pwa-standalone :is(.bt-shoferat-profile-modal, .bt-shoferat-form-modal, .bt-document-upload-modal, .bt-document-viewer-modal, .bt-document-type-modal) .bt-modal-body { flex: 1; min-height: 0; max-height: none; padding: 18px 16px max(24px, env(safe-area-inset-bottom)); }
+  html.bt-pwa-standalone .bt-shoferat-detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  html.bt-pwa-standalone .bt-shoferat-detail-grid > div { min-width: 0; }
+  html.bt-pwa-standalone .bt-shoferat-form { grid-template-columns: minmax(0, 1fr); }
+  html.bt-pwa-standalone .bt-shoferat-form input,
+  html.bt-pwa-standalone .bt-role-form :is(input, textarea) { min-height: 48px; font-size: 16px; }
+  html.bt-pwa-standalone .bt-shoferat-actions { position: sticky; bottom: 0; margin-top: 18px; padding: 12px 0 max(8px, env(safe-area-inset-bottom)); background: #fff; }
+  html.bt-pwa-standalone .bt-shoferat-actions button { min-height: 48px; }
+  html.bt-pwa-standalone .bt-shoferat-profile-documents .bt-driver-documents { justify-items: stretch; }
+  html.bt-pwa-standalone .bt-shoferat-profile-documents .bt-driver-documents li { grid-template-columns: minmax(0, 1fr) auto; padding: 12px; border: 1px solid var(--bt-line); border-radius: 12px; background: #f8fbfc; }
+  html.bt-pwa-standalone .bt-shoferat-profile-documents .bt-driver-document-actions button { width: 44px; height: 44px; }
+  html.bt-pwa-standalone .bt-shoferat-profile-documents .bt-driver-documents > button { min-height: 48px; }
+  html.bt-pwa-standalone .bt-driver-type-list { max-height: min(34dvh, 260px); }
+  html.bt-pwa-standalone .bt-driver-type-list button { min-height: 48px; }
+  html.bt-pwa-standalone .bt-document-upload-preview iframe { height: min(38dvh, 300px); }
+  html.bt-pwa-standalone .bt-document-viewer-modal .bt-modal-body { padding: 0; overflow: hidden; }
+  html.bt-pwa-standalone .bt-document-viewer { display: flex; flex-direction: column; height: 100%; }
+  html.bt-pwa-standalone .bt-document-viewer-toolbar { flex: none; padding: 10px 12px; }
+  html.bt-pwa-standalone .bt-document-viewer-toolbar :is(button, a) { min-height: 44px; }
+  html.bt-pwa-standalone .bt-document-viewer-content { flex: 1; min-height: 0; height: auto; }
+}

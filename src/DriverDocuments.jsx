@@ -26,17 +26,6 @@ function UploadPreview({ file }) {
   return <div className="bt-document-upload-preview"><strong>Pamje paraprake</strong><span>{file.name} · {(file.size / 1024).toLocaleString("sq-AL", { maximumFractionDigits: 0 })} KB</span>{isImage ? <img ref={previewRef} alt={`Pamje paraprake e ${file.name}`} /> : isPdf ? <iframe ref={previewRef} title={`Pamje paraprake e ${file.name}`} /> : <p>Ky format nuk ka pamje paraprake.</p>}</div>;
 }
 
-async function getAllDocuments(id) {
-  const items = [];
-  let page = 1;
-  while (true) {
-    const result = await documentsApi.list({ entity_type: entityType, entity_id: String(id), page, page_size: 200 });
-    items.push(...result.items);
-    if (items.length >= result.total || !result.items.length) return items;
-    page += 1;
-  }
-}
-
 function openBlob(blob, filename, download = false) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
@@ -50,12 +39,13 @@ function openBlob(blob, filename, download = false) {
   window.setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
 
-export default function DriverDocuments({ driver }) {
-  const [documents, setDocuments] = useState([]);
+export default function DriverDocuments({ driver, defer = false, documents, loadDocuments }) {
+  const rootRef = useRef(null);
+  const [visible, setVisible] = useState(!defer);
   const [types, setTypes] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const loading = documents === undefined && !error;
   const [form, setForm] = useState(null);
   const [typeQuery, setTypeQuery] = useState("");
   const [typeListOpen, setTypeListOpen] = useState(false);
@@ -71,13 +61,22 @@ export default function DriverDocuments({ driver }) {
   }, [viewer?.url]);
 
   useEffect(() => {
+    if (!defer || visible) return undefined;
+    const node = rootRef.current;
+    if (!node) return undefined;
+    const observer = new IntersectionObserver(([entry]) => { if (entry.isIntersecting) setVisible(true); });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [defer, visible]);
+
+  useEffect(() => {
+    if (!visible || !loading) return undefined;
     let active = true;
-    getAllDocuments(driver.id)
-      .then((items) => { if (active) { setDocuments(items); setError(""); } })
+    loadDocuments(driver.id)
+      .then(() => { if (active) setError(""); })
       .catch((requestError) => { if (active) setError(requestError.message); })
-      .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [driver.id]);
+  }, [driver.id, visible, loading, loadDocuments]);
 
   async function addDocument() {
     if (locked) return;
@@ -105,7 +104,7 @@ export default function DriverDocuments({ driver }) {
       body.append("file", form.file);
       if (form.comment.trim()) body.append("comment", form.comment.trim());
       await documentsApi.upload(body);
-      setDocuments(await getAllDocuments(driver.id));
+      await loadDocuments(driver.id, true);
       setForm(null);
     } catch (requestError) { setError(requestError.message); }
     finally { setBusy(false); setOperation(null); }
@@ -118,7 +117,7 @@ export default function DriverDocuments({ driver }) {
     setError("");
     try {
       await documentsApi.remove(item.id);
-      setDocuments(await getAllDocuments(driver.id));
+      await loadDocuments(driver.id, true);
     } catch (requestError) { setError(requestError.message); }
     finally { setBusy(false); setOperation(null); }
   }
@@ -152,11 +151,11 @@ export default function DriverDocuments({ driver }) {
     setTypeListOpen(false);
   }
 
-  return <div className="bt-driver-documents">
+  return <div ref={rootRef} className="bt-driver-documents">
     {loading && <span role="status">Duke ngarkuar…</span>}
     {operation && <span className="bt-document-operation-status" role="status">{operation.kind === "view" ? "Duke hapur dokumentin…" : operation.kind === "download" ? "Duke shkarkuar dokumentin…" : operation.kind === "remove" ? "Duke fshirë dokumentin…" : operation.kind === "types" ? "Duke ngarkuar llojet e dokumenteve…" : "Duke ngarkuar dokumentin…"}</span>}
-    {!loading && !documents.length && !error && <span>Pa dokumente</span>}
-    {!!documents.length && <ul>{documents.map((item) => <li key={item.id}>
+    {!loading && !documents?.length && !error && <span>Pa dokumente</span>}
+    {!!documents?.length && <ul>{documents.map((item) => <li key={item.id}>
       <div><FileText size={16} aria-hidden="true" /><button type="button" className="bt-driver-document-link" disabled={locked} onClick={() => openDocument(item, false)}>{(operation?.kind === "view" || operation?.kind === "download") && operation.id === item.id && <LoaderCircle size={15} className="bt-document-spinner" aria-hidden="true" />}{item.document_type?.name || "Dokument"} · {item.original_filename}</button></div>
       {item.comment && <small>{item.comment}</small>}
       <div className="bt-driver-document-actions">
@@ -173,7 +172,7 @@ export default function DriverDocuments({ driver }) {
       </div>
       <div className="bt-document-viewer-content">{viewer.kind === "pdf" ? <iframe title={viewer.item.original_filename} src={`${viewer.url}#toolbar=1`} /> : <img src={viewer.url} alt={viewer.item.original_filename} style={{ width: `${zoom * 100}%` }} />}</div>
     </div></Modal>}
-    {form && <Modal title={`Shto dokument · ${driver.emri}`} onClose={() => { if (!locked) setForm(null); }}><form className="bt-role-form" onSubmit={upload}>
+    {form && <Modal title={`Shto dokument · ${driver.emri}`} className="bt-document-upload-modal" onClose={() => { if (!locked) setForm(null); }}><form className="bt-role-form" onSubmit={upload}>
       <div className="bt-driver-type-field" onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setTypeListOpen(false); }}>
         <label htmlFor={`bt-driver-type-${driver.id}`}>Lloji i dokumentit</label>
         <input id={`bt-driver-type-${driver.id}`} type="text" role="combobox" aria-autocomplete="list" aria-expanded={typeListOpen} aria-controls={`bt-driver-type-list-${driver.id}`} placeholder="Kërko llojin e dokumentit…" autoComplete="off" disabled={locked} value={typeQuery} onFocus={() => setTypeListOpen(true)} onChange={(event) => { setTypeQuery(event.target.value); setForm({ ...form, documentTypeId: "" }); setTypeListOpen(true); }} onKeyDown={(event) => { if (event.key === "Escape") setTypeListOpen(false); if (event.key === "ArrowDown") { event.preventDefault(); event.currentTarget.nextElementSibling?.querySelector("button")?.focus(); } if (event.key === "Enter" && typeListOpen && matchingTypes.length) { event.preventDefault(); chooseType(matchingTypes[0]); } }} />

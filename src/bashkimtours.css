@@ -6423,6 +6423,8 @@
 .bt-shoferat-suggestions button { padding: 5px 10px; border: 1px solid #dce5eb; border-radius: 100px; background: #fff; color: #185a88; cursor: pointer; }
 .bt-shoferat-summary { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; color: #526675; }
 .bt-shoferat-summary strong { color: #152e42; font-size: 20px; }
+.bt-shoferat-types-link, .bt-document-types-back { color: #185a88; text-decoration: none; }
+.bt-document-types-back { justify-self: start; font-size: 13px; font-weight: 700; }
 .bt-shoferat-table-wrap { overflow-x: auto; border: 1px solid #dce5eb; border-radius: 14px; background: #fff; }
 .bt-shoferat-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
 .bt-shoferat-table th { padding: clamp(6px, .7vw, 9px) clamp(6px, .8vw, 10px); background: #f5f8fa; color: #526675; text-align: left; font-size: clamp(10px, .85vw, 11px); font-weight: 700; }

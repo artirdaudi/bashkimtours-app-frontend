@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { FileText, Pencil, Plus, RefreshCw, Search } from "lucide-react";
 import { documentTypesApi } from "./api";
 import { Modal } from "./PortalPages";
@@ -61,11 +62,12 @@ export default function DocumentTypesPage() {
   const term = search.trim().toLocaleLowerCase("sq");
   const shown = types.filter((type) => [type.name, type.comment].some((value) => String(value || "").toLocaleLowerCase("sq").includes(term)));
 
-  return <div className="bt-page bt-ops-page bt-accounts-roles-page">
+  return <div className="bt-page bt-ops-page bt-accounts-roles-page bt-document-types-page">
     <header className="bt-page-header">
       <div><span className="bt-eyebrow">Settings</span><h1>Llojet e Dokumentave</h1><p>Menaxhimi i llojeve të dokumenteve.</p></div>
       <button type="button" className="bt-btn-primary" onClick={() => openForm()}><Plus size={18} /> Shto lloj dokumenti</button>
     </header>
+    <Link className="bt-document-types-back" to="/shoferat">← Shoferat dhe Staff</Link>
     <label className="bt-accounts-search"><Search size={19} aria-hidden="true" /><input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Kërko sipas emrit ose komentit…" aria-label="Kërko llojet e dokumenteve" /></label>
     {error && !form && <p className="bt-inline-error" role="alert">{error}</p>}
     <section className="bt-accounts-section">
@@ -82,7 +84,7 @@ export default function DocumentTypesPage() {
         </tr>)}</tbody>
       </table></div>}
     </section>
-    {form && <Modal title={form.id ? "Ndrysho llojin e dokumentit" : "Shto lloj dokumenti"} onClose={() => { if (!busy) setForm(null); }}><form className="bt-role-form" onSubmit={save}>
+    {form && <Modal title={form.id ? "Ndrysho llojin e dokumentit" : "Shto lloj dokumenti"} className="bt-document-type-modal" onClose={() => { if (!busy) setForm(null); }}><form className="bt-role-form" onSubmit={save}>
       <label>Emri<input required maxLength={100} value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} /></label>
       <label>Koment<textarea rows={3} value={form.comment} onChange={(event) => setForm({ ...form, comment: event.target.value })} /></label>
       {error && <p className="bt-inline-error" role="alert">{error}</p>}
