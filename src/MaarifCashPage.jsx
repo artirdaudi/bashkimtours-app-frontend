@@ -95,7 +95,7 @@ function Summary({ session, closed = false, current = false }) {
   </>;
 }
 
-function TransactionColumns({ items, loading = false, expenseRegisterId = null, onExpenseChanged }) {
+function TransactionColumns({ items, loading = false, expenseRegisterId = null, onExpenseChanged, registerType = "MAARIF" }) {
   const [paymentDetail, setPaymentDetail] = useState(null);
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [paymentError, setPaymentError] = useState("");
@@ -103,7 +103,7 @@ function TransactionColumns({ items, loading = false, expenseRegisterId = null, 
   const [expenseForm, setExpenseForm] = useState(null);
   const [expenseBusy, setExpenseBusy] = useState(false);
   const [expenseError, setExpenseError] = useState("");
-  const income = groupIncomeTransactions(items.filter((item) => item.transaction_type === "INCOME"));
+  const income = registerType === "MAARIF" ? groupIncomeTransactions(items.filter((item) => item.transaction_type === "INCOME")) : items.filter((item) => item.transaction_type === "INCOME");
   const expenses = items.filter((item) => item.transaction_type === "EXPENSE");
 
   async function showPayment(group) {
@@ -166,7 +166,8 @@ function TransactionColumns({ items, loading = false, expenseRegisterId = null, 
     <section className="bt-maarif-cash-panel"><h2><ArrowDownRight size={21} /> Të hyrat</h2>
       {loading && <p>Duke ngarkuar…</p>}
       {!loading && !income.length && <p>Nuk ka të hyra në këtë sesion.</p>}
-      {!!income.length && <div className="bt-accounts-table-wrap"><table className="bt-accounts-table"><thead><tr><th>Data e pagesës</th><th>Nxënësi</th><th>Muaji</th><th>Koment</th><th>Shuma</th></tr></thead><tbody>{income.map((group) => {
+      {!!income.length && registerType !== "MAARIF" && <div className="bt-accounts-table-wrap"><table className="bt-accounts-table bt-excursion-income-table"><thead><tr><th>Data</th><th>Burimi</th><th>Koment</th><th>Regjistruar nga</th><th>Shuma</th></tr></thead><tbody>{income.map((item) => <tr key={item.id}><td>{dateTime(item.created_at)}</td><td>{item.source_type || "—"}</td><td>{item.comment || "—"}</td><td>{item.created_by_username || "—"}</td><td>+{money(item.amount)}</td></tr>)}</tbody></table></div>}
+      {!!income.length && registerType === "MAARIF" && <div className="bt-accounts-table-wrap"><table className="bt-accounts-table"><thead><tr><th>Data e pagesës</th><th>Nxënësi</th><th>Muaji</th><th>Koment</th><th>Shuma</th></tr></thead><tbody>{income.map((group) => {
         const item = group.transactions[0];
         const hasDetails = group.transactions.some((entry) => entry.payment?.id != null || entry.payment_id != null);
         return <tr key={group.key} className={hasDetails ? "bt-cash-income-row" : ""} tabIndex={hasDetails ? 0 : undefined} role={hasDetails ? "button" : undefined} aria-label={hasDetails ? `Shiko detajet e pagesës për ${item.payment?.student_first_name || "nxënësin"} ${item.payment?.student_last_name || ""}` : undefined} onClick={hasDetails ? () => showPayment(group) : undefined} onKeyDown={hasDetails ? (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); showPayment(group); } } : undefined}>{item.payment ? <><td>{paymentDate(item.payment.payment_date)}</td><td><strong>{item.payment.student_first_name} {item.payment.student_last_name}</strong></td><td>{groupMonths(group.transactions)}</td><td>{item.payment.comment || "—"}</td><td>+{money(group.totalAmount)}</td></> : <><td>{dateTime(item.created_at)}</td><td colSpan={3}>Detajet e pagesës nuk janë të disponueshme.</td><td>+{money(group.totalAmount)}</td></>}</tr>;
@@ -205,8 +206,8 @@ function TransactionColumns({ items, loading = false, expenseRegisterId = null, 
   </div>;
 }
 
-function SessionPrintSheet({ session }) {
-  const income = groupIncomeTransactions(session.transactions.filter((item) => item.transaction_type === "INCOME"));
+function SessionPrintSheet({ session, registerType = "MAARIF" }) {
+  const income = registerType === "MAARIF" ? groupIncomeTransactions(session.transactions.filter((item) => item.transaction_type === "INCOME")) : session.transactions.filter((item) => item.transaction_type === "INCOME");
   const expenses = session.transactions.filter((item) => item.transaction_type === "EXPENSE");
   return <div className="bt-print-sheet bt-cash-session-print">
     <header><img src={bashkimToursLogo} alt="Bashkim Tours" /><div><strong>Bashkim Tours</strong><span>Dervish Cara Nr. 4 · 1200 Tetovë, Maqedoni</span><span>+389 44 338 003 · +389 75 312 015</span></div></header>
@@ -220,8 +221,8 @@ function SessionPrintSheet({ session }) {
       {session.status === "CLOSED" && <tr><th>Balanci fizik në mbyllje</th><td>{money(session.actual_closing_balance)}</td><th>Diferenca</th><td>{differenceLabel(session.difference)}</td></tr>}
       {session.comment && <tr><th>Koment</th><td colSpan={3}>{session.comment}</td></tr>}
     </tbody></table></section>
-    <section className="bt-print-section"><h2>Të hyrat <span>{income.reduce((total, group) => total + group.transactions.length, 0)} pagesa · {money(session.total_income)}</span></h2><table><thead><tr><th>Data</th><th>Nxënësi</th><th>Muaji</th><th>Koment</th><th>Shuma</th></tr></thead><tbody>
-      {income.map((group) => { const item = group.transactions[0]; return <tr key={group.key}><td>{item.payment ? paymentDate(item.payment.payment_date) : dateTime(item.created_at)}</td><td>{item.payment ? `${item.payment.student_first_name} ${item.payment.student_last_name}` : "—"}</td><td>{item.payment ? groupMonths(group.transactions) : "—"}</td><td>{item.payment?.comment || item.comment || "—"}</td><td>+{money(group.totalAmount)}</td></tr>; })}
+    <section className="bt-print-section"><h2>Të hyrat <span>{registerType === "MAARIF" ? income.reduce((total, group) => total + group.transactions.length, 0) : income.length} pagesa · {money(session.total_income)}</span></h2><table><thead><tr><th>Data</th><th>{registerType === "MAARIF" ? "Nxënësi" : "Burimi"}</th><th>{registerType === "MAARIF" ? "Muaji" : "Përdoruesi"}</th><th>Koment</th><th>Shuma</th></tr></thead><tbody>
+      {registerType === "MAARIF" ? income.map((group) => { const item = group.transactions[0]; return <tr key={group.key}><td>{item.payment ? paymentDate(item.payment.payment_date) : dateTime(item.created_at)}</td><td>{item.payment ? `${item.payment.student_first_name} ${item.payment.student_last_name}` : "—"}</td><td>{item.payment ? groupMonths(group.transactions) : "—"}</td><td>{item.payment?.comment || item.comment || "—"}</td><td>+{money(group.totalAmount)}</td></tr>; }) : income.map((item) => <tr key={item.id}><td>{dateTime(item.created_at)}</td><td>{item.source_type || "—"}</td><td>{item.created_by_username || "—"}</td><td>{item.comment || "—"}</td><td>+{money(item.amount)}</td></tr>)}
       {!income.length && <tr><td colSpan={5}>Nuk ka të hyra në këtë sesion.</td></tr>}
     </tbody></table></section>
     <section className="bt-print-section"><h2>Të dalurat <span>{expenses.length} dalje · {money(session.total_expenses)}</span></h2><table><thead><tr><th>Data</th><th>Koment</th><th>Regjistruar nga</th><th>Shuma</th></tr></thead><tbody>
@@ -232,7 +233,7 @@ function SessionPrintSheet({ session }) {
   </div>;
 }
 
-export default function MaarifCashPage() {
+export default function MaarifCashPage({ registerType = "MAARIF", moduleLabel = "Maarif" }) {
   const [me, setMe] = useState(null);
   const [registers, setRegisters] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
@@ -263,9 +264,9 @@ export default function MaarifCashPage() {
     try {
       const user = await authApi.me();
       setMe(user);
-      const maarifAssignment = user.cash_register_assignments?.find((assignment) => assignment.register_type === "MAARIF");
-      if (maarifAssignment != null) {
-        const register = await cashRegistersApi.get(maarifAssignment.cash_register_id);
+      const registerAssignment = user.cash_register_assignments?.find((assignment) => assignment.register_type === registerType);
+      if (registerAssignment != null) {
+        const register = await cashRegistersApi.get(registerAssignment.cash_register_id);
         setRegisters([register]);
         setSelectedId(register.id);
         setSession(register.current_session);
@@ -275,8 +276,8 @@ export default function MaarifCashPage() {
         return;
       }
       const list = await cashRegistersApi.list();
-      setRegisters(list.filter((register) => register.register_type === "MAARIF"));
-      setSelectedId((current) => list.some((item) => item.id === current && item.register_type === "MAARIF") ? current : null);
+      setRegisters(list.filter((register) => register.register_type === registerType));
+      setSelectedId((current) => list.some((item) => item.id === current && item.register_type === registerType) ? current : null);
       setOverviewSessions({});
       setError("");
     } catch (requestError) {
@@ -284,7 +285,7 @@ export default function MaarifCashPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [registerType]);
 
   useEffect(() => {
     const request = window.setTimeout(loadOverview, 0);
@@ -303,7 +304,7 @@ export default function MaarifCashPage() {
   }, [printSession]);
 
   useEffect(() => {
-    if (selectedId == null || me?.cash_register_assignments?.some((assignment) => assignment.register_type === "MAARIF" && assignment.cash_register_id === selectedId)) return;
+    if (selectedId == null || me?.cash_register_assignments?.some((assignment) => assignment.register_type === registerType && assignment.cash_register_id === selectedId)) return;
     let active = true;
     const fetchCurrent = async () => {
       setDetailLoading(true);
@@ -328,7 +329,7 @@ export default function MaarifCashPage() {
     };
     fetchCurrent();
     return () => { active = false; };
-  }, [selectedId, refresh, me?.cash_register_assignments]);
+  }, [selectedId, refresh, me?.cash_register_assignments, registerType]);
 
   useEffect(() => {
     if (selectedId == null || accessDenied || section !== "history") return;
@@ -353,7 +354,7 @@ export default function MaarifCashPage() {
 
   const selected = registers.find((item) => item.id === selectedId);
   const roleName = me?.role?.name?.toUpperCase();
-  const mayOperate = Boolean(me?.is_active && selected && (me.cash_register_assignments?.some((assignment) => assignment.register_type === "MAARIF" && assignment.cash_register_id === selected.id) || ((roleName === "OWNER" || roleName === "ADMIN") && me.role?.is_active)));
+  const mayOperate = Boolean(me?.is_active && selected && (me.cash_register_assignments?.some((assignment) => assignment.register_type === registerType && assignment.cash_register_id === selected.id) || ((roleName === "OWNER" || roleName === "ADMIN") && me.role?.is_active)));
   const open = Boolean(session?.status === "OPEN");
 
   function chooseRegister(id) {
@@ -418,10 +419,10 @@ export default function MaarifCashPage() {
   }
 
   return <div className="bt-page bt-ops-page bt-maarif-cash-page">
-    <header className="bt-page-header"><div><span className="bt-eyebrow">Maarif</span><h1>Arka</h1><p>Balanci dhe sesionet ditore të arkës.</p></div></header>
+    <header className="bt-page-header"><div><span className="bt-eyebrow">{moduleLabel}</span><h1>Arka</h1><p>Balanci dhe sesionet ditore të arkës.</p></div></header>
     {error && !action && <p className="bt-inline-error" role="alert">{error}</p>}
     {loading && <p className="bt-accounts-state" role="status"><RefreshCw className="bt-spin" /> Duke ngarkuar…</p>}
-    {!loading && !me?.cash_register_assignments?.some((assignment) => assignment.register_type === "MAARIF") && selectedId == null && <>
+    {!loading && !me?.cash_register_assignments?.some((assignment) => assignment.register_type === registerType) && selectedId == null && <>
       {!registers.length && <p className="bt-accounts-state">Nuk ka arka të regjistruara.</p>}
       {!!registers.length && <div className="bt-cash-overview">{registers.map((register) => <article className="bt-maarif-cash-panel" key={register.id}>
         <h2><Wallet size={21} /> {register.name}</h2>
@@ -432,15 +433,15 @@ export default function MaarifCashPage() {
       </article>)}</div>}
     </>}
     {selected && <>
-      {!me?.cash_register_assignments?.some((assignment) => assignment.register_type === "MAARIF") && <button type="button" className="bt-cash-back" onClick={() => setSelectedId(null)}><ArrowLeft size={17} /> Të gjitha arkat</button>}
+      {!me?.cash_register_assignments?.some((assignment) => assignment.register_type === registerType) && <button type="button" className="bt-cash-back" onClick={() => setSelectedId(null)}><ArrowLeft size={17} /> Të gjitha arkat</button>}
       <section className="bt-maarif-cash-balance"><div><span>{selected.name} <span className={`bt-cash-session-status ${selected.has_open_session ? "open" : ""}`}>{selected.has_open_session ? "E hapur" : "E mbyllur"}</span></span><strong>{money(selected.balance)}</strong><small>Gjendja aktuale</small></div><Wallet size={34} /></section>
       <div className="bt-accounts-tabs" role="tablist" aria-label="Seksionet e arkës"><button type="button" role="tab" aria-selected={section === "current"} className={section === "current" ? "active" : ""} onClick={() => setSection("current")}>Gjendja aktuale</button><button type="button" role="tab" aria-selected={section === "history"} className={section === "history" ? "active" : ""} onClick={() => setSection("history")}>Historia</button></div>
       {accessDenied && <p className="bt-inline-error" role="status">API-ja nuk lejon shikimin e detajeve ose historisë së sesioneve të kësaj arke për këtë përdorues.</p>}
-      {section === "current" && accessDenied && <>{!selected.has_open_session && <div className="bt-maarif-cash-panel"><p>Arka nuk ka sesion të hapur.</p></div>}{selected.has_open_session && <TransactionColumns items={currentTransactions} loading={detailLoading} />}</>}
+      {section === "current" && accessDenied && <>{!selected.has_open_session && <div className="bt-maarif-cash-panel"><p>Arka nuk ka sesion të hapur.</p></div>}{selected.has_open_session && <TransactionColumns items={currentTransactions} loading={detailLoading} registerType={registerType} />}</>}
       {section === "current" && !accessDenied && <>
         {detailLoading && <p className="bt-accounts-state"><RefreshCw className="bt-spin" /> Duke ngarkuar sesionin…</p>}
         {!detailLoading && !session && <div className="bt-maarif-cash-panel"><p>Arka nuk ka sesion të hapur.</p>{mayOperate && selected.is_active && <button type="button" className="bt-btn-primary" onClick={() => { setActionForm(emptyAction()); setAction("open"); }}>Hap arkën</button>}</div>}
-        {!detailLoading && open && <><div className="bt-maarif-cash-panel"><h2>Sesioni aktual</h2><Summary session={session} current /><div className="bt-cash-session-actions">{mayOperate && <button type="button" className="bt-btn-primary" onClick={() => { setActionForm(emptyAction()); setAction("expense"); }}><Plus size={17} /> Shto të dalur</button>}</div></div><TransactionColumns items={currentTransactions} expenseRegisterId={mayOperate ? selected.id : null} onExpenseChanged={refreshAfterExpenseChange} />{mayOperate && <div className="bt-cash-close-section"><span>Mbyllja e sesionit bëhet pasi të numërohen paratë në arkë.</span><button type="button" className="bt-btn-danger" onClick={() => { setActionForm(emptyAction()); setAction("close"); }}>Mbyll arkën</button></div>}</>}
+        {!detailLoading && open && <><div className="bt-maarif-cash-panel"><h2>Sesioni aktual</h2><Summary session={session} current /><div className="bt-cash-session-actions">{mayOperate && <button type="button" className="bt-btn-primary" onClick={() => { setActionForm(emptyAction()); setAction("expense"); }}><Plus size={17} /> Shto të dalur</button>}</div></div><TransactionColumns items={currentTransactions} expenseRegisterId={mayOperate ? selected.id : null} onExpenseChanged={refreshAfterExpenseChange} registerType={registerType} />{mayOperate && <div className="bt-cash-close-section"><span>Mbyllja e sesionit bëhet pasi të numërohen paratë në arkë.</span><button type="button" className="bt-btn-danger" onClick={() => { setActionForm(emptyAction()); setAction("close"); }}>Mbyll arkën</button></div>}</>}
       </>}
       {section === "history" && !accessDenied && <section className="bt-maarif-cash-panel"><h2>Historia e sesioneve</h2>
         <div className="bt-cash-history-filters"><label>Prej datës<input type="date" value={filters.date_from} onChange={(event) => { setPage(1); setFilters({ ...filters, date_from: event.target.value }); }} /></label><label>Deri më<input type="date" value={filters.date_to} onChange={(event) => { setPage(1); setFilters({ ...filters, date_to: event.target.value }); }} /></label><label>Statusi<select value={filters.session_status} onChange={(event) => { setPage(1); setFilters({ ...filters, session_status: event.target.value }); }}><option value="">Të gjitha</option><option value="OPEN">E hapur</option><option value="CLOSED">E mbyllur</option></select></label></div>
@@ -462,7 +463,7 @@ export default function MaarifCashPage() {
       <div className="bt-modal-actions"><button type="submit" className={action === "close" ? "bt-btn-danger" : "bt-btn-primary"} disabled={saving}>{saving ? "Duke ruajtur…" : action === "open" ? "Hap arkën" : action === "close" ? "Konfirmo mbylljen" : "Ruaj të dalurën"}</button></div>
     </form></Modal>}
     {closeResult && <Modal title="Arka u mbyll" onClose={() => setCloseResult(null)}><div className="bt-cash-close-result"><Summary session={closeResult} closed />{error && <p className="bt-inline-error" role="alert">{error}</p>}<div className="bt-modal-actions"><button type="button" className="bt-btn-secondary" disabled={printLoading} onClick={() => printSessionById(closeResult.cash_register_id, closeResult.id)}><Printer size={17} /> {printLoading ? "Duke përgatitur…" : "Printo sesionin"}</button><button type="button" className="bt-btn-primary" onClick={() => setCloseResult(null)}>Mbyll</button></div></div></Modal>}
-    {sessionDetail && <Modal title={`Sesioni · ${sessionDetail.cash_register_name}`} onClose={() => setSessionDetail(null)} className="bt-cash-detail-modal"><div className="bt-cash-session-detail"><span className={`bt-cash-session-status ${sessionDetail.status === "OPEN" ? "open" : ""}`}>{sessionDetail.status === "OPEN" ? "E hapur" : "E mbyllur"}</span><Summary session={sessionDetail} closed={sessionDetail.status === "CLOSED"} /><TransactionColumns items={sessionDetail.transactions || []} /></div></Modal>}
-    {printSession && <SessionPrintSheet session={printSession} />}
+    {sessionDetail && <Modal title={`Sesioni · ${sessionDetail.cash_register_name}`} onClose={() => setSessionDetail(null)} className="bt-cash-detail-modal"><div className="bt-cash-session-detail"><span className={`bt-cash-session-status ${sessionDetail.status === "OPEN" ? "open" : ""}`}>{sessionDetail.status === "OPEN" ? "E hapur" : "E mbyllur"}</span><Summary session={sessionDetail} closed={sessionDetail.status === "CLOSED"} /><TransactionColumns items={sessionDetail.transactions || []} registerType={registerType} /></div></Modal>}
+    {printSession && <SessionPrintSheet session={printSession} registerType={registerType} />}
   </div>;
 }

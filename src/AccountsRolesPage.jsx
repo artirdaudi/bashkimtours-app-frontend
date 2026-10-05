@@ -3,6 +3,7 @@ import { confirmAction } from "./confirmAction";
 import { Pencil, Plus, RefreshCw, Search, ShieldCheck, UserCircle } from "lucide-react";
 import { authApi, cashRegistersApi, rolesApi, usersApi } from "./api";
 import { Modal } from "./PortalPages";
+import { cashRegisterTypeLabel } from "./cashRegisterLabels";
 
 const emptyRole = { name: "", description: "", is_active: true };
 const emptyUser = { username: "", password: "", role_id: "", comment: "", is_active: true };
@@ -227,7 +228,7 @@ export default function AccountsRolesPage() {
           <td>{user.role?.name || "Pa rol"}</td>
           <td><span className={`bt-role-status ${user.is_active ? "active" : ""}`}>{user.is_active ? "Aktive" : "Joaktive"}</span></td>
           <td>{user.comment || "—"}</td>
-          <td>{user.cash_register_assignments?.map((assignment) => `${assignment.register_type}: ${assignment.cash_register_name}`).join(", ") || "—"}</td>
+          <td>{user.cash_register_assignments?.map((assignment) => `${cashRegisterTypeLabel(assignment.register_type)}: ${assignment.cash_register_name}`).join(", ") || "—"}</td>
           <td><div className="bt-role-actions">
             <button type="button" className="bt-btn-secondary" onClick={() => { setError(""); setAssignmentUser(user); setAssignmentRegisterId(""); }}>Arkat</button>
             <button type="button" className="bt-btn-secondary" onClick={() => openUser(user)}><Pencil size={16} /> Ndrysho</button>
@@ -261,7 +262,7 @@ export default function AccountsRolesPage() {
         <option value="" disabled={Boolean(userEdit.id && userEdit.role)}>Pa rol</option>
         {roles.filter((role) => role.is_active || role.id === userEdit.role?.id).map((role) => <option value={role.id} key={role.id}>{role.name}{role.is_active ? "" : " (joaktiv)"}</option>)}
       </select></label>
-      {!userEdit.id && <label>Arka (opsionale)<select value={newUserRegisterId} onChange={(event) => setNewUserRegisterId(event.target.value)}><option value="">Pa arkë</option>{registers.filter((register) => register.is_active).map((register) => <option value={register.id} key={register.id}>{register.register_type} · {register.name}</option>)}</select></label>}
+      {!userEdit.id && <label>Arka (opsionale)<select value={newUserRegisterId} onChange={(event) => setNewUserRegisterId(event.target.value)}><option value="">Pa arkë</option>{registers.filter((register) => register.is_active).map((register) => <option value={register.id} key={register.id}>{cashRegisterTypeLabel(register.register_type)} · {register.name}</option>)}</select></label>}
       <label>Koment<textarea value={userForm.comment} rows={3} onChange={(event) => setUserForm({ ...userForm, comment: event.target.value })} /></label>
       <label className="bt-role-checkbox"><input type="checkbox" checked={userForm.is_active} disabled={userEdit.id === me?.id && userForm.is_active} onChange={(event) => setUserForm({ ...userForm, is_active: event.target.checked })} /> Llogari aktive</label>
       {error && <p className="bt-inline-error" role="alert">{error}</p>}
@@ -272,8 +273,8 @@ export default function AccountsRolesPage() {
       {error && <p className="bt-inline-error" role="alert">{error}</p>}
       <h3>Arkat e caktuara</h3>
       {!assignmentUser.cash_register_assignments?.length && <p>Asnjë arkë e caktuar.</p>}
-      {(assignmentUser.cash_register_assignments || []).map((assignment) => <div className="bt-cash-assigned-users" key={assignment.id}><div><strong>{assignment.register_type} · {assignment.cash_register_name}</strong><button type="button" className="bt-btn-secondary bt-btn-small" disabled={busy} onClick={() => removeAssignment(assignment)}>Hiq</button></div></div>)}
-      <form className="bt-cash-assign-form" onSubmit={addAssignment}><label htmlFor="bt-account-register-select">Cakto arkë</label><div><select id="bt-account-register-select" value={assignmentRegisterId} onChange={(event) => setAssignmentRegisterId(event.target.value)} disabled={busy}><option value="">Zgjidh arkën…</option>{registers.filter((register) => register.is_active && !(assignmentUser.cash_register_assignments || []).some((assignment) => assignment.register_type === register.register_type)).map((register) => <option key={register.id} value={register.id}>{register.register_type} · {register.name}</option>)}</select><button type="submit" className="bt-btn-primary" disabled={busy || !assignmentRegisterId}>{busy ? "Duke ruajtur…" : "Cakto"}</button></div></form>
+      {(assignmentUser.cash_register_assignments || []).map((assignment) => <div className="bt-cash-assigned-users" key={assignment.id}><div><strong>{cashRegisterTypeLabel(assignment.register_type)} · {assignment.cash_register_name}</strong><button type="button" className="bt-btn-secondary bt-btn-small" disabled={busy} onClick={() => removeAssignment(assignment)}>Hiq</button></div></div>)}
+      <form className="bt-cash-assign-form" onSubmit={addAssignment}><label htmlFor="bt-account-register-select">Cakto arkë</label><div><select id="bt-account-register-select" value={assignmentRegisterId} onChange={(event) => setAssignmentRegisterId(event.target.value)} disabled={busy}><option value="">Zgjidh arkën…</option>{registers.filter((register) => register.is_active && !(assignmentUser.cash_register_assignments || []).some((assignment) => assignment.register_type === register.register_type)).map((register) => <option key={register.id} value={register.id}>{cashRegisterTypeLabel(register.register_type)} · {register.name}</option>)}</select><button type="submit" className="bt-btn-primary" disabled={busy || !assignmentRegisterId}>{busy ? "Duke ruajtur…" : "Cakto"}</button></div></form>
     </div></Modal>}
 
     {roleEdit && <Modal title={roleEdit.id ? "Ndrysho rolin" : "Shto rol"} onClose={() => { if (!busy) setRoleEdit(null); }}><form className="bt-role-form" onSubmit={saveRole}>

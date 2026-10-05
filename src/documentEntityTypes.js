@@ -1,0 +1,4 @@
+export const DOCUMENT_ENTITY_TYPES = Object.freeze({
+  SHOFER_STAFF: "SHOFER_STAFF",
+  CHARTER: "CHARTER",
+});

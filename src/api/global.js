@@ -46,6 +46,18 @@ export const busExtApi = {
   update: (id, body) => api(`/busext/${id}`, { method: "PUT", body: JSON.stringify(body) }),
   remove: (id) => api(`/busext/${id}`, { method: "DELETE" }),
 };
+export const chartersApi = {
+  list: (params) => api(`/charters${query(params)}`),
+  get: (id) => api(`/charters/${id}`),
+  create: (body) => api("/charters", { method: "POST", body: JSON.stringify(body) }),
+  update: (id, body) => api(`/charters/${id}`, { method: "PUT", body: JSON.stringify(body) }),
+  remove: (id) => api(`/charters/${id}`, { method: "DELETE" }),
+};
+export const charterPaymentsApi = {
+  list: (charterId) => api(`/charters/${charterId}/payments`),
+  summary: (charterId) => api(`/charters/${charterId}/payments/summary`),
+  create: (charterId, body) => api(`/charters/${charterId}/payments`, { method: "POST", body: JSON.stringify(body) }),
+};
 export const driversApi = resource("/drivers");
 export const shoferiApi = {
   ...resource("/shoferi"),

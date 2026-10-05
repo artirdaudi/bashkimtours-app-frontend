@@ -3,8 +3,8 @@ import { Download, ExternalLink, FileText, LoaderCircle, Plus, RotateCcw, Trash2
 import { documentTypesApi, documentsApi } from "./api";
 import { confirmAction } from "./confirmAction";
 import { Modal } from "./PortalPages";
+import { DOCUMENT_ENTITY_TYPES } from "./documentEntityTypes";
 
-const entityType = "SHOFER_STAFF";
 const imageTypes = { png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg", gif: "image/gif", webp: "image/webp", svg: "image/svg+xml" };
 
 function previewBlob(blob, filename) {
@@ -39,7 +39,7 @@ function openBlob(blob, filename, download = false) {
   window.setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
 
-export default function DriverDocuments({ driver, defer = false, documents, loadDocuments }) {
+export default function DriverDocuments({ driver, defer = false, documents, loadDocuments, entityType = DOCUMENT_ENTITY_TYPES.SHOFER_STAFF, addLabel = "Shto dokumente", multiple = false, readOnly = false }) {
   const rootRef = useRef(null);
   const [visible, setVisible] = useState(!defer);
   const [types, setTypes] = useState([]);
@@ -83,7 +83,7 @@ export default function DriverDocuments({ driver, defer = false, documents, load
     setError("");
     setTypeQuery("");
     setTypeListOpen(false);
-    setForm({ documentTypeId: "", file: null, comment: "" });
+    setForm({ documentTypeId: "", files: [], comment: "" });
     setOperation({ kind: "types" });
     try { setTypes((await documentTypesApi.list()).filter((type) => type.is_active)); }
     catch (requestError) { setError(requestError.message); }
@@ -92,21 +92,28 @@ export default function DriverDocuments({ driver, defer = false, documents, load
 
   async function upload(event) {
     event.preventDefault();
-    if (locked || !form.file || !form.documentTypeId) return;
+    event.stopPropagation();
+    if (locked || !form.files.length || !form.documentTypeId) return;
     setBusy(true);
     setOperation({ kind: "upload" });
     setError("");
     try {
-      const body = new FormData();
-      body.append("document_type_id", form.documentTypeId);
-      body.append("entity_type", entityType);
-      body.append("entity_id", String(driver.id));
-      body.append("file", form.file);
-      if (form.comment.trim()) body.append("comment", form.comment.trim());
-      await documentsApi.upload(body);
+      for (const file of form.files) {
+        const body = new FormData();
+        body.append("document_type_id", form.documentTypeId);
+        body.append("entity_type", entityType);
+        body.append("entity_id", String(driver.id));
+        body.append("file", file);
+        if (form.comment.trim()) body.append("comment", form.comment.trim());
+        await documentsApi.upload(body);
+        setForm((current) => ({ ...current, files: current.files.filter((pending) => pending !== file) }));
+      }
       await loadDocuments(driver.id, true);
       setForm(null);
-    } catch (requestError) { setError(requestError.message); }
+    } catch (requestError) {
+      setError(requestError.message);
+      await loadDocuments(driver.id, true).catch(() => {});
+    }
     finally { setBusy(false); setOperation(null); }
   }
 
@@ -160,11 +167,11 @@ export default function DriverDocuments({ driver, defer = false, documents, load
       {item.comment && <small>{item.comment}</small>}
       <div className="bt-driver-document-actions">
         <button type="button" title="Shkarko dokumentin" aria-label={`Shkarko ${item.original_filename}`} disabled={locked} onClick={() => openDocument(item, true)}>{operation?.kind === "download" && operation.id === item.id ? <LoaderCircle size={16} className="bt-document-spinner" /> : <Download size={16} />}</button>
-        <button type="button" title="Fshi dokumentin" aria-label={`Fshi ${item.original_filename}`} disabled={locked} onClick={() => remove(item)}>{operation?.kind === "remove" && operation.id === item.id ? <LoaderCircle size={16} className="bt-document-spinner" /> : <Trash2 size={16} />}</button>
+        {!readOnly && <button type="button" title="Fshi dokumentin" aria-label={`Fshi ${item.original_filename}`} disabled={locked} onClick={() => remove(item)}>{operation?.kind === "remove" && operation.id === item.id ? <LoaderCircle size={16} className="bt-document-spinner" /> : <Trash2 size={16} />}</button>}
       </div>
     </li>)}</ul>}
     {error && !form && <p className="bt-inline-error" role="alert">{error}</p>}
-    <button type="button" className="bt-btn-secondary bt-btn-small" disabled={locked} onClick={addDocument}>{operation?.kind === "types" ? <LoaderCircle size={15} className="bt-document-spinner" /> : <Plus size={15} />} Shto dokumente</button>
+    {!readOnly && <button type="button" className="bt-btn-secondary bt-btn-small" disabled={locked} onClick={addDocument}>{operation?.kind === "types" ? <LoaderCircle size={15} className="bt-document-spinner" /> : <Plus size={15} />} {addLabel}</button>}
     {viewer && <Modal title={viewer.item.original_filename} className="bt-document-viewer-modal" onClose={() => { if (!locked) closeViewer(); }}><div className="bt-document-viewer">
       <div className="bt-document-viewer-toolbar">
         {viewer.kind === "image" && <div className="bt-document-zoom"><button type="button" title="Zvogëlo" aria-label="Zvogëlo" disabled={zoom <= .5} onClick={() => setZoom((value) => Math.max(.5, +(value - .25).toFixed(2)))}><ZoomOut size={18} /></button><span>{Math.round(zoom * 100)}%</span><button type="button" title="Zmadho" aria-label="Zmadho" disabled={zoom >= 3} onClick={() => setZoom((value) => Math.min(3, +(value + .25).toFixed(2)))}><ZoomIn size={18} /></button><button type="button" title="Madhësia fillestare" aria-label="Madhësia fillestare" onClick={() => setZoom(1)}><RotateCcw size={17} /></button></div>}
@@ -178,8 +185,8 @@ export default function DriverDocuments({ driver, defer = false, documents, load
         <input id={`bt-driver-type-${driver.id}`} type="text" role="combobox" aria-autocomplete="list" aria-expanded={typeListOpen} aria-controls={`bt-driver-type-list-${driver.id}`} placeholder="Kërko llojin e dokumentit…" autoComplete="off" disabled={locked} value={typeQuery} onFocus={() => setTypeListOpen(true)} onChange={(event) => { setTypeQuery(event.target.value); setForm({ ...form, documentTypeId: "" }); setTypeListOpen(true); }} onKeyDown={(event) => { if (event.key === "Escape") setTypeListOpen(false); if (event.key === "ArrowDown") { event.preventDefault(); event.currentTarget.nextElementSibling?.querySelector("button")?.focus(); } if (event.key === "Enter" && typeListOpen && matchingTypes.length) { event.preventDefault(); chooseType(matchingTypes[0]); } }} />
         {typeListOpen && <div id={`bt-driver-type-list-${driver.id}`} className="bt-driver-type-list" role="listbox">{matchingTypes.length ? matchingTypes.map((type) => <button key={type.id} type="button" role="option" aria-selected={String(type.id) === String(form.documentTypeId)} onPointerDown={(event) => { event.preventDefault(); chooseType(type); }} onClick={() => chooseType(type)} onKeyDown={(event) => { if (event.key === "ArrowDown" && event.currentTarget.nextElementSibling) { event.preventDefault(); event.currentTarget.nextElementSibling.focus(); } if (event.key === "ArrowUp") { event.preventDefault(); (event.currentTarget.previousElementSibling || event.currentTarget.parentElement.previousElementSibling)?.focus(); } if (event.key === "Escape") { setTypeListOpen(false); document.getElementById(`bt-driver-type-${driver.id}`)?.focus(); } }}>{type.name}</button>) : <span>Nuk u gjet asnjë lloj dokumenti.</span>}</div>}
       </div>
-      <label>Skedari<input type="file" required disabled={locked} onChange={(event) => setForm({ ...form, file: event.target.files?.[0] || null })} /></label>
-      {form.file && <UploadPreview file={form.file} />}
+      <label>{multiple ? "Skedarët" : "Skedari"}<input type="file" multiple={multiple} required disabled={locked} onChange={(event) => setForm({ ...form, files: Array.from(event.target.files || []) })} /></label>
+      {form.files.map((file, index) => <UploadPreview key={`${file.name}-${index}`} file={file} />)}
       <label>Koment<textarea rows={3} disabled={locked} value={form.comment} onChange={(event) => setForm({ ...form, comment: event.target.value })} /></label>
       {error && <p className="bt-inline-error" role="alert">{error}</p>}
       <div className="bt-modal-actions"><button type="submit" className="bt-btn-primary" disabled={locked || !types.length}>{operation?.kind === "upload" && <LoaderCircle size={16} className="bt-document-spinner" />}{operation?.kind === "upload" ? "Duke ngarkuar…" : operation?.kind === "types" ? "Duke ngarkuar llojet…" : "Ngarko dokumentin"}</button></div>

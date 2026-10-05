@@ -9,6 +9,9 @@ import { AccountPage, AreasPage, DriversPage } from "./PortalPages";
 import IncomePage from "./IncomePage";
 import ShoferatPage from "./ShoferatPage";
 import AutobusatPage from "./AutobusatPage";
+import ChartersPage from "./ChartersPage";
+import CharterTabs from "./CharterTabs";
+import CharterFinancePage from "./CharterFinancePage";
 import AcademicCalendarPage from "./AcademicCalendarPage";
 import StudentCardsPage from "./StudentCardsPage";
 import PaymentFollowupRulesPage from "./PaymentFollowupRulesPage";
@@ -64,6 +67,11 @@ export default function BashkimToursApp() {
         <Route path="income" element={<IncomePage />} />
         <Route path="shoferat" element={<ShoferatPage />} />
         <Route path="autobusat" element={<AutobusatPage />} />
+        <Route path="charters" element={<CharterTabs />}>
+          <Route index element={<ChartersPage />} />
+          <Route path="payments" element={<CharterFinancePage />} />
+          <Route path="cash" element={<MaarifCashPage registerType="EXCURSION" moduleLabel="Charterët" />} />
+        </Route>
         <Route path="messages" element={<MessagesPage />} />
         <Route path="settings/accounts-roles" element={<AccountsRolesPage />} />
         <Route path="settings/cash-registers" element={<CashRegistersPage />} />
