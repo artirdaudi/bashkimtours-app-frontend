@@ -1,4 +1,4 @@
-import { API_BASE_URL, clearToken, getToken } from "../auth";
+import { API_BASE_URL, clearToken, getToken, refreshAccessToken } from "../auth";
 import { runMutation } from "./mutationState";
 const message = (data, fallback) =>
   Array.isArray(data?.detail)
@@ -20,24 +20,30 @@ export async function api(path, options = {}) {
 }
 
 async function request(path, options) {
-  let response;
-  try {
-    response = await fetch(`${API_BASE_URL}${path}`, {
-      ...options,
-      cache: "no-store",
-      headers: {
-        ...(options.body && !(options.body instanceof FormData) ? { "Content-Type": "application/json" } : {}),
-        Authorization: `Bearer ${getToken()}`,
-        ...options.headers,
-      },
-    });
-  } catch {
-    throw new Error("Nuk mund të lidhemi me serverin.");
-  }
-  if (response.status === 401) {
-    clearToken();
-    window.location.replace("/");
-    throw new Error("Sesioni ka skaduar.");
+  const send = async (token) => {
+    try {
+      return await fetch(`${API_BASE_URL}${path}`, {
+        ...options,
+        cache: "no-store",
+        headers: {
+          ...(options.body && !(options.body instanceof FormData) ? { "Content-Type": "application/json" } : {}),
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...options.headers,
+        },
+      });
+    } catch { throw new Error("Nuk mund të lidhemi me serverin."); }
+  };
+  const usedToken = getToken();
+  let response = await send(usedToken);
+  if (response.status === 401 && !path.startsWith("/auth/login") && !path.startsWith("/auth/refresh") && !path.startsWith("/auth/logout")) {
+    try {
+      const token = getToken() && getToken() !== usedToken ? getToken() : await refreshAccessToken();
+      response = await send(token);
+    } catch (error) {
+      if (error.status >= 400 && error.status < 500) clearToken();
+      throw error;
+    }
+    if (response.status === 401) clearToken();
   }
   const data = response.status === 204 ? null : options.responseType === "blob" && response.ok
     ? await response.blob() : await response.json().catch(() => ({}));

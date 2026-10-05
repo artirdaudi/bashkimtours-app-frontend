@@ -1,5 +1,6 @@
+import { useEffect, useSyncExternalStore } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import { getToken } from "./auth";
+import { getAuthStatus, initializeAuth, subscribeAuth } from "./auth";
 import LoginPage from "./LoginPage";
 import DashboardLayout from "./DashboardLayout";
 import MaarifTabs from "./MaarifTabs";
@@ -27,15 +28,19 @@ import PublicStudentPage from "./PublicStudentPage";
 import "./bashkimtours.css";
 
 const Guard = ({ children }) =>
-  getToken() ? children : <Navigate to="/" replace />;
+  getAuthStatus() === "authenticated" ? children : <Navigate to="/" replace />;
 
 export default function BashkimToursApp() {
+  const status = useSyncExternalStore(subscribeAuth, getAuthStatus);
+  useEffect(() => { initializeAuth(); }, []);
+  if (status === "initializing") return <main role="status" aria-live="polite">Duke ngarkuar…</main>;
+  if (status === "unavailable") return <main role="status">Nuk mund të lidhemi me serverin. <button onClick={() => window.location.reload()}>Provo përsëri</button></main>;
   return (
     <Routes>
       <Route
         path="/"
         element={
-          getToken() ? (
+          status === "authenticated" ? (
             <Navigate to="/students" replace />
           ) : (
             <LoginPage />

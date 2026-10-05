@@ -35,7 +35,7 @@ import {
   vehiclesApi,
 } from "./api";
 import { monthSq } from "./locale";
-import { clearToken } from "./auth";
+import { logout } from "./auth";
 
 const date = (v) => (v ? v.split("-").reverse().join("/") : "—");
 const euro = new Intl.NumberFormat("sq-AL", {
@@ -969,7 +969,7 @@ export function AccountPage() {
       <button
         type="button"
         className="bt-pwa-account-logout"
-        onClick={() => { clearToken(); window.location.replace("/"); }}
+        onClick={async () => { await logout(); window.location.replace("/"); }}
       >
         <LogOut size={19} aria-hidden="true" /> Dil nga llogaria
       </button>

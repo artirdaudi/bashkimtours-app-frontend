@@ -1,7 +1,7 @@
 import { Banknote, BellRing, Bus, ChevronDown, CreditCard, FileText, LogOut, Menu, Route, ScanLine, Settings, ShieldCheck, UserCircle, UsersRound, Wallet, X } from "lucide-react";
 import { useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
-import { clearToken } from "./auth";
+import { logout as endSession } from "./auth";
 import logo from "./assets/bashkimtours_logo.png";
 import maarifLogo from "./assets/maarif_logo.jpeg";
 import { prepareScanAudio } from "./scanAudio";
@@ -17,8 +17,8 @@ export default function DashboardLayout() {
     sessionStorage.removeItem("bt_login_transition");
     return active;
   });
-  const logout = () => {
-    clearToken();
+  const logout = async () => {
+    await endSession();
     window.location.replace("/");
   };
 
