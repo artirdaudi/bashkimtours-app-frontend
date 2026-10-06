@@ -131,10 +131,7 @@ export default function PaymentFollowupRulesPage({ onSaved }) {
                 <span />
                 <b>{form.is_active ? "Aktiv" : "Joaktiv"}</b>
               </label>
-              <button className="bt-btn-primary" disabled={saving}>
-                {saving ? <RefreshCw className="bt-spin" /> : <Save />}
-                {saving ? "Duke ruajtur…" : "Ruaj rregullat"}
-              </button>
+
             </div>
           </section>
 
@@ -174,6 +171,10 @@ export default function PaymentFollowupRulesPage({ onSaved }) {
                 <Check /> Rregullat u ruajtën me sukses.
               </p>
             )}
+              <button className="bt-btn-primary" disabled={saving}>
+                {saving ? <RefreshCw className="bt-spin" /> : <Save />}
+                {saving ? "Duke ruajtur…" : "Ruaj rregullat"}
+              </button>
           </div>
         </form>
       )}

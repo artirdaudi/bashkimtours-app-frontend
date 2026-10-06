@@ -282,7 +282,7 @@ html.bt-pwa-standalone .bt-login-page.is-exiting .bt-submit { background: #15803
   html.bt-pwa-standalone .bt-shoferat-form { grid-template-columns: minmax(0, 1fr); }
   html.bt-pwa-standalone .bt-shoferat-form input,
   html.bt-pwa-standalone .bt-role-form :is(input, textarea) { min-height: 48px; font-size: 16px; }
-  html.bt-pwa-standalone .bt-shoferat-actions { position: sticky; bottom: 0; margin-top: 18px; padding: 12px 0 max(8px, env(safe-area-inset-bottom)); background: #fff; }
+  html.bt-pwa-standalone .bt-shoferat-actions { margin-top: 18px; padding-bottom: max(8px, env(safe-area-inset-bottom)); }
   html.bt-pwa-standalone .bt-shoferat-actions button { min-height: 48px; }
   html.bt-pwa-standalone .bt-shoferat-profile-documents .bt-driver-documents { justify-items: stretch; }
   html.bt-pwa-standalone .bt-shoferat-profile-documents .bt-driver-documents li { grid-template-columns: minmax(0, 1fr) auto; padding: 12px; border: 1px solid var(--bt-line); border-radius: 12px; background: #f8fbfc; }

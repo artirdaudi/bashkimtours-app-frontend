@@ -2497,12 +2497,12 @@
   align-items: center;
   gap: 14px;
 }
-.bt-followup-master-actions button {
+.bt-followup-rule-footer button {
   display: inline-flex;
   align-items: center;
   gap: 7px;
 }
-.bt-followup-master-actions button svg {
+.bt-followup-rule-footer button svg {
   width: 17px;
 }
 .bt-followup-master-rule p {
@@ -6735,7 +6735,7 @@
   .bt-main:has(> .bt-maarif-shell--scan),
   .bt-maarif-shell--scan { height: calc(100dvh - 60px - env(safe-area-inset-bottom)); }
   .bt-main:has(> .bt-maarif-shell--scan) { padding-bottom: 0; }
-  .bt-modal-actions { position: sticky; bottom: 0; z-index: 1; padding: 10px 0 max(8px, env(safe-area-inset-bottom)); background: #fff; }
+  .bt-modal-actions { padding-bottom: max(8px, env(safe-area-inset-bottom)); }
   :is(.bt-modal input, .bt-modal textarea, .bt-modal select, .bt-login-page input, .bt-admin-filters input) { font-size: max(16px, 1em); }
 }
 
@@ -7053,7 +7053,7 @@
   .bt-charter-calendar { width: min(300px, calc(100vw - 82px)); }
   .bt-charter-time-popover { left: 0; right: auto; width: min(280px, calc(100vw - 82px)); }
   .bt-charter-time-control input, .bt-charter-date-button, .bt-charter-reference-picker input, .bt-charter-form-grid select { min-height: 44px; }
-  .bt-charter-form .bt-shoferat-actions { position: sticky; bottom: 0; z-index: 4; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 10px 0 max(8px, env(safe-area-inset-bottom)); background: #fff; }
+  .bt-charter-form .bt-shoferat-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding-bottom: max(8px, env(safe-area-inset-bottom)); }
   .bt-charter-form .bt-shoferat-actions button { min-height: 44px; justify-content: center; }
 }
 html.bt-pwa-standalone .bt-charter-shell :is(.bt-charter-form-grid, .bt-charter-date-time, .bt-charter-reference-picker, .bt-charter-finance-rows article) { min-width: 0; max-width: 100%; }
