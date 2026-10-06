@@ -6888,7 +6888,7 @@
 .bt-charter-card { overflow: hidden; border: 1px solid #dce5eb; border-radius: 15px; background: #fff; box-shadow: 0 3px 12px #152e4209; }
 .bt-charter-card-head { display: flex; justify-content: space-between; gap: 20px; padding: 19px 21px 17px; }
 .bt-charter-number { display: inline-block; margin-bottom: 7px; color: #0a8794; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
-.bt-charter-card h2 { margin: 0; color: #152e42; font-size: 20px; line-height: 1.25; }
+.bt-charter-card h2 { margin: 0; color: #152e42; font-size: 20px; font-weight: 800; line-height: 1.25; }
 .bt-charter-card-head p { display: flex; align-items: center; gap: 6px; margin: 7px 0 0; color: #526675; font-size: 14px; }
 .bt-charter-card-head p svg { flex: none; }
 .bt-charter-card-price { display: grid; align-content: start; justify-items: end; gap: 3px; min-width: 100px; text-align: right; }
@@ -6900,6 +6900,12 @@
 .bt-charter-card-facts span { display: grid; gap: 4px; min-width: 0; }
 .bt-charter-card-facts small { color: #637582; font-size: 12px; }
 .bt-charter-card-facts strong { color: #17364c; font-size: 13px; font-weight: 700; overflow-wrap: anywhere; }
+.bt-charter-card-facts .bt-charter-card-fact-inline { display: flex; align-items: baseline; flex-wrap: wrap; gap: 5px; }
+.bt-charter-card-assignments { display: grid; gap: 8px; padding: 13px 21px; border-bottom: 1px solid #edf1f4; }
+.bt-charter-card-assignment { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 16px; color: #526675; font-size: 13px; }
+.bt-charter-card-assignment strong, .bt-charter-card-assignment span { display: inline-flex; align-items: center; gap: 6px; }
+.bt-charter-card-assignment strong { color: #17364c; font-weight: 750; }
+.bt-charter-card-assignment svg { flex: none; color: #0a8794; }
 .bt-charter-card-footer { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 20px; padding: 13px 21px; color: #637582; font-size: 12px; }
 .bt-charter-card-footer > span { display: inline-flex; align-items: center; gap: 5px; }
 .bt-charter-card-footer strong { color: #17364c; }

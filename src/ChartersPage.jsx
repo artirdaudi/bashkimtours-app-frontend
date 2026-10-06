@@ -43,7 +43,7 @@ const formGroups = [
 ];
 const createHidden = new Set(["paid_amount", "payment_date"]);
 const pageSize = 20;
-const money = (value) => value == null ? "—" : new Intl.NumberFormat("sq-AL", { maximumFractionDigits: 2 }).format(Number(value));
+const money = (value) => value == null ? "—" : `${new Intl.NumberFormat("sq-AL", { maximumFractionDigits: 2 }).format(Number(value))} €`;
 const dateTime = (value) => {
   if (!value) return "—";
   const date = new Date(value);
@@ -76,6 +76,7 @@ export default function ChartersPage() {
   const [agendaDrafts, setAgendaDrafts] = useState([]);
   const [assignmentDrafts, setAssignmentDrafts] = useState([]);
   const [existingAssignments, setExistingAssignments] = useState([]);
+  const [cardAssignments, setCardAssignments] = useState({});
   const [assignmentLoading, setAssignmentLoading] = useState(false);
   const [assignmentLoadError, setAssignmentLoadError] = useState(false);
   const assignmentLoadId = useRef(0);
@@ -110,6 +111,20 @@ export default function ChartersPage() {
   const upcomingCount = items.filter((item) => item.departure_at && new Date(item.departure_at).getTime() >= currentTime).length;
   const filteredItems = useMemo(() => items.filter((item) => (!unpaidOnly || !(Number(item.price) > 0 && Number(item.paid_amount) >= Number(item.price))) && (!upcomingOnly || (item.departure_at && new Date(item.departure_at).getTime() >= currentTime)) && (!filter || [item.contractor, item.route].some((value) => String(value || "").toLocaleLowerCase("sq-AL").includes(filter)))), [items, filter, unpaidOnly, upcomingOnly, currentTime]);
   const visibleItems = (upcomingOnly ? [...filteredItems].sort((a, b) => new Date(a.departure_at) - new Date(b.departure_at)) : filteredItems).slice(offset, offset + pageSize);
+  const visibleIds = visibleItems.map((item) => item.id).join(",");
+  useEffect(() => {
+    if (!visibleIds) return;
+    let active = true;
+    const ids = visibleIds.split(",");
+    (async () => {
+      for (let start = 0; start < ids.length; start += 4) {
+        const results = await Promise.allSettled(ids.slice(start, start + 4).map(async (id) => [id, await loadCharterAssignments(id)]));
+        if (!active) return;
+        setCardAssignments((current) => ({ ...current, ...Object.fromEntries(results.filter((result) => result.status === "fulfilled").map((result) => result.value)) }));
+      }
+    })();
+    return () => { active = false; };
+  }, [visibleIds, refresh]);
 
   useEffect(() => {
     let active = true;
@@ -281,7 +296,8 @@ export default function ChartersPage() {
 
   const renderCard = (item) => <article className="bt-charter-card" key={item.id} tabIndex={0} aria-label={`Ndrysho charter-in ${item.contractor || item.id}`} onClick={(event) => { if (!event.target.closest("button, a, input, select, textarea, summary, [role=button]")) openForm(item); }} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); openForm(item); } }}>
         <div className="bt-charter-card-head"><div><h2>{item.contractor || "Pa porositës"}</h2><p><Route size={16} /> {item.route || "Relacioni nuk është shënuar"}</p></div><div className="bt-charter-card-price"><span>Çmimi</span><strong>{money(item.price)}</strong><small>{displayValue(item, { key: "billing_type" })}</small><small>{item.passenger_count ?? "—"} udhëtarë</small></div></div>
-        <div className="bt-charter-card-facts"><div><CalendarDays size={18} /><span><small>Nisja</small><strong>{dateTime(item.departure_at)}</strong></span></div><div><CalendarDays size={18} /><span><small>Kthimi</small><strong>{dateTime(item.return_at)}</strong></span></div><div><Bus size={18} /><span><small>Autobusë</small><strong>{item.number_of_buses ?? "—"}</strong></span></div><div><UsersRound size={18} /><span><small>Shoferë për autobus</small><strong>{item.drivers_per_bus ?? "—"}</strong></span></div></div>
+        <div className="bt-charter-card-facts"><div><CalendarDays size={18} /><span><small>Nisja</small><strong>{dateTime(item.departure_at)}</strong></span></div><div><CalendarDays size={18} /><span><small>Kthimi</small><strong>{dateTime(item.return_at)}</strong></span></div><div><Bus size={18} /><span className="bt-charter-card-fact-inline"><small>Autobusë:</small><strong>{item.number_of_buses ?? "—"}</strong></span></div><div><UsersRound size={18} /><span className="bt-charter-card-fact-inline"><small>Shoferë për autobus:</small><strong>{item.drivers_per_bus ?? "—"}</strong></span></div></div>
+        {cardAssignments[String(item.id)]?.length > 0 && <div className="bt-charter-card-assignments" aria-label="Autobusët dhe shoferët e caktuar">{cardAssignments[String(item.id)].map((assignment) => { const bus = buses.find((entry) => String(entry.ID) === String(assignment.bus_id)); return <div className="bt-charter-card-assignment" key={assignment.id}><strong><Bus size={16} /> {bus?.targa || `Autobusi #${assignment.bus_id}`}</strong><span><UsersRound size={16} /> {assignment.drivers?.length ? assignment.drivers.map((entry) => drivers.find((driver) => String(driver.id) === String(entry.driver_id))?.emri || `Shoferi #${entry.driver_id}`).join(", ") : "Pa shofer të caktuar"}</span></div>; })}</div>}
         <div className="bt-charter-agenda-summary"><FileText size={17} /><div><strong>Agjenda{agendaDocuments[String(item.id)] ? ` · ${agendaDocuments[String(item.id)].length} dokumente` : ""}</strong>{agendaDocuments[String(item.id)] === undefined ? <small>{agendaLoadError ? "Dokumentet nuk u ngarkuan" : "Duke ngarkuar dokumentet…"}</small> : <DriverDocuments driver={{ id: item.id, emri: item.contractor || `Charter ${item.id}` }} entityType={DOCUMENT_ENTITY_TYPES.CHARTER} documents={agendaDocuments[String(item.id)]} loadDocuments={loadAgendaDocuments} readOnly />}</div></div>
         <div className="bt-charter-card-footer"><span className={`bt-charter-paid ${Number(item.price) > 0 && Number(item.paid_amount) >= Number(item.price) ? "is-paid" : "is-unpaid"}`}><Banknote size={16} /> {Number(item.price) > 0 && Number(item.paid_amount) >= Number(item.price) ? "Paguar" : "Ende pa paguar"}: <strong>{money(item.paid_amount)} / {money(item.price)}</strong></span><span>Regjistruar nga: <strong>{displayValue(item, { key: "created_by_user" })}</strong></span><span>Regjistruar në: <strong>{dateTime(item.created_at)}</strong></span><div className="bt-charter-card-actions">{Number(item.price) > 0 && Number(item.paid_amount || 0) < Number(item.price) && <button type="button" className="bt-btn-primary" onClick={() => openPayment(item)}><Banknote size={16} /> Bëj pagesë</button>}<button type="button" className="bt-btn-secondary" onClick={() => openForm(item)}><Pencil size={16} /> Ndrysho</button><button type="button" className="bt-btn-danger" disabled={busy} onClick={() => remove(item)}><Trash2 size={16} /> Fshi</button></div></div>
 
