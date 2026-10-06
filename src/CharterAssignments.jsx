@@ -1,9 +1,15 @@
+import CharterReferencePicker from "./CharterReferencePicker";
+
+const busLabel = (bus) => bus?.targa || `Autobusi #${bus?.ID}`;
+const driverLabel = (driver) => driver?.emri || `Shoferi #${driver?.id}`;
+const matches = (parts, text) => parts.some((part) => String(part ?? "").toLocaleLowerCase("sq-AL").includes(text.toLocaleLowerCase("sq-AL")));
+
 export default function CharterAssignments({ assignments, onChange, numberOfBuses, driversPerBus, buses, drivers, disabled }) {
   const busCount = Math.max(0, Number(numberOfBuses) || 0);
   const driverCount = Math.max(0, Number(driversPerBus) || 0);
   const updateBus = (index, busId) => {
     const next = Array.from({ length: busCount }, (_, slot) => assignments[slot] || { busId: "", driverIds: [] });
-    next[index] = { busId, driverIds: next[index].driverIds };
+    next[index] = { ...next[index], busId };
     onChange(next);
   };
   const updateDriver = (busIndex, driverIndex, driverId) => {
@@ -16,9 +22,16 @@ export default function CharterAssignments({ assignments, onChange, numberOfBuse
   return <div className="bt-charter-assignment-fields">
     {Array.from({ length: busCount }, (_, busIndex) => {
       const item = assignments[busIndex] || { busId: "", driverIds: [] };
+      const bus = buses.find((entry) => String(entry.ID) === String(item.busId));
+      const busOptions = (text) => buses.filter((entry) => (String(entry.ID) === String(item.busId) || !assignments.some((selected, index) => index !== busIndex && String(selected.busId) === String(entry.ID))) && matches([entry.targa, entry.marka, entry.tipi, entry.ID], text)).slice(0, 40).map((entry) => ({ id: entry.ID, label: busLabel(entry), meta: [entry.marka, entry.tipi, entry.ulse != null ? `${entry.ulse} ulëse` : null].filter(Boolean).join(" · ") }));
       return <div className="bt-charter-assignment-slot" key={busIndex}>
-        <label><span>Autobusi {busIndex + 1}</span><select required disabled={disabled} value={item.busId || ""} onChange={(event) => updateBus(busIndex, event.target.value)}><option value="">Zgjidh autobusin</option>{buses.filter((bus) => String(bus.ID) === String(item.busId) || !assignments.some((entry, index) => index !== busIndex && String(entry.busId) === String(bus.ID))).map((bus) => <option key={bus.ID} value={bus.ID}>{[bus.targa || `Autobusi #${bus.ID}`, bus.marka, bus.tipi].filter(Boolean).join(" · ")}</option>)}</select></label>
-        <div className="bt-charter-driver-slots">{Array.from({ length: driverCount }, (_, driverIndex) => <label key={driverIndex}><span>Shoferi {driverIndex + 1} · Autobusi {busIndex + 1}</span><select required disabled={disabled} value={item.driverIds[driverIndex] || ""} onChange={(event) => updateDriver(busIndex, driverIndex, event.target.value)}><option value="">Zgjidh shoferin</option>{drivers.filter((driver) => String(driver.id) === String(item.driverIds[driverIndex]) || !assignments.some((entry, entryIndex) => entry.driverIds.some((id, index) => (entryIndex !== busIndex || index !== driverIndex) && String(id) === String(driver.id)))).map((driver) => <option key={driver.id} value={driver.id}>{driver.emri || `Shoferi #${driver.id}`}</option>)}</select></label>)}</div>
+        <label><span>Autobusi {busIndex + 1}</span><CharterReferencePicker value={item.busId} selectedLabel={bus ? busLabel(bus) : item.busId ? `Autobusi #${item.busId}` : ""} placeholder="Kërko targën ose autobusin…" searchOptions={busOptions} onSelect={(option) => updateBus(busIndex, option ? String(option.id) : "")} disabled={disabled} required /></label>
+        <div className="bt-charter-driver-slots">{Array.from({ length: driverCount }, (_, driverIndex) => {
+          const id = item.driverIds[driverIndex] || "";
+          const driver = drivers.find((entry) => String(entry.id) === String(id));
+          const driverOptions = (text) => drivers.filter((entry) => (String(entry.id) === String(id) || !assignments.some((selected, selectedBusIndex) => selected.driverIds.some((selectedId, selectedDriverIndex) => (selectedBusIndex !== busIndex || selectedDriverIndex !== driverIndex) && String(selectedId) === String(entry.id)))) && matches([entry.emri, entry.telefoni, entry.id], text)).slice(0, 40).map((entry) => ({ id: entry.id, label: driverLabel(entry), meta: entry.telefoni || "" }));
+          return <label key={driverIndex}><span>Shoferi {driverIndex + 1} · Autobusi {busIndex + 1}</span><CharterReferencePicker value={id} selectedLabel={driver ? driverLabel(driver) : id ? `Shoferi #${id}` : ""} placeholder="Kërko emrin ose telefonin…" searchOptions={driverOptions} onSelect={(option) => updateDriver(busIndex, driverIndex, option ? String(option.id) : "")} disabled={disabled} required /></label>;
+        })}</div>
       </div>;
     })}
   </div>;

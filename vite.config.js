@@ -54,6 +54,7 @@ export default defineConfig(({ mode }) => {
             "/api": {
               target: env.DEV_API_TARGET,
               changeOrigin: true,
+              cookiePathRewrite: { "/auth": "/api/auth" },
               rewrite: (path) => path.replace(/^\/api/, ""),
             },
           }
