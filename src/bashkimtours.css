@@ -6855,21 +6855,14 @@
 .bt-charter-calendar-days span { color: #71818e; }
 .bt-charter-calendar-days button:hover, .bt-charter-calendar-days button[aria-pressed="true"] { background: #dff4f5; color: #096875; }
 .bt-charter-date-time { grid-template-columns: minmax(0, 1fr) minmax(140px, 170px); }
-.bt-charter-time-select { display: flex; align-items: center; gap: 3px; min-width: 0; }
-.bt-charter-time-select select { min-width: 0; flex: 1; padding: 10px 5px; }
-.bt-charter-time-select span { color: #637582; }
+.bt-charter-date-field { display: grid; gap: 6px; min-width: 0; }
+.bt-charter-field-label { color: #637582; font-size: 13px; }
+.bt-charter-time-fields { display: flex; align-items: center; gap: 4px; min-width: 0; min-height: 42px; padding: 2px 7px; border: 1px solid #dce5eb; border-radius: 9px; background: #fff; color: #334b5d; }
+.bt-charter-time-fields > svg { flex: none; color: #637582; }
+.bt-charter-form .bt-charter-time-fields select { flex: 1; min-width: 0; width: 0; padding: 7px 2px; border: 0; background: transparent; color: #17364c; font: inherit; text-align: center; }
+.bt-charter-time-fields select:disabled { color: #98a2ad; }
+.bt-charter-time-fields:focus-within { border-color: #0faab7; box-shadow: 0 0 0 3px #0faab722; }
 @media (max-width: 420px) { .bt-charter-date-time { grid-template-columns: 1fr; } }
-.bt-charter-time-control { display: flex; position: relative; min-width: 0; }
-.bt-charter-time-control input { min-width: 0; padding-right: 38px; }
-.bt-charter-time-control > button { position: absolute; right: 3px; top: 3px; bottom: 3px; display: grid; place-items: center; width: 34px; border: 0; border-radius: 7px; background: transparent; color: #526675; cursor: pointer; }
-.bt-charter-time-control > button:disabled { opacity: .5; cursor: default; }
-.bt-charter-time-popover { position: absolute; z-index: 30; top: calc(100% + 5px); right: 0; width: min(280px, 90vw); padding: 12px; border: 1px solid #dce5eb; border-radius: 12px; background: #fff; box-shadow: 0 12px 30px #17364c22; }
-.bt-charter-time-title { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 9px; color: #17364c; font-size: 13px; }
-.bt-charter-time-title button { border: 0; background: transparent; color: #096875; cursor: pointer; }
-.bt-charter-time-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
-.bt-charter-time-grid button { min-height: 34px; border: 0; border-radius: 7px; background: #f4f8fa; color: #17364c; cursor: pointer; }
-.bt-charter-time-grid button:hover { background: #dff4f5; }
-.bt-charter-bus-field { grid-column: 1 / -1; }
 .bt-charter-reference-picker { position: relative; min-width: 0; }
 .bt-charter-reference-picker input { width: 100%; min-height: 42px; padding: 10px 36px; border: 1px solid #dce5eb; border-radius: 9px; background: #fff; font: inherit; outline: none; }
 .bt-charter-reference-picker input:focus { border-color: #0faab7; box-shadow: 0 0 0 3px #0faab722; }
@@ -7055,14 +7048,13 @@
   .bt-charter-form-grid { grid-template-columns: minmax(0, 1fr); }
   .bt-charter-date-time { grid-template-columns: minmax(0, 1fr); }
   .bt-charter-calendar { width: min(300px, calc(100vw - 82px)); }
-  .bt-charter-time-popover { left: 0; right: auto; width: min(280px, calc(100vw - 82px)); }
-  .bt-charter-time-control input, .bt-charter-date-button, .bt-charter-reference-picker input, .bt-charter-form-grid select { min-height: 44px; }
+  .bt-charter-date-button, .bt-charter-time-fields, .bt-charter-reference-picker input, .bt-charter-form-grid select { min-height: 44px; }
   .bt-charter-form .bt-shoferat-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding-bottom: max(8px, env(safe-area-inset-bottom)); }
   .bt-charter-form .bt-shoferat-actions button { min-height: 44px; justify-content: center; }
 }
 html.bt-pwa-standalone .bt-charter-shell :is(.bt-charter-form-grid, .bt-charter-date-time, .bt-charter-reference-picker, .bt-charter-finance-rows article) { min-width: 0; max-width: 100%; }
 html.bt-pwa-standalone .bt-charter-shell :is(input, select, textarea) { min-width: 0; max-width: 100%; }
-html.bt-pwa-standalone .bt-charter-form-modal :is(.bt-charter-form-grid, .bt-charter-date-time, .bt-charter-reference-picker, .bt-charter-time-control) { min-width: 0; max-width: 100%; }
+html.bt-pwa-standalone .bt-charter-form-modal :is(.bt-charter-form-grid, .bt-charter-date-time, .bt-charter-reference-picker, .bt-charter-time-fields) { min-width: 0; max-width: 100%; }
 html.bt-pwa-standalone .bt-charter-form-modal :is(input, select, textarea) { box-sizing: border-box; min-width: 0; max-width: 100%; font-size: max(16px, 1em); }
 @media (max-width: 800px) { .bt-charter-finance-list .bt-shoferat-pages button { min-width: 44px; min-height: 44px; } }
 

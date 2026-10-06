@@ -1,5 +1,12 @@
 import { charterAssignmentsApi } from "./api";
 
+export function selectedCharterAssignments(drafts, busCount, driverCount) {
+  return Array.from({ length: Number(busCount) || 0 }, (_, index) => ({
+    busId: drafts[index]?.busId || "",
+    driverIds: Array.from({ length: Number(driverCount) || 0 }, (_, slot) => drafts[index]?.driverIds[slot] || "").filter(Boolean),
+  })).filter((item) => item.busId);
+}
+
 export async function loadCharterAssignments(charterId) {
   const assignments = [];
   for (let offset = 0; ; offset += 100) {
