@@ -75,3 +75,24 @@ export default function CharterAssignments({ charter, buses, drivers }) {
     {!loading && assignments.length < Number(charter.number_of_buses || 0) && <div className="bt-charter-assignment-add"><CharterReferencePicker value={busId} selectedLabel={busLabel} placeholder="Kërko autobusin…" searchOptions={busChoices} onSelect={(option) => { setBusId(option?.id || ""); setBusLabel(option?.label || ""); }} /><button type="button" className="bt-btn-secondary" disabled={busy || !busId} onClick={() => change(async () => { await charterAssignmentsApi.assignBus(charter.id, busId); setBusId(""); setBusLabel(""); })}>Shto autobus</button></div>}
   </section>;
 }
+
+export function DraftCharterAssignments({ assignments, onChange, numberOfBuses, driversPerBus, buses, drivers }) {
+  const [busId, setBusId] = useState("");
+  const [busLabel, setBusLabel] = useState("");
+  const [driverIds, setDriverIds] = useState({});
+  const [driverLabels, setDriverLabels] = useState({});
+  const selectedBuses = new Set(assignments.map((item) => String(item.busId)));
+  const busChoices = (text) => buses.filter((bus) => !selectedBuses.has(String(bus.ID)) && [bus.targa, bus.marka, bus.tipi, bus.ID].some((part) => String(part ?? "").toLocaleLowerCase("sq-AL").includes(text.toLocaleLowerCase("sq-AL")))).slice(0, 30).map((bus) => ({ id: bus.ID, label: labelBus(bus), meta: [bus.marka, bus.tipi].filter(Boolean).join(" · ") }));
+  const driverChoices = (item, text) => drivers.filter((driver) => !item.driverIds.includes(String(driver.id)) && [driver.emri, driver.telefoni, driver.id].some((part) => String(part ?? "").toLocaleLowerCase("sq-AL").includes(text.toLocaleLowerCase("sq-AL")))).slice(0, 30).map((driver) => ({ id: driver.id, label: labelDriver(driver), meta: driver.telefoni || "" }));
+  const change = (busKey, update) => onChange(assignments.map((item) => String(item.busId) === String(busKey) ? update(item) : item));
+  return <section className="bt-charter-assignments">
+    <h3>Autobusët dhe shoferët</h3>
+    <p>{assignments.length} / {numberOfBuses || "—"} autobusë · deri {driversPerBus || "—"} shoferë për autobus</p>
+    {assignments.map((item) => <div className="bt-charter-assignment" key={item.busId}>
+      <div className="bt-charter-assignment-header"><strong>{item.busLabel}</strong><button type="button" className="bt-btn-danger bt-btn-small" disabled={Boolean(item.assignmentId)} onClick={() => onChange(assignments.filter((entry) => entry !== item))}>Hiq autobusin</button></div>
+      <div className="bt-charter-assignment-drivers">{item.driverIds.map((id) => <div key={id}><span>{drivers.find((driver) => String(driver.id) === id)?.emri || `Shoferi #${id}`}</span><button type="button" className="bt-btn-secondary bt-btn-small" onClick={() => change(item.busId, (entry) => ({ ...entry, driverIds: entry.driverIds.filter((driverId) => driverId !== id) }))}>Hiq</button></div>)}</div>
+      {item.driverIds.length < Number(driversPerBus || 0) && <div className="bt-charter-assignment-add"><CharterReferencePicker value={driverIds[item.busId] || ""} selectedLabel={driverLabels[item.busId] || ""} placeholder="Kërko shoferin…" searchOptions={(text) => driverChoices(item, text)} onSelect={(option) => { setDriverIds((current) => ({ ...current, [item.busId]: option?.id || "" })); setDriverLabels((current) => ({ ...current, [item.busId]: option?.label || "" })); }} /><button type="button" className="bt-btn-secondary" disabled={!driverIds[item.busId]} onClick={() => { change(item.busId, (entry) => ({ ...entry, driverIds: [...entry.driverIds, String(driverIds[item.busId])] })); setDriverIds((current) => ({ ...current, [item.busId]: "" })); setDriverLabels((current) => ({ ...current, [item.busId]: "" })); }}>Shto shofer</button></div>}
+    </div>)}
+    {assignments.length < Number(numberOfBuses || 0) && <div className="bt-charter-assignment-add"><CharterReferencePicker value={busId} selectedLabel={busLabel} placeholder="Kërko autobusin…" searchOptions={busChoices} onSelect={(option) => { setBusId(option?.id || ""); setBusLabel(option?.label || ""); }} /><button type="button" className="bt-btn-secondary" disabled={!busId} onClick={() => { onChange([...assignments, { busId, busLabel, driverIds: [] }]); setBusId(""); setBusLabel(""); }}>Shto autobus</button></div>}
+  </section>;
+}
