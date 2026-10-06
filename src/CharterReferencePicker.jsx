@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { ChevronDown, Search, X } from "lucide-react";
 
-export default function CharterReferencePicker({ value, selectedLabel, placeholder, searchOptions, onSelect, disabled = false, required = false }) {
+export default function CharterReferencePicker({ value, selectedLabel, label, placeholder, searchOptions, onSelect, disabled = false, required = false }) {
   const listId = useId();
   const inputRef = useRef(null);
   const [query, setQuery] = useState("");
@@ -43,7 +43,7 @@ export default function CharterReferencePicker({ value, selectedLabel, placehold
   const visibleText = open ? query : selectedLabel || "";
   return <div className={`bt-charter-reference-picker${open ? " is-open" : ""}${above ? " opens-above" : ""}`}>
     <Search size={17} className="bt-charter-reference-search" aria-hidden="true" />
-    <input ref={inputRef} role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded={open} aria-controls={listId} aria-activedescendant={open && options.length ? `${listId}-${activeIndex}` : undefined} autoComplete="off" placeholder={placeholder} value={visibleText} disabled={disabled} required={required && !value} onFocus={showOptions} onBlur={() => setOpen(false)} onChange={(event) => { setQuery(event.target.value); onSelect(null); setOpen(true); }} onKeyDown={(event) => {
+    <input ref={inputRef} role="combobox" aria-label={label} aria-autocomplete="list" aria-haspopup="listbox" aria-expanded={open} aria-controls={listId} aria-activedescendant={open && options.length ? `${listId}-${activeIndex}` : undefined} autoComplete="off" placeholder={placeholder} value={visibleText} disabled={disabled} required={required && !value} onFocus={showOptions} onBlur={() => setOpen(false)} onChange={(event) => { setQuery(event.target.value); onSelect(null); setOpen(true); }} onKeyDown={(event) => {
       if (event.key === "Escape") { setOpen(false); inputRef.current?.blur(); }
       if (event.key === "ArrowDown" && open) { event.preventDefault(); setActiveIndex((index) => Math.min(index + 1, Math.max(0, options.length - 1))); }
       if (event.key === "ArrowUp" && open) { event.preventDefault(); setActiveIndex((index) => Math.max(index - 1, 0)); }

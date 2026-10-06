@@ -12,6 +12,7 @@ test('saving charter selections reconciles buses and drivers without duplicating
   const server = await createServer({ server: { middlewareMode: true }, appType: 'custom' });
   try {
     const { selectedCharterAssignments, syncCharterAssignments } = await server.ssrLoadModule('/src/charterAssignmentSync.js');
+    assert.deepEqual(selectedCharterAssignments([], "", ""), []);
     assert.deepEqual(selectedCharterAssignments([{ busId: "", driverIds: ["10"] }, { busId: "12", driverIds: ["", "11"] }], 2, 2), [{ busId: "12", driverIds: ["11"] }]);
     await syncCharterAssignments(7, [
       { busId: '12', driverIds: ['10', '11'] },

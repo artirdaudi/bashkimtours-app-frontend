@@ -7061,7 +7061,7 @@ html.bt-pwa-standalone .bt-charter-form-modal :is(input, select, textarea) { box
 .bt-charter-assignment-fields { display: grid; gap: 14px; margin-top: 16px; }
 .bt-charter-assignment-slot { display: grid; gap: 12px; padding: 15px; border: 1px solid #dce5eb; border-radius: 12px; background: #fbfdff; }
 .bt-charter-assignment-slot:focus-within { border-color: #8fcad2; box-shadow: 0 0 0 3px #0faab712; }
-.bt-charter-assignment-slot > label, .bt-charter-driver-slots > label { display: grid; gap: 7px; min-width: 0; color: #344b5d; font-weight: 650; }
+.bt-charter-assignment-field { display: grid; gap: 7px; min-width: 0; color: #344b5d; font-weight: 650; }
 .bt-charter-driver-slots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .bt-charter-assignment-slot .bt-charter-reference-picker { width: 100%; }
 .bt-charter-assignment-slot .bt-charter-reference-picker input { min-height: 46px; color: #17364c; }
