@@ -7062,11 +7062,12 @@ html.bt-pwa-standalone .bt-charter-form-modal :is(.bt-charter-form-grid, .bt-cha
 html.bt-pwa-standalone .bt-charter-form-modal :is(input, select, textarea) { box-sizing: border-box; min-width: 0; max-width: 100%; font-size: max(16px, 1em); }
 @media (max-width: 800px) { .bt-charter-finance-list .bt-shoferat-pages button { min-width: 44px; min-height: 44px; } }
 
-.bt-charter-assignments { display: grid; gap: 12px; padding: 18px 0; border-top: 1px solid var(--bt-border, #e5e7eb); }
-.bt-charter-assignments h3, .bt-charter-assignments p { margin: 0; }
-.bt-charter-assignments > p { color: var(--bt-muted, #667085); }
-.bt-charter-assignment { display: grid; gap: 10px; padding: 14px; border: 1px solid var(--bt-border, #e5e7eb); border-radius: 12px; }
-.bt-charter-assignment-header, .bt-charter-assignment-drivers > div, .bt-charter-assignment-add { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.bt-charter-assignment-drivers { display: grid; gap: 7px; }
-.bt-charter-assignment-add .bt-charter-reference-picker { flex: 1; min-width: 0; }
-@media (max-width: 600px) { .bt-charter-assignment-add { flex-wrap: wrap; } .bt-charter-assignment-add .bt-charter-reference-picker { flex-basis: 100%; } }
+.bt-charter-assignment-fields { display: grid; gap: 14px; margin-top: 16px; }
+.bt-charter-assignment-slot { display: grid; gap: 12px; padding: 14px; border: 1px solid var(--bt-border, #e5e7eb); border-radius: 12px; }
+.bt-charter-assignment-slot > label, .bt-charter-driver-slots > label { display: grid; gap: 6px; min-width: 0; }
+.bt-charter-driver-slots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.bt-charter-assignment-slot select { width: 100%; }
+@media (max-width: 600px) { .bt-charter-driver-slots { grid-template-columns: 1fr; } }
+
+.bt-charter-card { cursor: pointer; }
+.bt-charter-card:focus-visible { outline: 3px solid #073878; outline-offset: 3px; }

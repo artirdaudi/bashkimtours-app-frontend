@@ -1,98 +1,25 @@
-import { useCallback, useEffect, useState } from "react";
-import { charterAssignmentsApi } from "./api";
-import CharterReferencePicker from "./CharterReferencePicker";
-import { confirmAction } from "./confirmAction";
-
-const labelBus = (bus) => bus?.targa || `Autobusi #${bus?.ID}`;
-const labelDriver = (driver) => driver?.emri || `Shoferi #${driver?.id}`;
-
-export default function CharterAssignments({ charter, buses, drivers }) {
-  const [assignments, setAssignments] = useState([]);
-  const [busId, setBusId] = useState("");
-  const [busLabel, setBusLabel] = useState("");
-  const [driverIds, setDriverIds] = useState({});
-  const [driverLabels, setDriverLabels] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-  const load = useCallback(async () => {
-    const busAssignments = [];
-    let offset = 0;
-    while (true) {
-      const batch = await charterAssignmentsApi.buses(charter.id, { limit: 100, offset });
-      busAssignments.push(...batch);
-      if (batch.length < 100) break;
-      offset += batch.length;
-    }
-    const withDrivers = await Promise.all(busAssignments.map(async (assignment) => {
-      const assignedDrivers = [];
-      let driverOffset = 0;
-      while (true) {
-        const batch = await charterAssignmentsApi.drivers(assignment.id, { limit: 100, offset: driverOffset });
-        assignedDrivers.push(...batch);
-        if (batch.length < 100) break;
-        driverOffset += batch.length;
-      }
-      return { ...assignment, drivers: assignedDrivers };
-    }));
-    setAssignments(withDrivers);
-  }, [charter.id]);
-  useEffect(() => {
-    let active = true;
-    const timer = setTimeout(() => {
-      load().catch((requestError) => { if (active) setError(requestError.message); })
-        .finally(() => { if (active) setLoading(false); });
-    }, 0);
-    return () => { active = false; clearTimeout(timer); };
-  }, [load]);
-  async function change(action) {
-    if (busy) return;
-    setBusy(true); setError("");
-    try { await action(); await load(); }
-    catch (requestError) { setError(requestError.message); }
-    finally { setBusy(false); }
-  }
-  const availableBuses = buses.filter((bus) => !assignments.some((item) => String(item.bus_id) === String(bus.ID)));
-  const busChoices = (text) => availableBuses.filter((bus) => [bus.targa, bus.marka, bus.tipi, bus.ID].some((part) => String(part ?? "").toLocaleLowerCase("sq-AL").includes(text.toLocaleLowerCase("sq-AL")))).slice(0, 30).map((bus) => ({ id: bus.ID, label: labelBus(bus), meta: [bus.marka, bus.tipi].filter(Boolean).join(" · ") }));
-  const driverChoices = (assignment, text) => drivers.filter((driver) => !assignment.drivers.some((item) => String(item.driver_id) === String(driver.id)) && [driver.emri, driver.telefoni, driver.id].some((part) => String(part ?? "").toLocaleLowerCase("sq-AL").includes(text.toLocaleLowerCase("sq-AL")))).slice(0, 30).map((driver) => ({ id: driver.id, label: labelDriver(driver), meta: driver.telefoni || "" }));
-  return <section className="bt-charter-assignments">
-    <h3>Autobusët dhe shoferët</h3>
-    <p>{assignments.length} / {charter.number_of_buses ?? "—"} autobusë · deri {charter.drivers_per_bus ?? "—"} shoferë për autobus</p>
-    {loading && <p role="status">Duke ngarkuar caktimet…</p>}
-    {error && <p className="bt-inline-error" role="alert">{error}</p>}
-    {!loading && assignments.map((assignment) => {
-      const bus = buses.find((item) => String(item.ID) === String(assignment.bus_id));
-      const selectedDriver = driverIds[assignment.id];
-      return <div className="bt-charter-assignment" key={assignment.id}>
-        <div className="bt-charter-assignment-header"><strong>{bus ? labelBus(bus) : `Autobusi #${assignment.bus_id}`}</strong><button type="button" className="bt-btn-danger bt-btn-small" disabled={busy} onClick={async () => { if (await confirmAction("Të hiqet autobusi dhe caktimet e shoferëve të tij?")) change(() => charterAssignmentsApi.removeBus(assignment.id)); }}>Hiq autobusin</button></div>
-        <div className="bt-charter-assignment-drivers">{assignment.drivers.map((item) => {
-          const driver = drivers.find((entry) => String(entry.id) === String(item.driver_id));
-          return <div key={item.id}><span>{driver ? labelDriver(driver) : `Shoferi #${item.driver_id}`}</span><button type="button" className="bt-btn-secondary bt-btn-small" disabled={busy} onClick={() => change(() => charterAssignmentsApi.removeDriver(item.id))}>Hiq</button></div>;
-        })}</div>
-        {assignment.drivers.length < Number(charter.drivers_per_bus || 0) && <div className="bt-charter-assignment-add"><CharterReferencePicker value={selectedDriver || ""} selectedLabel={driverLabels[assignment.id] || ""} placeholder="Kërko shoferin…" searchOptions={(text) => driverChoices(assignment, text)} onSelect={(option) => { setDriverIds((current) => ({ ...current, [assignment.id]: option?.id || "" })); setDriverLabels((current) => ({ ...current, [assignment.id]: option?.label || "" })); }} /><button type="button" className="bt-btn-secondary" disabled={busy || !selectedDriver} onClick={() => change(async () => { await charterAssignmentsApi.assignDriver(assignment.id, selectedDriver); setDriverIds((current) => ({ ...current, [assignment.id]: "" })); setDriverLabels((current) => ({ ...current, [assignment.id]: "" })); })}>Shto shofer</button></div>}
+export default function CharterAssignments({ assignments, onChange, numberOfBuses, driversPerBus, buses, drivers, disabled }) {
+  const busCount = Math.max(0, Number(numberOfBuses) || 0);
+  const driverCount = Math.max(0, Number(driversPerBus) || 0);
+  const updateBus = (index, busId) => {
+    const next = Array.from({ length: busCount }, (_, slot) => assignments[slot] || { busId: "", driverIds: [] });
+    next[index] = { busId, driverIds: next[index].driverIds };
+    onChange(next);
+  };
+  const updateDriver = (busIndex, driverIndex, driverId) => {
+    const next = Array.from({ length: busCount }, (_, slot) => assignments[slot] || { busId: "", driverIds: [] });
+    const driverIds = Array.from({ length: driverCount }, (_, slot) => next[busIndex].driverIds[slot] || "");
+    driverIds[driverIndex] = driverId;
+    next[busIndex] = { ...next[busIndex], driverIds };
+    onChange(next);
+  };
+  return <div className="bt-charter-assignment-fields">
+    {Array.from({ length: busCount }, (_, busIndex) => {
+      const item = assignments[busIndex] || { busId: "", driverIds: [] };
+      return <div className="bt-charter-assignment-slot" key={busIndex}>
+        <label><span>Autobusi {busIndex + 1}</span><select required disabled={disabled} value={item.busId || ""} onChange={(event) => updateBus(busIndex, event.target.value)}><option value="">Zgjidh autobusin</option>{buses.filter((bus) => String(bus.ID) === String(item.busId) || !assignments.some((entry, index) => index !== busIndex && String(entry.busId) === String(bus.ID))).map((bus) => <option key={bus.ID} value={bus.ID}>{[bus.targa || `Autobusi #${bus.ID}`, bus.marka, bus.tipi].filter(Boolean).join(" · ")}</option>)}</select></label>
+        <div className="bt-charter-driver-slots">{Array.from({ length: driverCount }, (_, driverIndex) => <label key={driverIndex}><span>Shoferi {driverIndex + 1} · Autobusi {busIndex + 1}</span><select required disabled={disabled} value={item.driverIds[driverIndex] || ""} onChange={(event) => updateDriver(busIndex, driverIndex, event.target.value)}><option value="">Zgjidh shoferin</option>{drivers.filter((driver) => String(driver.id) === String(item.driverIds[driverIndex]) || !assignments.some((entry, entryIndex) => entry.driverIds.some((id, index) => (entryIndex !== busIndex || index !== driverIndex) && String(id) === String(driver.id)))).map((driver) => <option key={driver.id} value={driver.id}>{driver.emri || `Shoferi #${driver.id}`}</option>)}</select></label>)}</div>
       </div>;
     })}
-    {!loading && assignments.length < Number(charter.number_of_buses || 0) && <div className="bt-charter-assignment-add"><CharterReferencePicker value={busId} selectedLabel={busLabel} placeholder="Kërko autobusin…" searchOptions={busChoices} onSelect={(option) => { setBusId(option?.id || ""); setBusLabel(option?.label || ""); }} /><button type="button" className="bt-btn-secondary" disabled={busy || !busId} onClick={() => change(async () => { await charterAssignmentsApi.assignBus(charter.id, busId); setBusId(""); setBusLabel(""); })}>Shto autobus</button></div>}
-  </section>;
-}
-
-export function DraftCharterAssignments({ assignments, onChange, numberOfBuses, driversPerBus, buses, drivers }) {
-  const [busId, setBusId] = useState("");
-  const [busLabel, setBusLabel] = useState("");
-  const [driverIds, setDriverIds] = useState({});
-  const [driverLabels, setDriverLabels] = useState({});
-  const selectedBuses = new Set(assignments.map((item) => String(item.busId)));
-  const busChoices = (text) => buses.filter((bus) => !selectedBuses.has(String(bus.ID)) && [bus.targa, bus.marka, bus.tipi, bus.ID].some((part) => String(part ?? "").toLocaleLowerCase("sq-AL").includes(text.toLocaleLowerCase("sq-AL")))).slice(0, 30).map((bus) => ({ id: bus.ID, label: labelBus(bus), meta: [bus.marka, bus.tipi].filter(Boolean).join(" · ") }));
-  const driverChoices = (item, text) => drivers.filter((driver) => !item.driverIds.includes(String(driver.id)) && [driver.emri, driver.telefoni, driver.id].some((part) => String(part ?? "").toLocaleLowerCase("sq-AL").includes(text.toLocaleLowerCase("sq-AL")))).slice(0, 30).map((driver) => ({ id: driver.id, label: labelDriver(driver), meta: driver.telefoni || "" }));
-  const change = (busKey, update) => onChange(assignments.map((item) => String(item.busId) === String(busKey) ? update(item) : item));
-  return <section className="bt-charter-assignments">
-    <h3>Autobusët dhe shoferët</h3>
-    <p>{assignments.length} / {numberOfBuses || "—"} autobusë · deri {driversPerBus || "—"} shoferë për autobus</p>
-    {assignments.map((item) => <div className="bt-charter-assignment" key={item.busId}>
-      <div className="bt-charter-assignment-header"><strong>{item.busLabel}</strong><button type="button" className="bt-btn-danger bt-btn-small" disabled={Boolean(item.assignmentId)} onClick={() => onChange(assignments.filter((entry) => entry !== item))}>Hiq autobusin</button></div>
-      <div className="bt-charter-assignment-drivers">{item.driverIds.map((id) => <div key={id}><span>{drivers.find((driver) => String(driver.id) === id)?.emri || `Shoferi #${id}`}</span><button type="button" className="bt-btn-secondary bt-btn-small" onClick={() => change(item.busId, (entry) => ({ ...entry, driverIds: entry.driverIds.filter((driverId) => driverId !== id) }))}>Hiq</button></div>)}</div>
-      {item.driverIds.length < Number(driversPerBus || 0) && <div className="bt-charter-assignment-add"><CharterReferencePicker value={driverIds[item.busId] || ""} selectedLabel={driverLabels[item.busId] || ""} placeholder="Kërko shoferin…" searchOptions={(text) => driverChoices(item, text)} onSelect={(option) => { setDriverIds((current) => ({ ...current, [item.busId]: option?.id || "" })); setDriverLabels((current) => ({ ...current, [item.busId]: option?.label || "" })); }} /><button type="button" className="bt-btn-secondary" disabled={!driverIds[item.busId]} onClick={() => { change(item.busId, (entry) => ({ ...entry, driverIds: [...entry.driverIds, String(driverIds[item.busId])] })); setDriverIds((current) => ({ ...current, [item.busId]: "" })); setDriverLabels((current) => ({ ...current, [item.busId]: "" })); }}>Shto shofer</button></div>}
-    </div>)}
-    {assignments.length < Number(numberOfBuses || 0) && <div className="bt-charter-assignment-add"><CharterReferencePicker value={busId} selectedLabel={busLabel} placeholder="Kërko autobusin…" searchOptions={busChoices} onSelect={(option) => { setBusId(option?.id || ""); setBusLabel(option?.label || ""); }} /><button type="button" className="bt-btn-secondary" disabled={!busId} onClick={() => { onChange([...assignments, { busId, busLabel, driverIds: [] }]); setBusId(""); setBusLabel(""); }}>Shto autobus</button></div>}
-  </section>;
+  </div>;
 }
