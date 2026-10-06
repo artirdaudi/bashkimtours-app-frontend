@@ -6894,14 +6894,17 @@
 .bt-charter-card-price { display: grid; align-content: start; justify-items: end; gap: 3px; min-width: 100px; text-align: right; }
 .bt-charter-card-price span, .bt-charter-card-price small { color: #637582; font-size: 12px; }
 .bt-charter-card-price strong { color: #152e42; font-size: 20px; }
-.bt-charter-card-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; padding: 17px 21px; border-block: 1px solid #edf1f4; background: #f8fbfc; }
+.bt-charter-card-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; padding: 17px 21px; border-block: 1px solid #edf1f4; background: #f8fbfc; }
 .bt-charter-card-facts > div { display: flex; align-items: flex-start; gap: 9px; min-width: 0; }
 .bt-charter-card-facts svg { flex: none; color: #0a8794; }
 .bt-charter-card-facts span { display: grid; gap: 4px; min-width: 0; }
 .bt-charter-card-facts small { color: #637582; font-size: 12px; }
 .bt-charter-card-facts strong { color: #17364c; font-size: 13px; font-weight: 700; overflow-wrap: anywhere; }
-.bt-charter-card-facts .bt-charter-card-fact-inline { display: flex; align-items: baseline; flex-wrap: wrap; gap: 5px; }
-.bt-charter-card-assignments { display: grid; gap: 8px; padding: 13px 21px; border-bottom: 1px solid #edf1f4; }
+.bt-charter-card-facts > .bt-charter-card-transport { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(200px, 1fr) minmax(0, 2fr); gap: 18px; padding-top: 12px; border-top: 1px solid #e5ebef; }
+.bt-charter-card-counts { display: grid; align-content: start; gap: 10px; }
+.bt-charter-card-counts > div { display: flex; align-items: center; gap: 9px; }
+.bt-charter-card-counts span { display: flex; align-items: baseline; flex-wrap: wrap; gap: 5px; }
+.bt-charter-card-assignments { display: grid; align-content: start; gap: 8px; min-width: 0; padding-left: 18px; border-left: 1px solid #e5ebef; }
 .bt-charter-card-assignment { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 16px; color: #526675; font-size: 13px; }
 .bt-charter-card-assignment strong, .bt-charter-card-assignment span { display: inline-flex; align-items: center; gap: 6px; }
 .bt-charter-card-assignment strong { color: #17364c; font-weight: 750; }
@@ -6917,8 +6920,9 @@
 .bt-charter-card-details > div { display: grid; align-content: start; gap: 4px; min-width: 0; }
 .bt-charter-card-details span { color: #637582; font-size: 12px; }
 .bt-charter-card-details strong { color: #17364c; font-size: 13px; font-weight: 600; overflow-wrap: anywhere; white-space: pre-wrap; }
-@media (max-width: 1100px) { .bt-charter-card-facts, .bt-charter-card-details { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 1100px) { .bt-charter-card-details { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 600px) { .bt-charter-card-head { padding: 16px; } .bt-charter-card-facts { gap: 14px; padding: 15px 16px; } .bt-charter-card-footer { padding: 13px 16px; } .bt-charter-card-actions { width: 100%; margin-left: 0; } .bt-charter-card-more summary { padding-inline: 16px; } .bt-charter-card-details { padding-inline: 16px; } }
+@media (max-width: 600px) { .bt-charter-card-facts > .bt-charter-card-transport { grid-template-columns: minmax(0, 1fr); } .bt-charter-card-assignments { padding-left: 0; border-left: 0; } }
 @media (max-width: 430px) { .bt-charter-card-facts, .bt-charter-card-details { grid-template-columns: 1fr; } .bt-charter-card-head { gap: 10px; } .bt-charter-card h2 { font-size: 18px; } }
 .bt-charter-card-price small + small { margin-top: 2px; color: #17364c; font-weight: 700; }
 .bt-charter-card-footer .bt-charter-paid { padding: 6px 9px; border-radius: 8px; font-weight: 700; }
@@ -7047,7 +7051,6 @@
   .bt-charter-card-head > div:first-child { min-width: 0; }
   .bt-charter-card-price { min-width: 82px; }
   .bt-charter-card-price strong { font-size: 17px; }
-  .bt-charter-card-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .bt-charter-card-footer > span:not(.bt-charter-paid) { width: 100%; }
   .bt-charter-agenda-summary { align-items: flex-start; }
   .bt-charter-form-group { padding: 12px; }
