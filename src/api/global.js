@@ -53,6 +53,16 @@ export const chartersApi = {
   update: (id, body) => api(`/charters/${id}`, { method: "PUT", body: JSON.stringify(body) }),
   remove: (id) => api(`/charters/${id}`, { method: "DELETE" }),
 };
+export const charterAssignmentsApi = {
+  buses: (charterId, params) => api(`/charters/${charterId}/bus-assignments${query(params)}`),
+  assignBus: (charterId, busId) => api(`/charters/${charterId}/bus-assignments`, { method: "POST", body: JSON.stringify({ bus_id: busId }) }),
+  bus: (assignmentId) => api(`/charter-bus-assignments/${assignmentId}`),
+  removeBus: (assignmentId) => api(`/charter-bus-assignments/${assignmentId}`, { method: "DELETE" }),
+  drivers: (busAssignmentId, params) => api(`/charter-bus-assignments/${busAssignmentId}/drivers${query(params)}`),
+  assignDriver: (busAssignmentId, driverId) => api(`/charter-bus-assignments/${busAssignmentId}/drivers`, { method: "POST", body: JSON.stringify({ driver_id: driverId }) }),
+  driver: (assignmentId) => api(`/charter-driver-bus-assignments/${assignmentId}`),
+  removeDriver: (assignmentId) => api(`/charter-driver-bus-assignments/${assignmentId}`, { method: "DELETE" }),
+};
 export const charterPaymentsApi = {
   list: (charterId) => api(`/charters/${charterId}/payments`),
   summary: (charterId) => api(`/charters/${charterId}/payments/summary`),
