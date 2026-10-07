@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Banknote, Bus, CalendarDays, ChevronLeft, ChevronRight, FileText, LoaderCircle, Pencil, Plus, Route, Search, Trash2, UsersRound, X } from "lucide-react";
+import { Banknote, Bus, CalendarDays, ChevronLeft, ChevronRight, FileText, LoaderCircle, Pencil, Plus, Printer, Route, Search, Trash2, UsersRound, X } from "lucide-react";
 import { busExtApi, charterPaymentsApi, chartersApi, documentsApi, shoferiApi } from "./api";
 import DriverDocuments from "./DriverDocuments";
 import CharterAgendaDraft from "./CharterAgendaDraft";
@@ -7,6 +7,7 @@ import { DOCUMENT_ENTITY_TYPES } from "./documentEntityTypes";
 import CharterAssignments from "./CharterAssignments";
 import CharterDateTimeField from "./CharterDateTimeField";
 import CharterPatenNalogModal from "./CharterPatenNalogModal";
+import CharterPaymentReceipt from "./CharterPaymentReceipt";
 import { loadCharterAssignments, selectedCharterAssignments, syncCharterAssignments } from "./charterAssignmentSync";
 import { confirmAction } from "./confirmAction";
 import { Modal } from "./PortalPages";
@@ -74,6 +75,7 @@ export default function ChartersPage() {
   const [paymentForm, setPaymentForm] = useState({ amount: "", comment: "" });
   const [paymentBusy, setPaymentBusy] = useState(false);
   const [paymentError, setPaymentError] = useState("");
+  const [paymentReceipt, setPaymentReceipt] = useState(null);
   const [refresh, setRefresh] = useState(0);
   const [buses, setBuses] = useState([]);
   const [drivers, setDrivers] = useState([]);
@@ -86,6 +88,16 @@ export default function ChartersPage() {
   const assignmentLoadId = useRef(0);
   const [agendaDocuments, setAgendaDocuments] = useState({});
   const [agendaLoadError, setAgendaLoadError] = useState(false);
+  useEffect(() => {
+    if (!paymentReceipt) return undefined;
+    const finish = () => setPaymentReceipt(null);
+    window.addEventListener("afterprint", finish, { once: true });
+    const timer = window.setTimeout(() => window.print(), 120);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("afterprint", finish);
+    };
+  }, [paymentReceipt]);
   useEffect(() => {
     const update = () => setCurrentTime(Date.now());
     update();
@@ -288,6 +300,7 @@ export default function ChartersPage() {
   async function savePayment(event) {
     event.preventDefault();
     if (!paymentItem || paymentBusy) return;
+    const printReceipt = event.nativeEvent.submitter?.value === "print";
     const isInvoice = paymentItem.billing_type === "INVOICE";
     const amount = Number(paymentForm.amount);
     const remaining = Number(paymentItem.price) - Number(paymentItem.paid_amount || 0);
@@ -298,13 +311,14 @@ export default function ChartersPage() {
     setPaymentBusy(true);
     setPaymentError("");
     try {
-      await charterPaymentsApi.create(paymentItem.id, {
+      const created = await charterPaymentsApi.create(paymentItem.id, {
         amount: isInvoice ? null : amount,
         payment_date: new Date().toISOString(),
         comment: paymentForm.comment.trim() || null,
       });
       setPaymentItem(null);
       setRefresh((value) => value + 1);
+      if (printReceipt) setPaymentReceipt({ charter: paymentItem, payment: created, remaining: Math.max(0, Number(paymentItem.price || 0) - Number(paymentItem.paid_amount || 0) - Number(created.amount || 0)) });
     } catch (requestError) { setPaymentError(requestError.message); }
     finally { setPaymentBusy(false); }
   }
@@ -339,7 +353,8 @@ export default function ChartersPage() {
       {!loading && <section className="bt-charter-section" aria-label="Lista e charterëve"><div className="bt-charter-section-cards">{visibleItems.map(renderCard)}{!filteredItems.length && !error && <div className="bt-shoferat-empty">Nuk u gjet asnjë charter.</div>}</div>{filteredItems.length > pageSize && <nav className="bt-shoferat-pages" aria-label="Faqet e charterëve"><button type="button" aria-label="Faqja e mëparshme" disabled={offset === 0} onClick={() => setOffset(Math.max(0, offset - pageSize))}><ChevronLeft size={19} /></button><span>Faqja {offset / pageSize + 1} nga {Math.ceil(filteredItems.length / pageSize)}</span><button type="button" aria-label="Faqja tjetër" disabled={offset + pageSize >= filteredItems.length} onClick={() => setOffset(offset + pageSize)}><ChevronRight size={19} /></button></nav>}</section>}
     </div>
     {patenCharter && <CharterPatenNalogModal charter={patenCharter} buses={buses} drivers={drivers} onClose={() => setPatenCharter(null)} />}
-    {paymentItem && <Modal title={`Bëj pagesë · ${paymentItem.contractor || `Charter ${paymentItem.id}`}`} onClose={() => { if (!paymentBusy) setPaymentItem(null); }}><form className="bt-role-form bt-charter-payment-form" onSubmit={savePayment}><p className="bt-charter-payment-context">{paymentItem.route || "Pa relacion"} · Mbetur: <strong>{money(Math.max(0, Number(paymentItem.price) - Number(paymentItem.paid_amount || 0)))}</strong></p>{paymentItem.billing_type !== "INVOICE" && <label>Shuma<input type="number" min="0.01" max={Math.max(0, Number(paymentItem.price) - Number(paymentItem.paid_amount || 0))} step="0.01" required value={paymentForm.amount} onChange={(event) => setPaymentForm({ ...paymentForm, amount: event.target.value })} /></label>}<label>Koment <small>(opsional)</small><textarea rows={3} value={paymentForm.comment} onChange={(event) => setPaymentForm({ ...paymentForm, comment: event.target.value })} /></label>{paymentError && <p className="bt-inline-error" role="alert">{paymentError}</p>}<div className="bt-modal-actions"><button type="button" className="bt-btn-secondary" disabled={paymentBusy} onClick={() => setPaymentItem(null)}>Anulo</button><button type="submit" className="bt-btn-primary" disabled={paymentBusy}>{paymentBusy ? "Duke ruajtur…" : "Ruaj pagesën"}</button></div></form></Modal>}
+    {paymentItem && <Modal title={`Bëj pagesë · ${paymentItem.contractor || `Charter ${paymentItem.id}`}`} onClose={() => { if (!paymentBusy) setPaymentItem(null); }}><form className="bt-role-form bt-charter-payment-form" onSubmit={savePayment}><p className="bt-charter-payment-context">{paymentItem.route || "Pa relacion"} · Mbetur: <strong>{money(Math.max(0, Number(paymentItem.price) - Number(paymentItem.paid_amount || 0)))}</strong></p>{paymentItem.billing_type !== "INVOICE" && <label>Shuma<input type="number" min="0.01" max={Math.max(0, Number(paymentItem.price) - Number(paymentItem.paid_amount || 0))} step="0.01" required value={paymentForm.amount} onChange={(event) => setPaymentForm({ ...paymentForm, amount: event.target.value })} /></label>}<label>Koment <small>(opsional)</small><textarea rows={3} value={paymentForm.comment} onChange={(event) => setPaymentForm({ ...paymentForm, comment: event.target.value })} /></label>{paymentError && <p className="bt-inline-error" role="alert">{paymentError}</p>}<div className="bt-modal-actions"><button type="button" className="bt-btn-secondary" disabled={paymentBusy} onClick={() => setPaymentItem(null)}>Anulo</button><button type="submit" className="bt-btn-secondary" disabled={paymentBusy}>{paymentBusy ? "Duke ruajtur…" : "Ruaj pagesën"}</button><button type="submit" value="print" className="bt-btn-primary" disabled={paymentBusy}><Printer size={17} /> {paymentBusy ? "Duke ruajtur…" : "Paguaj dhe printo vërtetimin"}</button></div></form></Modal>}
+    {paymentReceipt && <CharterPaymentReceipt {...paymentReceipt} />}
     {form && <Modal title={form.id != null ? "Ndrysho charter-in" : "Shto charter"} className="bt-shoferat-form-modal bt-charter-form-modal" onClose={() => { if (!busy) { assignmentLoadId.current += 1; setForm(null); } }}><form className="bt-shoferat-form bt-charter-form" onSubmit={save}>{formGroups.map((group) => { const groupFields = group.keys.map((key) => fields.find((field) => field.key === key)).filter((field) => field && (form.id != null || !createHidden.has(field.key))); return <fieldset className="bt-charter-form-group" key={group.title}><legend>{group.title}</legend>{group.title === "Agjenda" ? (form.id != null ? <DriverDocuments driver={{ id: form.id, emri: `Charter ${form.id}` }} entityType={DOCUMENT_ENTITY_TYPES.CHARTER} multiple documents={agendaDocuments[String(form.id)]} loadDocuments={loadAgendaDocuments} /> : <CharterAgendaDraft files={agendaDrafts} onChange={setAgendaDrafts} />) : <div className="bt-charter-form-grid">{groupFields.map(({ key, label, type, step }) => type === "datetime-local" ? <CharterDateTimeField key={key} label={label} value={form[key]} onChange={(value) => setForm((current) => ({ ...current, [key]: value }))} /> : <label key={key}><span>{label}</span>{key === "billing_type" ? <select value={form[key]} onChange={(event) => setForm({ ...form, [key]: event.target.value })}><option value="">Zgjidh llojin</option><option value="CASH">Kesh</option><option value="INVOICE">Faturë</option></select> : type === "textarea" ? <textarea value={form[key]} onChange={(event) => setForm({ ...form, [key]: event.target.value })} rows={3} /> : <input type={type || "text"} min={type === "number" ? (["number_of_buses", "drivers_per_bus"].includes(key) ? 1 : 0) : undefined} step={step || (type === "number" ? "1" : undefined)} value={form[key]} onChange={(event) => setForm({ ...form, [key]: event.target.value })} />}</label>)}</div>}{group.title === "Autobusi dhe shoferët" && <CharterAssignments assignments={assignmentDrafts} onChange={setAssignmentDrafts} numberOfBuses={form.number_of_buses} driversPerBus={form.drivers_per_bus} buses={buses} drivers={drivers} disabled={assignmentLoading} />}</fieldset>; })}{error && <p className="bt-inline-error" role="alert">{error}</p>}<div className="bt-shoferat-actions"><button className="bt-btn-primary" disabled={busy || assignmentLoading}>{busy ? "Duke ruajtur…" : assignmentLoading ? "Duke ngarkuar…" : "Ruaj"}</button><button type="button" className="bt-btn-secondary" disabled={busy} onClick={() => setForm(null)}>Anulo</button></div></form></Modal>}
   </div>;
 }
