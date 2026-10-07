@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Banknote, Bus, CalendarDays, ChevronLeft, ChevronRight, FileText, Pencil, Plus, Route, Search, Trash2, UsersRound, X } from "lucide-react";
+import { Banknote, Bus, CalendarDays, ChevronLeft, ChevronRight, FileText, LoaderCircle, Pencil, Plus, Route, Search, Trash2, UsersRound, X } from "lucide-react";
 import { busExtApi, charterPaymentsApi, chartersApi, documentsApi, shoferiApi } from "./api";
 import DriverDocuments from "./DriverDocuments";
 import CharterAgendaDraft from "./CharterAgendaDraft";
@@ -61,6 +61,8 @@ export default function ChartersPage() {
   const [search, setSearch] = useState("");
   const [unpaidOnly, setUnpaidOnly] = useState(false);
   const [upcomingOnly, setUpcomingOnly] = useState(false);
+  const [filterBusy, setFilterBusy] = useState(false);
+  const filterTimer = useRef(null);
   const [filter, setFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -92,6 +94,15 @@ export default function ChartersPage() {
     const timer = setTimeout(() => { setOffset(0); setFilter(search.trim().toLocaleLowerCase("sq-AL")); }, 300);
     return () => clearTimeout(timer);
   }, [search]);
+  useEffect(() => () => clearTimeout(filterTimer.current), []);
+  function chooseFilter(next) {
+    setUnpaidOnly(next === "unpaid");
+    setUpcomingOnly(next === "upcoming");
+    setOffset(0);
+    setFilterBusy(true);
+    clearTimeout(filterTimer.current);
+    filterTimer.current = setTimeout(() => setFilterBusy(false), 350);
+  }
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -110,6 +121,8 @@ export default function ChartersPage() {
   const unpaidCount = items.filter((item) => !(Number(item.price) > 0 && Number(item.paid_amount) >= Number(item.price))).length;
   const upcomingCount = items.filter((item) => item.departure_at && new Date(item.departure_at).getTime() >= currentTime).length;
   const filteredItems = useMemo(() => items.filter((item) => (!unpaidOnly || !(Number(item.price) > 0 && Number(item.paid_amount) >= Number(item.price))) && (!upcomingOnly || (item.departure_at && new Date(item.departure_at).getTime() >= currentTime)) && (!filter || [item.contractor, item.route].some((value) => String(value || "").toLocaleLowerCase("sq-AL").includes(filter)))), [items, filter, unpaidOnly, upcomingOnly, currentTime]);
+  const filterTitle = upcomingOnly ? "Charterët e ardhshëm" : unpaidOnly ? "Rezervimet ende pa paguar" : "Të gjitha rezervimet";
+  const filterDescription = upcomingOnly ? "Rezervimet me nisje nga tani e tutje, të renditura sipas datës së nisjes." : unpaidOnly ? "Rezervimet që kanë ende pagesë të papërfunduar." : "Të gjitha rezervimet e charterëve, përfshirë ato të ardhshme dhe të kaluara.";
   const visibleItems = (upcomingOnly ? [...filteredItems].sort((a, b) => new Date(a.departure_at) - new Date(b.departure_at)) : filteredItems).slice(offset, offset + pageSize);
   const visibleIds = visibleItems.map((item) => item.id).join(",");
   useEffect(() => {
@@ -315,7 +328,8 @@ export default function ChartersPage() {
   return <div className="bt-page bt-shoferat-page bt-charters-page">
     <header className="bt-page-header"><div><span className="bt-eyebrow">Bashkim Tours</span><h1>Charterët Rezervim</h1><p>Udhëtimet me porosi, oraret dhe pagesat.</p></div><button type="button" className="bt-btn-primary" onClick={() => openForm()}><Plus size={18} /> Shto charter</button></header>
     <div className="bt-shoferat-notice" role="note">Faqja ende është në përpunim.</div>
-    <div className="bt-charter-metrics" aria-label="Filtrat e rezervimeve"><button type="button" className={`bt-charter-metric ${!unpaidOnly && !upcomingOnly ? "active" : ""}`} aria-pressed={!unpaidOnly && !upcomingOnly} onClick={() => { setUnpaidOnly(false); setUpcomingOnly(false); setOffset(0); }}><span className="bt-charter-metric-icon"><Route size={20} /></span><span><small>Rezervime gjithsej</small><strong>{items.length}</strong></span></button><button type="button" className={`bt-charter-metric ${upcomingOnly ? "active" : ""}`} aria-pressed={upcomingOnly} onClick={() => { setUpcomingOnly(true); setUnpaidOnly(false); setOffset(0); }}><span className="bt-charter-metric-icon"><CalendarDays size={20} /></span><span><small>Charterët e ardhshëm</small><strong>{upcomingCount}</strong></span></button><button type="button" className={`bt-charter-metric bt-charter-metric-unpaid ${unpaidOnly ? "active" : ""}`} aria-pressed={unpaidOnly} onClick={() => { setUnpaidOnly(true); setUpcomingOnly(false); setOffset(0); }}><span className="bt-charter-metric-icon"><Banknote size={20} /></span><span><small>Ende pa paguar</small><strong>{unpaidCount}</strong></span></button></div>
+    <div className="bt-charter-metrics" aria-label="Filtrat e rezervimeve"><button type="button" className={`bt-charter-metric ${!unpaidOnly && !upcomingOnly ? "active" : ""}`} aria-pressed={!unpaidOnly && !upcomingOnly} onClick={() => chooseFilter("all")}><span className="bt-charter-metric-icon"><Route size={20} /></span><span><small>Rezervime gjithsej</small><strong>{items.length}</strong></span></button><button type="button" className={`bt-charter-metric ${upcomingOnly ? "active" : ""}`} aria-pressed={upcomingOnly} onClick={() => chooseFilter("upcoming")}><span className="bt-charter-metric-icon"><CalendarDays size={20} /></span><span><small>Charterët e ardhshëm</small><strong>{upcomingCount}</strong></span></button><button type="button" className={`bt-charter-metric bt-charter-metric-unpaid ${unpaidOnly ? "active" : ""}`} aria-pressed={unpaidOnly} onClick={() => chooseFilter("unpaid")}><span className="bt-charter-metric-icon"><Banknote size={20} /></span><span><small>Ende pa paguar</small><strong>{unpaidCount}</strong></span></button></div>
+    <div className="bt-charter-filter-description" aria-live="polite"><div><h2>{filterTitle}</h2><p>{filterDescription}{filter && ` Kërkimi: “${search.trim()}”.`}</p></div><span className="bt-charter-filter-status">{filterBusy ? <><LoaderCircle size={16} className="bt-spin" /> Duke filtruar…</> : `${filteredItems.length} rezervime`}</span></div>
     <section className="bt-shoferat-toolbar"><label className="bt-shoferat-search"><Search size={19} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Kërko porositësin ose relacionin…" aria-label="Kërko charterët" />{search && <button type="button" aria-label="Pastro kërkimin" onClick={() => setSearch("")}><X size={16} /></button>}</label></section>
     {error && !form && <p className="bt-inline-error" role="alert">{error}</p>}
     <div className="bt-charter-list" aria-busy={loading}>

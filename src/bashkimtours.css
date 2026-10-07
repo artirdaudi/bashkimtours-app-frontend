@@ -6970,6 +6970,10 @@
 .bt-charter-metric strong { color: #152e42; font-size: 23px; line-height: 1.1; }
 .bt-charter-metric-unpaid .bt-charter-metric-icon { background: #fff0ed; color: #b42318; }
 .bt-charter-metric-unpaid.active { border-color: #d78277; background: #fff8f6; box-shadow: 0 0 0 2px #b4231817; }
+.bt-charter-filter-description { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px 20px; margin: 0 0 16px; }
+.bt-charter-filter-description h2 { margin: 0 0 3px; color: #152e42; font-size: 18px; }
+.bt-charter-filter-description p { margin: 0; color: #637582; font-size: 13px; }
+.bt-charter-filter-status { display: inline-flex; align-items: center; gap: 7px; min-width: 115px; color: #0a8794; font-size: 13px; font-weight: 700; }
 .bt-charter-agenda-summary { display: flex; align-items: center; gap: 9px; min-width: 0; padding: 10px 21px; border-top: 1px solid #edf1f4; color: #185a88; }
 .bt-charter-agenda-summary > svg { flex: none; }
 .bt-charter-agenda-summary > span { display: grid; gap: 2px; flex: 1; min-width: 0; }
