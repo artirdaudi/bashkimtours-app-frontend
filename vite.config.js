@@ -27,24 +27,11 @@ export default defineConfig(({ mode }) => {
         ],
       },
       workbox: {
-        // Fetch page HTML from the network on every navigation/reload so browser
-        // tabs receive deployments without accepting a service-worker update.
-        globPatterns: ["**/*.{js,css,png,jpg,jpeg,svg,woff,woff2}"],
-        navigateFallback: null,
-        runtimeCaching: [{
-          urlPattern: ({ request, url, sameOrigin }) => sameOrigin && request.mode === "navigate" && (
-            /^\/$/.test(url.pathname) ||
-            /^\/(students|debts|cards|skano|areas|autobusat|vehicles|drivers|calendar|followup-rules|payments|arka|account|income|messages|shoferat|settings\/(accounts-roles|cash-registers))\/?$/.test(url.pathname) ||
-            /^\/student\/[^/]+\/?$/.test(url.pathname)
-          ),
-          handler: "NetworkFirst",
-          options: {
-            cacheName: "bt-page-shells",
-            fetchOptions: { cache: "no-store" },
-            cacheableResponse: { statuses: [200] },
-            expiration: { maxEntries: 20 },
-          },
-        }],
+        // Keep the HTML and hashed assets in the same precache revision so an
+        // older page never asks a new deployment for a removed stylesheet.
+        globPatterns: ["**/*.{html,js,css,png,jpg,jpeg,svg,woff,woff2}"],
+        navigateFallback: "/index.html",
+        navigateFallbackDenylist: [/^\/api\//],
         cleanupOutdatedCaches: true,
       },
     })],

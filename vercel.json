@@ -1,7 +1,7 @@
 {
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/((?!assets/|icons/|whatsapp/|api/|[^/]+\\.[^/]+$).*)",
       "destination": "/index.html"
     }
   ],

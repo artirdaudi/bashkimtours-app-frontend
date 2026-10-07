@@ -36,20 +36,16 @@ test('manifest has installable identity and correctly sized icons', () => {
   assert(manifest.icons.some((icon) => icon.purpose === 'maskable'));
 });
 
-test('only app assets are precached and live APIs have no runtime cache', () => {
+test('the app shell and its assets are precached together without API caching', () => {
   assert.equal(routes.length, 1);
-  assert(routes[0].handler instanceof workbox.NetworkFirst);
-  assert.equal(routes[0].handler.options.fetchOptions.cache, 'no-store');
-  assert(!precache.some(({ url }) => url.endsWith('.html')));
+  assert(routes[0].match instanceof workbox.NavigationRoute);
+  assert.equal(routes[0].match.handler, '/index.html');
+  assert(precache.some(({ url }) => url === 'index.html'));
+  assert(precache.some(({ url }) => url.endsWith('.css')));
   for (const { url } of precache) {
     assert(existsSync(new URL('../dist/' + url, import.meta.url)), url);
     assert(!url.startsWith('http') && !url.startsWith('api/'));
   }
-  const allowed = (path, mode = 'navigate', sameOrigin = true) => routes[0].match({ request: { mode }, url: new URL(path, 'https://app.bashkimtours.com'), sameOrigin });
-  assert(!allowed('/students', 'cors'));
-  assert(!allowed('/students', 'navigate', false));
-  for (const path of ['/', '/students', '/skano', '/payments', '/arka', '/settings/cash-registers', '/student/test-token']) assert(allowed(path), path);
-  for (const path of ['/api/auth/me', '/api/maarif/monthly-payments', '/api/maarif/qr/test-token', '/auth/login', '/health']) assert(!allowed(path), path);
 });
 
 test('new service worker waits for user acceptance before activating', () => {
