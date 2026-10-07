@@ -49,13 +49,26 @@ export default defineConfig(({ mode }) => {
       },
     })],
     server: {
+      port: 8787,
+      strictPort: true,
       proxy: env.DEV_API_TARGET
         ? {
             "/api": {
               target: env.DEV_API_TARGET,
               changeOrigin: true,
-              cookiePathRewrite: { "/auth": "/api/auth" },
+              headers: { Origin: "https://app.bashkimtours.com" },
               rewrite: (path) => path.replace(/^\/api/, ""),
+              configure: (proxy) => {
+                proxy.on("proxyRes", (response) => {
+                  const cookies = response.headers["set-cookie"];
+                  if (!cookies) return;
+                  response.headers["set-cookie"] = cookies.map((cookie) => cookie
+                    .replace(/;\s*Path=\/auth(?=;|$)/i, "; Path=/api/auth")
+                    .replace(/;\s*Secure(?=;|$)/i, "")
+                    .replace(/;\s*SameSite=None(?=;|$)/i, "; SameSite=Lax")
+                    .replace(/;\s*Domain=[^;]*/i, ""));
+                });
+              },
             },
           }
         : undefined,

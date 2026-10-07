@@ -9,9 +9,9 @@ Standalone React frontend for the Bashkim Tours operational application.
    VITE_BASHKIMTOURS_API_URL=/api
    DEV_API_TARGET=https://api.bashkimtours.com
    ```
-2. Optionally set `VITE_APP_URL` to the public app URL for shareable QR cards. Otherwise cards use the current browser origin. The development proxy lets local requests reach the API on whichever port Vite selects.
+2. Optionally set `VITE_APP_URL` to the public app URL for shareable QR cards. Otherwise cards use the current browser origin. The development proxy sends local API requests to the configured API target, uses the approved app origin for the API's login check, and adapts the refresh cookie for local HTTP.
 3. Run `npm install`.
-4. Run `npm run dev`.
+4. Run `npm run dev` and open `http://localhost:8787`. Vite stops if port 8787 is occupied.
 
 ## Production environment
 

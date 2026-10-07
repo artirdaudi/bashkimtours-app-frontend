@@ -6974,6 +6974,27 @@
 .bt-charter-filter-description h2 { margin: 0 0 3px; color: #152e42; font-size: 18px; }
 .bt-charter-filter-description p { margin: 0; color: #637582; font-size: 13px; }
 .bt-charter-filter-status { display: inline-flex; align-items: center; gap: 7px; min-width: 115px; color: #0a8794; font-size: 13px; font-weight: 700; }
+.bt-paten-list { display: grid; gap: 12px; }
+.bt-paten-list > p { display: flex; align-items: center; gap: 7px; margin: 0; color: #637582; }
+.bt-paten-empty { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 14px; border: 1px solid #dce5eb; border-radius: 11px; }
+.bt-paten-empty p { margin: 0; color: #637582; }
+.bt-paten-bus { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 14px; border: 1px solid #dce5eb; border-radius: 11px; background: #f8fbfc; }
+.bt-paten-bus-main { display: grid; gap: 7px; min-width: 0; }
+.bt-paten-bus-main strong, .bt-paten-bus-main span, .bt-paten-serial { display: inline-flex; align-items: center; gap: 6px; }
+.bt-paten-bus-main strong { color: #17364c; }
+.bt-paten-bus-main span { color: #526675; font-size: 13px; }
+.bt-paten-bus-main svg, .bt-paten-serial svg { flex: none; color: #0a8794; }
+.bt-paten-bus-action { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; }
+.bt-paten-serial { color: #526675; font-size: 13px; }
+.bt-paten-serial strong { color: #17364c; }
+.bt-paten-create { display: grid; gap: 12px; padding: 16px; border: 1px solid #8fcad2; border-radius: 11px; background: #f2fbfc; }
+.bt-paten-create h3 { margin: 0; color: #17364c; font-size: 16px; }
+.bt-paten-create label { display: grid; gap: 5px; color: #344b5d; font-weight: 650; }
+.bt-paten-create input { min-height: 42px; padding: 8px 10px; border: 1px solid #dce5eb; border-radius: 8px; font: inherit; }
+.bt-paten-create > div, .bt-paten-preview-actions, .bt-paten-preview-actions > div { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.bt-paten-preview { display: grid; gap: 12px; }
+.bt-paten-preview-actions strong { color: #17364c; }
+.bt-paten-preview iframe { width: 100%; min-height: min(70vh, 750px); border: 1px solid #dce5eb; border-radius: 8px; background: #fff; }
 .bt-charter-agenda-summary { display: flex; align-items: center; gap: 9px; min-width: 0; padding: 10px 21px; border-top: 1px solid #edf1f4; color: #185a88; }
 .bt-charter-agenda-summary > svg { flex: none; }
 .bt-charter-agenda-summary > span { display: grid; gap: 2px; flex: 1; min-width: 0; }

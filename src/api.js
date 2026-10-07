@@ -1,5 +1,5 @@
 export { api, publicApi, query } from "./api/client";
-export { authApi, rolesApi, usersApi, documentTypesApi, documentsApi, driversApi, shoferiApi, vehiclesApi, autobusiApi, busExtApi, chartersApi, charterAssignmentsApi, charterPaymentsApi, transportCardsApi, cardPaymentsApi } from "./api/global";
+export { authApi, rolesApi, usersApi, documentTypesApi, documentsApi, driversApi, shoferiApi, vehiclesApi, autobusiApi, busExtApi, chartersApi, charterAssignmentsApi, charterPaymentsApi, patenNalogsApi, transportCardsApi, cardPaymentsApi } from "./api/global";
 export {
   areasApi, studentsApi, qrApi, calendarApi, duesApi, monthlyPaymentsApi,
   studentAssignmentsApi, driverAssignmentsApi, followupApi, followupRulesApi,

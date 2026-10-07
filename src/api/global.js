@@ -68,6 +68,11 @@ export const charterPaymentsApi = {
   summary: (charterId) => api(`/charters/${charterId}/payments/summary`),
   create: (charterId, body) => api(`/charters/${charterId}/payments`, { method: "POST", body: JSON.stringify(body) }),
 };
+export const patenNalogsApi = {
+  list: (params) => api(`/paten-nalogs${query(params)}`),
+  create: (busAssignmentId, body) => api(`/charter-bus-assignments/${busAssignmentId}/paten-nalog`, { method: "POST", body: JSON.stringify(body) }),
+  pdf: (id) => api(`/paten-nalogs/${id}/pdf`, { responseType: "blob" }),
+};
 export const driversApi = resource("/drivers");
 export const shoferiApi = {
   ...resource("/shoferi"),
