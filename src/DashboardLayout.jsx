@@ -46,9 +46,10 @@ export default function DashboardLayout() {
               ["/followup-rules", "Rregullat e pagesave"],
             ].map(([path, label]) => <NavLink key={path} to={path} onClick={() => setOpen(false)}>{label}</NavLink>)}
           </div>
-          <NavLink to="/charters" onClick={() => setOpen(false)}>
+          <NavLink to="/charters" className="bt-charter-nav-feature" onClick={() => setOpen(false)}>
             <Route />
             <span>Charterët Rezervim</span>
+            <small className="bt-charter-nav-ribbon">NEW</small>
           </NavLink>
           <div className="bt-mobile-module-links" aria-label="Modulet Charterët">
             <NavLink to="/charters/payments" onClick={() => setOpen(false)}>Pagesat Charter</NavLink>

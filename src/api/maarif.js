@@ -158,6 +158,7 @@ export const followupRulesApi = {
     }),
 };
 export const whatsappNotificationsApi = {
+  sendCharterDriverAssignment: (driverBusAssignmentId) => api("/whatsapp/charter-driver-assignment/send", { method: "POST", body: JSON.stringify({ driver_bus_assignment_id: driverBusAssignmentId }) }),
   sendPayment: () => api("/whatsapp/payment-notification/send", { method: "POST" }),
   sendCard: () => api("/whatsapp/card-notification/send", { method: "POST" }),
   sendTest: (body) => api("/whatsapp/whatsapp/test-message", { method: "POST", body: JSON.stringify(body) }),

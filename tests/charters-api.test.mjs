@@ -13,6 +13,7 @@ test('charter assignments use the documented nested endpoints and bodies', async
   const server = await createServer({ server: { middlewareMode: true }, appType: 'custom' });
   try {
     const { charterAssignmentsApi, patenNalogsApi } = await server.ssrLoadModule('/src/api/global.js');
+    const { whatsappNotificationsApi } = await server.ssrLoadModule('/src/api/maarif.js');
     await charterAssignmentsApi.buses(7, { limit: 100, offset: 0 });
     await charterAssignmentsApi.assignBus(7, 12);
     await charterAssignmentsApi.drivers(5, { limit: 100, offset: 0 });
@@ -22,12 +23,16 @@ test('charter assignments use the documented nested endpoints and bodies', async
     assert.match(calls[2].url, /\/charter-bus-assignments\/5\/drivers\?limit=100&offset=0$/);
     assert.equal(calls[3].body, JSON.stringify({ driver_id: 42 }));
     await patenNalogsApi.list({ charter_id: 7, limit: 1000, offset: 0 });
-    await patenNalogsApi.create(5, { issue_date: '2026-10-07', issue_place: 'Tetovë' });
+    await patenNalogsApi.create(5, { issue_date: '2026-10-07', issue_place: 'Tetovo' });
     const pdf = await patenNalogsApi.pdf(9);
     assert.match(calls[4].url, /\/paten-nalogs\?charter_id=7&limit=1000&offset=0$/);
     assert.match(calls[5].url, /\/charter-bus-assignments\/5\/paten-nalog$/);
-    assert.equal(calls[5].body, JSON.stringify({ issue_date: '2026-10-07', issue_place: 'Tetovë' }));
+    assert.equal(calls[5].body, JSON.stringify({ issue_date: '2026-10-07', issue_place: 'Tetovo' }));
     assert.match(calls[6].url, /\/paten-nalogs\/9\/pdf$/);
     assert.equal(await pdf.text(), '%PDF-1.4');
+    await whatsappNotificationsApi.sendCharterDriverAssignment(23);
+    assert.match(calls[7].url, /\/whatsapp\/charter-driver-assignment\/send$/);
+    assert.equal(calls[7].method, 'POST');
+    assert.equal(calls[7].body, JSON.stringify({ driver_bus_assignment_id: 23 }));
   } finally { await server.close(); }
 });

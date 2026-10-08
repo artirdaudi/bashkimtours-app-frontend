@@ -3385,6 +3385,31 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+.bt-sidebar-new .bt-nav a.bt-charter-nav-feature { position: relative; padding-right: 35px; }
+.bt-sidebar-new .bt-nav .bt-charter-nav-ribbon { position: absolute; top: 3px; right: -6px; display: grid; place-items: center; width: 33px; height: 16px; border-radius: 3px; background: var(--bt-blue); color: #fff; box-shadow: 0 2px 5px #07387830; font-size: 8px; font-weight: 800; letter-spacing: .08em; line-height: 1; transform: rotate(16deg); }
+.bt-messages-page .bt-messages-service-tabs button { border-bottom-color: transparent; color: #637582; cursor: pointer; }
+.bt-messages-page .bt-messages-service-tabs button.active { border-bottom-color: #185a88; color: #185a88; }
+.bt-charter-whatsapp-modal { width: min(780px, 100%); }
+.bt-charter-whatsapp-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.bt-charter-whatsapp-heading p { margin: 0; color: #526675; }
+.bt-charter-whatsapp-help { display: grid; place-items: center; flex: none; width: 36px; height: 36px; border: 1px solid #dce5eb; border-radius: 9px; background: #fff; color: #185a88; cursor: pointer; }
+.bt-charter-whatsapp-preview { margin: 14px 0; padding: 12px; border-radius: 12px; background: #f5f7f9; text-align: center; }
+.bt-charter-whatsapp-preview img { display: block; max-width: 100%; max-height: 55dvh; margin: auto; object-fit: contain; }
+.bt-charter-whatsapp-preview figcaption { margin-top: 8px; color: #637582; font-size: 12px; }
+.bt-charter-whatsapp-state { display: flex; align-items: center; gap: 8px; color: #526675; }
+.bt-charter-whatsapp-buses { display: grid; gap: 14px; margin-top: 16px; }
+.bt-charter-whatsapp-bus { padding: 14px; border: 1px solid #dce5eb; border-radius: 12px; background: #f8fbfc; }
+.bt-charter-whatsapp-bus h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; color: #17364c; font-size: 15px; }
+.bt-charter-whatsapp-bus > p { margin: 0; color: #637582; }
+.bt-charter-whatsapp-driver { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding: 12px 0; border-top: 1px solid #dce5eb; }
+.bt-charter-whatsapp-driver > div { min-width: 0; }
+.bt-charter-whatsapp-driver strong { display: flex; align-items: center; gap: 7px; }
+.bt-charter-whatsapp-driver button { display: inline-flex; align-items: center; gap: 7px; min-height: 40px; }
+.bt-charter-whatsapp-driver p { margin: 5px 0 0; font-size: 12px; }
+.bt-charter-whatsapp-success { color: #187443; }
+.bt-charter-whatsapp-progress { display: flex; align-items: center; gap: 6px; color: #526675; }
+@media (max-width: 600px) { .bt-charter-whatsapp-driver button { width: 100%; justify-content: center; } }
 @media (max-width: 650px) {
   .bt-vehicle-cards {
     grid-template-columns: 1fr;

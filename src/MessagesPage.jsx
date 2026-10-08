@@ -13,6 +13,7 @@ const previewImage = (name) => [name, `${name}_preview`]
   .find(Boolean);
 
 const messages = [
+  { id: "charter-reminder", service: "charters", name: "charter_departure_reminder", title: "Kujtesë për Rezervim Autobusi", icon: BellRing, description: "Kujtesë automatike për rezervimin e autobusit. Mesazhi dërgohet 3 ditë para datës së nisjes së charterit te numrat: 38975201015, 38970321120 dhe 38976448448.", preview: "Shembull i kujtesës që dërgohet 3 ditë para nisjes. Të dhënat e udhëtimit plotësohen automatikisht nga sistemi." },
   { id: "monthly", name: "maarif_monthly_report", title: "Raporti mujor Maarif", icon: FileText, description: "Përmbledhja automatike e muajit të kaluar: të hyrat, pagesat e nxënësve, detyrimet e mbetura dhe përqindjet e pagesave. Dërgohet te marrësit e raportit mujor.", preview: "Raporti përmbledh të hyrat, nxënësit që kanë paguar, shumën e paguar dhe detyrimet e papaguara për muajin e kaluar." },
   { id: "card", name: "card_collection_deadline", title: "Njoftimi i kartelës", icon: IdCard, description: "Njoftim në WhatsApp për afatin e marrjes së kartelës.", preview: "Shembull i mesazhit për afatin e marrjes së kartelës. Të dhënat konkrete plotësohen nga sistemi gjatë dërgimit.", send: whatsappNotificationsApi.sendCard },
   { id: "payment", name: "payment_notification", title: "Njoftimi i pagesës", icon: CreditCard, description: "Njoftim automatik në WhatsApp për pagesat.", preview: "Njoftim për pagesën e nxënësit. Të dhënat konkrete plotësohen nga sistemi gjatë dërgimit." },
@@ -41,6 +42,7 @@ export default function MessagesPage() {
   const [testForm, setTestForm] = useState({ to: "", template_name: "", language_code: "sq", variables: "", header_image_url: "" });
   const [testFeedback, setTestFeedback] = useState("");
   const [activeTab, setActiveTab] = useState("automatic");
+  const [service, setService] = useState("maarif");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -51,7 +53,7 @@ export default function MessagesPage() {
   const [paymentRules, setPaymentRules] = useState(null);
   const [rulesLoading, setRulesLoading] = useState(true);
   const [rulesError, setRulesError] = useState(false);
-  const filteredMessages = messages.filter((item) => (activeTab === "manual" ? item.id === "card" || item.manual : item.id !== "card" && !item.manual) && `${item.name} ${item.title} ${item.description}`.toLocaleLowerCase("sq").includes(search.trim().toLocaleLowerCase("sq")));
+  const filteredMessages = messages.filter((item) => (item.service || "maarif") === service && (activeTab === "manual" ? item.id === "card" || item.manual : item.id !== "card" && !item.manual) && `${item.name} ${item.title} ${item.description}`.toLocaleLowerCase("sq").includes(search.trim().toLocaleLowerCase("sq")));
 
   useEffect(() => {
     followupRulesApi.get()
@@ -119,10 +121,10 @@ export default function MessagesPage() {
         <button type="button" className="bt-btn-primary" onClick={() => { setManagerOpen((value) => !value); setSelected(null); setTestOpen(false); }}><ChartNoAxesCombined size={18} /> {managerOpen ? "Mesazhet" : "WhatsApp Manager"}</button>
       </header>
       {managerOpen ? <WhatsAppManager /> : <>
-      <nav className="bt-messages-service-tabs" aria-label="Shërbimet"><button type="button" className="active">Maarif</button></nav>
+      <nav className="bt-messages-service-tabs" aria-label="Shërbimet"><button type="button" className={service === "maarif" ? "active" : ""} aria-current={service === "maarif" ? "page" : undefined} onClick={() => { setService("maarif"); setSelected(null); setSearch(""); }}>Maarif</button><button type="button" className={service === "charters" ? "active" : ""} aria-current={service === "charters" ? "page" : undefined} onClick={() => { setService("charters"); setActiveTab("automatic"); setSelected(null); setSearch(""); }}>Charters</button></nav>
       <div className="bt-messages-type-tabs" role="tablist" aria-label="Lloji i mesazheve">
         <button type="button" role="tab" aria-selected={activeTab === "automatic"} className={activeTab === "automatic" ? "active" : ""} onClick={() => setActiveTab("automatic")}>Automatike</button>
-        <button type="button" role="tab" aria-selected={activeTab === "manual"} className={activeTab === "manual" ? "active" : ""} onClick={() => setActiveTab("manual")}>Manuale</button>
+        {service === "maarif" && <button type="button" role="tab" aria-selected={activeTab === "manual"} className={activeTab === "manual" ? "active" : ""} onClick={() => setActiveTab("manual")}>Manuale</button>}
       </div>
       <label className="bt-messages-search">
         <Search size={19} aria-hidden="true" />
@@ -137,6 +139,7 @@ export default function MessagesPage() {
               </span>
             </button>
             {item.id === "monthly" && <em className="bt-messages-status active">Aktiv</em>}
+            {item.id === "charter-reminder" && <em className="bt-messages-status active">Aktiv</em>}
             {item.id === "payment" && <em className={`bt-messages-status ${paymentRules?.is_active && paymentRules?.message_enabled ? "active" : ""}`}>{rulesLoading || rulesError ? "—" : paymentRules?.is_active && paymentRules?.message_enabled ? "Aktiv" : "Joaktiv"}</em>}
             {item.id === "card" && <button type="button" className="bt-btn-primary bt-messages-list-send" onClick={() => { setSelected(item); setSendFeedback(null); setPassword(""); setError(""); setConfirmOpen(true); }}><Send size={17} /> Dërgo</button>}
             {item.id === "test" && <button type="button" className="bt-btn-primary bt-messages-list-send" onClick={() => { setTestOpen(true); setError(""); }}><Send size={17} /> Testo</button>}
