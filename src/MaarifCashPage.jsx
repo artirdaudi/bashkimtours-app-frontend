@@ -11,11 +11,11 @@ const euro = new Intl.NumberFormat("sq-AL", { style: "currency", currency: "EUR"
 const money = (value) => value == null ? "—" : euro.format(Number(value));
 const mkd = new Intl.NumberFormat("sq-AL", { maximumFractionDigits: 2 });
 const formatMKD = (value) => value == null ? "—" : `${mkd.format(Number(value))} MKD`;
-const exchangeRate = 61.5;
 const dateTime = (value) => value ? new Intl.DateTimeFormat("sq-MK", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)) : "—";
 const paymentDate = (value) => value ? new Intl.DateTimeFormat("sq-MK", { dateStyle: "medium" }).format(new Date(`${value}T12:00:00`)) : "—";
 const differenceLabel = (value) => value == null ? "—" : Number(value) === 0 ? "Përputhet" : Number(value) > 0 ? `Tepricë: ${money(value)}` : `Mungesë: ${money(Math.abs(Number(value)))}`;
 const emptyAction = () => ({ amount: "", comment: "", currency: "EUR" });
+const amountInEUR = (transaction) => Number(transaction.amount_eur ?? transaction.amount ?? 0);
 
 function ExpenseAmount({ transaction }) {
   if (transaction.currency !== "MKD") return <>-{money(transaction.amount)}</>;
@@ -38,7 +38,7 @@ function groupIncomeTransactions(transactions) {
     );
     const userId = payment?.created_by_user_id ?? transaction.created_by_user_id ?? transaction.created_by_username;
     if (payment?.id == null || studentId == null || userId == null || !payment.payment_date) {
-      single.push({ key: transaction.id, transactions: [transaction], totalAmount: Number(transaction.amount) });
+      single.push({ key: transaction.id, transactions: [transaction], totalAmount: amountInEUR(transaction) });
       return;
     }
     groupable.push({
@@ -47,7 +47,7 @@ function groupIncomeTransactions(transactions) {
       student_id: studentId,
       created_by_user_id: userId,
       created_at: payment.created_at ?? transaction.created_at,
-      amount: transaction.amount,
+      amount: amountInEUR(transaction),
       transaction,
     });
   });
@@ -77,6 +77,7 @@ function Summary({ session, closed = false, current = false }) {
       <div className="bt-cash-current-totals">
         <div><span>Të hyrat</span><strong>{money(session.total_income)}</strong></div>
         <div><span>Të dalurat</span><strong>{money(session.total_expenses)}</strong></div>
+        {session.live_balance != null && <div><span>Gjendja aktuale</span><strong>{money(session.live_balance)}</strong></div>}
       </div>
     </div>
     {session.comment && <p><strong>Koment:</strong> {session.comment}</p>}
@@ -166,7 +167,7 @@ function TransactionColumns({ items, loading = false, expenseRegisterId = null, 
     <section className="bt-maarif-cash-panel"><h2><ArrowDownRight size={21} /> Të hyrat</h2>
       {loading && <p>Duke ngarkuar…</p>}
       {!loading && !income.length && <p>Nuk ka të hyra në këtë sesion.</p>}
-      {!!income.length && registerType !== "MAARIF" && <div className="bt-accounts-table-wrap"><table className="bt-accounts-table bt-excursion-income-table"><thead><tr><th>Data</th><th>Burimi</th><th>Koment</th><th>Regjistruar nga</th><th>Shuma</th></tr></thead><tbody>{income.map((item) => <tr key={item.id}><td>{dateTime(item.created_at)}</td><td>{item.source_type || "—"}</td><td>{item.comment || "—"}</td><td>{item.created_by_username || "—"}</td><td>+{money(item.amount)}</td></tr>)}</tbody></table></div>}
+      {!!income.length && registerType !== "MAARIF" && <div className="bt-accounts-table-wrap"><table className="bt-accounts-table bt-excursion-income-table"><thead><tr><th>Data</th><th>Burimi</th><th>Koment</th><th>Regjistruar nga</th><th>Shuma (EUR)</th></tr></thead><tbody>{income.map((item) => <tr key={item.id}><td>{dateTime(item.created_at)}</td><td>{item.source_type || "—"}</td><td>{item.comment || "—"}</td><td>{item.created_by_username || "—"}</td><td>+{money(amountInEUR(item))}</td></tr>)}</tbody></table></div>}
       {!!income.length && registerType === "MAARIF" && <div className="bt-accounts-table-wrap"><table className="bt-accounts-table"><thead><tr><th>Data e pagesës</th><th>Nxënësi</th><th>Muaji</th><th>Koment</th><th>Shuma</th></tr></thead><tbody>{income.map((group) => {
         const item = group.transactions[0];
         const hasDetails = group.transactions.some((entry) => entry.payment?.id != null || entry.payment_id != null);
@@ -222,7 +223,7 @@ function SessionPrintSheet({ session, registerType = "MAARIF" }) {
       {session.comment && <tr><th>Koment</th><td colSpan={3}>{session.comment}</td></tr>}
     </tbody></table></section>
     <section className="bt-print-section"><h2>Të hyrat <span>{registerType === "MAARIF" ? income.reduce((total, group) => total + group.transactions.length, 0) : income.length} pagesa · {money(session.total_income)}</span></h2><table><thead><tr><th>Data</th><th>{registerType === "MAARIF" ? "Nxënësi" : "Burimi"}</th><th>{registerType === "MAARIF" ? "Muaji" : "Përdoruesi"}</th><th>Koment</th><th>Shuma</th></tr></thead><tbody>
-      {registerType === "MAARIF" ? income.map((group) => { const item = group.transactions[0]; return <tr key={group.key}><td>{item.payment ? paymentDate(item.payment.payment_date) : dateTime(item.created_at)}</td><td>{item.payment ? `${item.payment.student_first_name} ${item.payment.student_last_name}` : "—"}</td><td>{item.payment ? groupMonths(group.transactions) : "—"}</td><td>{item.payment?.comment || item.comment || "—"}</td><td>+{money(group.totalAmount)}</td></tr>; }) : income.map((item) => <tr key={item.id}><td>{dateTime(item.created_at)}</td><td>{item.source_type || "—"}</td><td>{item.created_by_username || "—"}</td><td>{item.comment || "—"}</td><td>+{money(item.amount)}</td></tr>)}
+      {registerType === "MAARIF" ? income.map((group) => { const item = group.transactions[0]; return <tr key={group.key}><td>{item.payment ? paymentDate(item.payment.payment_date) : dateTime(item.created_at)}</td><td>{item.payment ? `${item.payment.student_first_name} ${item.payment.student_last_name}` : "—"}</td><td>{item.payment ? groupMonths(group.transactions) : "—"}</td><td>{item.payment?.comment || item.comment || "—"}</td><td>+{money(group.totalAmount)}</td></tr>; }) : income.map((item) => <tr key={item.id}><td>{dateTime(item.created_at)}</td><td>{item.source_type || "—"}</td><td>{item.created_by_username || "—"}</td><td>{item.comment || "—"}</td><td>+{money(amountInEUR(item))}</td></tr>)}
       {!income.length && <tr><td colSpan={5}>Nuk ka të hyra në këtë sesion.</td></tr>}
     </tbody></table></section>
     <section className="bt-print-section"><h2>Të dalurat <span>{expenses.length} dalje · {money(session.total_expenses)}</span></h2><table><thead><tr><th>Data</th><th>Koment</th><th>Regjistruar nga</th><th>Shuma</th></tr></thead><tbody>
@@ -457,7 +458,7 @@ export default function MaarifCashPage({ registerType = "MAARIF", moduleLabel = 
         <label>Shuma<input type="number" min="0.01" step="0.01" required value={actionForm.amount} onChange={(event) => setActionForm({ ...actionForm, amount: event.target.value })} /></label>
         <label>Monedha<select value={actionForm.currency} onChange={(event) => setActionForm({ ...actionForm, currency: event.target.value })}><option value="EUR">EUR</option><option value="MKD">MKD</option></select></label>
       </div> : <label>{action === "open" ? "Balanci fizik në hapje (EUR)" : "Balanci fizik në mbyllje (EUR)"}<input type="number" min="0" step="0.01" required value={actionForm.amount} onChange={(event) => setActionForm({ ...actionForm, amount: event.target.value })} /></label>}
-      {action === "expense" && actionForm.currency === "MKD" && Number(actionForm.amount) > 0 && <p className="bt-cash-conversion-preview">{formatMKD(actionForm.amount)} ≈ {money(Number(actionForm.amount) / exchangeRate)}<small>Kursi: 1 EUR = 61.5 MKD · Vlera përfundimtare llogaritet nga backend-i.</small></p>}
+      {action === "expense" && actionForm.currency === "MKD" && <p className="bt-cash-conversion-preview">Shuma në EUR dhe kursi i këmbimit përcaktohen nga sistemi pas ruajtjes.</p>}
       <label>Koment (opsional)<textarea rows={3} value={actionForm.comment} onChange={(event) => setActionForm({ ...actionForm, comment: event.target.value })} /></label>
       {error && <p className="bt-inline-error" role="alert">{error}</p>}
       <div className="bt-modal-actions"><button type="submit" className={action === "close" ? "bt-btn-danger" : "bt-btn-primary"} disabled={saving}>{saving ? "Duke ruajtur…" : action === "open" ? "Hap arkën" : action === "close" ? "Konfirmo mbylljen" : "Ruaj të dalurën"}</button></div>

@@ -211,7 +211,7 @@ export default function IncomePage() {
           <span className="bt-eyebrow">Bashkim Tours · Maarif · Financa</span>
           <h1>Të hyrat</h1>
           <p>
-            Përmbledhja e të hyrave nga transporti Maarif, e organizuar
+            Përmbledhja e të hyrave në EUR nga transporti Maarif, e organizuar
             sipas burimit dhe datës së arkëtimit.
           </p>
         </div>

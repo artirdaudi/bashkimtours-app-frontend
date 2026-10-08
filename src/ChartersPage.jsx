@@ -12,6 +12,7 @@ import CharterPaymentReceipt from "./CharterPaymentReceipt";
 import { loadCharterAssignments, selectedCharterAssignments, syncCharterAssignments } from "./charterAssignmentSync";
 import { confirmAction } from "./confirmAction";
 import { Modal } from "./PortalPages";
+import { charterCurrency, formatCharterMoney } from "./charterCurrency";
 
 const fields = [
   { key: "contractor", label: "Porositësi" },
@@ -19,6 +20,7 @@ const fields = [
   { key: "number_of_buses", label: "Numri i autobusëve (opsional)", type: "number" },
   { key: "drivers_per_bus", label: "Shoferë për autobus (opsional)", type: "number" },
   { key: "price", label: "Çmimi", type: "number", step: "0.01" },
+  { key: "currency", label: "Monedha" },
   { key: "billing_type", label: "Lloji i faturimit" },
   { key: "passenger_count", label: "Numri i udhëtarëve", type: "number" },
   { key: "departure_at", label: "Nisja", type: "datetime-local" },
@@ -33,20 +35,21 @@ const displayValue = (item, { key, type }) => {
   if (key === "created_by_user") return value?.username || (item.created_by_user_id != null ? String(item.created_by_user_id) : "—");
   if (value == null || value === "") return "—";
   if (type === "datetime-local") return dateTime(value);
-  if (key === "price" || key === "paid_amount") return money(value);
+  if (key === "price" || key === "paid_amount") return formatCharterMoney(value, charterCurrency(item));
+  if (key === "currency") return charterCurrency(item);
   if (key === "billing_type") return { CASH: "Kesh", INVOICE: "Faturë" }[value] || String(value);
   return String(value);
 };
 const formGroups = [
   { title: "Udhëtimi", keys: ["contractor", "route", "passenger_count", "responsible_phone", "departure_at", "return_at"] },
   { title: "Agjenda", keys: [] },
-  { title: "Faturimi", keys: ["price", "billing_type"] },
+  { title: "Faturimi", keys: ["price", "currency", "billing_type"] },
   { title: "Autobusi dhe shoferët", keys: ["number_of_buses", "drivers_per_bus"] },
   { title: "Shënime", keys: ["comment"] },
 ];
 const createHidden = new Set(["paid_amount", "payment_date"]);
 const pageSize = 20;
-const money = (value) => value == null ? "—" : `${new Intl.NumberFormat("sq-AL", { maximumFractionDigits: 2 }).format(Number(value))} €`;
+const money = formatCharterMoney;
 const dateTime = (value) => {
   if (!value) return "—";
   const date = new Date(value);
@@ -55,7 +58,7 @@ const dateTime = (value) => {
   return `${parts.day}/${parts.month}/${parts.year} ${parts.hour}:${parts.minute}`;
 };
 const formDate = (value) => value ? value.slice(0, 16) : "";
-const initialForm = (item) => Object.fromEntries(fields.map(({ key, type }) => [key, type === "datetime-local" ? formDate(item?.[key]) : item?.[key] ?? ""]));
+const initialForm = (item) => Object.fromEntries(fields.map(({ key, type }) => [key, type === "datetime-local" ? formDate(item?.[key]) : key === "currency" ? charterCurrency(item) : item?.[key] ?? ""]));
 
 export default function ChartersPage() {
   const [items, setItems] = useState([]);
@@ -307,7 +310,7 @@ export default function ChartersPage() {
     const amount = Number(paymentForm.amount);
     const remaining = Number(paymentItem.price) - Number(paymentItem.paid_amount || 0);
     if (!isInvoice && (!Number.isFinite(amount) || amount <= 0 || amount > remaining)) {
-      setPaymentError(`Shëno një shumë më të madhe se zero dhe jo më shumë se ${money(remaining)}.`);
+      setPaymentError(`Shëno një shumë më të madhe se zero dhe jo më shumë se ${money(remaining, charterCurrency(paymentItem))}.`);
       return;
     }
     setPaymentBusy(true);
@@ -326,7 +329,7 @@ export default function ChartersPage() {
   }
 
   const renderCard = (item) => <article className="bt-charter-card" key={item.id} tabIndex={0} aria-label={`Ndrysho charter-in ${item.contractor || item.id}`} onClick={(event) => { if (!event.target.closest("button, a, input, select, textarea, summary, [role=button]")) openForm(item); }} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); openForm(item); } }}>
-        <div className="bt-charter-card-head"><div><h2>{item.contractor || "Pa porositës"}</h2><p><Route size={16} /> {item.route || "Relacioni nuk është shënuar"}</p></div><div className="bt-charter-card-price"><span>Çmimi</span><strong>{money(item.price)}</strong><small>{displayValue(item, { key: "billing_type" })}</small><small>{item.passenger_count ?? "—"} udhëtarë</small></div></div>
+        <div className="bt-charter-card-head"><div><h2>{item.contractor || "Pa porositës"}</h2><p><Route size={16} /> {item.route || "Relacioni nuk është shënuar"}</p></div><div className="bt-charter-card-price"><span>Çmimi</span><strong>{money(item.price, charterCurrency(item))}</strong><small>{displayValue(item, { key: "billing_type" })}</small><small>{item.passenger_count ?? "—"} udhëtarë</small></div></div>
         <div className="bt-charter-card-facts">
           <div><CalendarDays size={18} /><span><small>Nisja</small><strong>{dateTime(item.departure_at)}</strong></span></div>
           <div><CalendarDays size={18} /><span><small>Kthimi</small><strong>{dateTime(item.return_at)}</strong></span></div>
@@ -339,7 +342,7 @@ export default function ChartersPage() {
           </div>
         </div>
         <div className="bt-charter-agenda-summary"><FileText size={17} /><div><strong>Agjenda{agendaDocuments[String(item.id)] ? ` · ${agendaDocuments[String(item.id)].length} dokumente` : ""}</strong>{agendaDocuments[String(item.id)] === undefined ? <small>{agendaLoadError ? "Dokumentet nuk u ngarkuan" : "Duke ngarkuar dokumentet…"}</small> : <DriverDocuments driver={{ id: item.id, emri: item.contractor || `Charter ${item.id}` }} entityType={DOCUMENT_ENTITY_TYPES.CHARTER} documents={agendaDocuments[String(item.id)]} loadDocuments={loadAgendaDocuments} readOnly />}</div></div>
-        <div className="bt-charter-card-footer"><span className={`bt-charter-paid ${Number(item.price) > 0 && Number(item.paid_amount) >= Number(item.price) ? "is-paid" : "is-unpaid"}`}><Banknote size={16} /> {Number(item.price) > 0 && Number(item.paid_amount) >= Number(item.price) ? "Paguar" : "Ende pa paguar"}: <strong>{money(item.paid_amount)} / {money(item.price)}</strong></span><span>Regjistruar nga: <strong>{displayValue(item, { key: "created_by_user" })}</strong></span><span>Regjistruar në: <strong>{dateTime(item.created_at)}</strong></span><div className="bt-charter-card-actions">{Number(item.price) > 0 && Number(item.paid_amount || 0) < Number(item.price) && <button type="button" className="bt-btn-primary" onClick={() => openPayment(item)}><Banknote size={16} /> Bëj pagesë</button>}<button type="button" className="bt-btn-secondary" onClick={() => setPatenCharter(item)}><FileText size={16} /> Paten Nalog</button><button type="button" className="bt-btn-secondary" onClick={() => setWhatsAppCharter(item)}><MessageCircle size={16} /> WhatsApp Messages</button><button type="button" className="bt-btn-secondary" onClick={() => openForm(item)}><Pencil size={16} /> Ndrysho</button><button type="button" className="bt-btn-danger" disabled={busy} onClick={() => remove(item)}><Trash2 size={16} /> Fshi</button></div></div>
+        <div className="bt-charter-card-footer"><span className={`bt-charter-paid ${Number(item.price) > 0 && Number(item.paid_amount) >= Number(item.price) ? "is-paid" : "is-unpaid"}`}><Banknote size={16} /> {Number(item.price) > 0 && Number(item.paid_amount) >= Number(item.price) ? "Paguar" : "Ende pa paguar"}: <strong>{money(item.paid_amount, charterCurrency(item))} / {money(item.price, charterCurrency(item))}</strong></span><span>Regjistruar nga: <strong>{displayValue(item, { key: "created_by_user" })}</strong></span><span>Regjistruar në: <strong>{dateTime(item.created_at)}</strong></span><div className="bt-charter-card-actions">{Number(item.price) > 0 && Number(item.paid_amount || 0) < Number(item.price) && <button type="button" className="bt-btn-primary" onClick={() => openPayment(item)}><Banknote size={16} /> Bëj pagesë</button>}<button type="button" className="bt-btn-secondary" onClick={() => setPatenCharter(item)}><FileText size={16} /> Paten Nalog</button><button type="button" className="bt-btn-secondary" onClick={() => setWhatsAppCharter(item)}><MessageCircle size={16} /> WhatsApp Messages</button><button type="button" className="bt-btn-secondary" onClick={() => openForm(item)}><Pencil size={16} /> Ndrysho</button><button type="button" className="bt-btn-danger" disabled={busy} onClick={() => remove(item)}><Trash2 size={16} /> Fshi</button></div></div>
 
     </article>;
 
@@ -355,8 +358,8 @@ export default function ChartersPage() {
     </div>
     {patenCharter && <CharterPatenNalogModal charter={patenCharter} buses={buses} drivers={drivers} onClose={() => setPatenCharter(null)} />}
     {whatsAppCharter && <CharterWhatsAppModal charter={whatsAppCharter} buses={buses} drivers={drivers} onClose={() => setWhatsAppCharter(null)} />}
-    {paymentItem && <Modal title={`Bëj pagesë · ${paymentItem.contractor || `Charter ${paymentItem.id}`}`} onClose={() => { if (!paymentBusy) setPaymentItem(null); }}><form className="bt-role-form bt-charter-payment-form" onSubmit={savePayment}><p className="bt-charter-payment-context">{paymentItem.route || "Pa relacion"} · Mbetur: <strong>{money(Math.max(0, Number(paymentItem.price) - Number(paymentItem.paid_amount || 0)))}</strong></p>{paymentItem.billing_type !== "INVOICE" && <label>Shuma<input type="number" min="0.01" max={Math.max(0, Number(paymentItem.price) - Number(paymentItem.paid_amount || 0))} step="0.01" required value={paymentForm.amount} onChange={(event) => setPaymentForm({ ...paymentForm, amount: event.target.value })} /></label>}<label>Koment <small>(opsional)</small><textarea rows={3} value={paymentForm.comment} onChange={(event) => setPaymentForm({ ...paymentForm, comment: event.target.value })} /></label>{paymentError && <p className="bt-inline-error" role="alert">{paymentError}</p>}<div className="bt-modal-actions"><button type="button" className="bt-btn-secondary" disabled={paymentBusy} onClick={() => setPaymentItem(null)}>Anulo</button><button type="submit" className="bt-btn-secondary" disabled={paymentBusy}>{paymentBusy ? "Duke ruajtur…" : "Ruaj pagesën"}</button><button type="submit" value="print" className="bt-btn-primary" disabled={paymentBusy}><Printer size={17} /> {paymentBusy ? "Duke ruajtur…" : "Paguaj dhe printo vërtetimin"}</button></div></form></Modal>}
+    {paymentItem && <Modal title={`Bëj pagesë · ${paymentItem.contractor || `Charter ${paymentItem.id}`}`} onClose={() => { if (!paymentBusy) setPaymentItem(null); }}><form className="bt-role-form bt-charter-payment-form" onSubmit={savePayment}><p className="bt-charter-payment-context">{paymentItem.route || "Pa relacion"} · Mbetur: <strong>{money(Math.max(0, Number(paymentItem.price) - Number(paymentItem.paid_amount || 0)), charterCurrency(paymentItem))}</strong></p>{paymentItem.billing_type !== "INVOICE" && <label>Shuma ({charterCurrency(paymentItem)})<input type="number" min="0.01" max={Math.max(0, Number(paymentItem.price) - Number(paymentItem.paid_amount || 0))} step="0.01" required value={paymentForm.amount} onChange={(event) => setPaymentForm({ ...paymentForm, amount: event.target.value })} /></label>}<label>Koment <small>(opsional)</small><textarea rows={3} value={paymentForm.comment} onChange={(event) => setPaymentForm({ ...paymentForm, comment: event.target.value })} /></label>{paymentError && <p className="bt-inline-error" role="alert">{paymentError}</p>}<div className="bt-modal-actions"><button type="button" className="bt-btn-secondary" disabled={paymentBusy} onClick={() => setPaymentItem(null)}>Anulo</button><button type="submit" className="bt-btn-secondary" disabled={paymentBusy}>{paymentBusy ? "Duke ruajtur…" : "Ruaj pagesën"}</button><button type="submit" value="print" className="bt-btn-primary" disabled={paymentBusy}><Printer size={17} /> {paymentBusy ? "Duke ruajtur…" : "Paguaj dhe printo vërtetimin"}</button></div></form></Modal>}
     {paymentReceipt && <CharterPaymentReceipt {...paymentReceipt} />}
-    {form && <Modal title={form.id != null ? "Ndrysho charter-in" : "Shto charter"} className="bt-shoferat-form-modal bt-charter-form-modal" onClose={() => { if (!busy) { assignmentLoadId.current += 1; setForm(null); } }}><form className="bt-shoferat-form bt-charter-form" onSubmit={save}>{formGroups.map((group) => { const groupFields = group.keys.map((key) => fields.find((field) => field.key === key)).filter((field) => field && (form.id != null || !createHidden.has(field.key))); return <fieldset className="bt-charter-form-group" key={group.title}><legend>{group.title}</legend>{group.title === "Agjenda" ? (form.id != null ? <DriverDocuments driver={{ id: form.id, emri: `Charter ${form.id}` }} entityType={DOCUMENT_ENTITY_TYPES.CHARTER} multiple documents={agendaDocuments[String(form.id)]} loadDocuments={loadAgendaDocuments} /> : <CharterAgendaDraft files={agendaDrafts} onChange={setAgendaDrafts} />) : <div className="bt-charter-form-grid">{groupFields.map(({ key, label, type, step }) => type === "datetime-local" ? <CharterDateTimeField key={key} label={label} value={form[key]} onChange={(value) => setForm((current) => ({ ...current, [key]: value }))} /> : <label key={key}><span>{label}</span>{key === "billing_type" ? <select value={form[key]} onChange={(event) => setForm({ ...form, [key]: event.target.value })}><option value="">Zgjidh llojin</option><option value="CASH">Kesh</option><option value="INVOICE">Faturë</option></select> : type === "textarea" ? <textarea value={form[key]} onChange={(event) => setForm({ ...form, [key]: event.target.value })} rows={3} /> : <input type={type || "text"} min={type === "number" ? (["number_of_buses", "drivers_per_bus"].includes(key) ? 1 : 0) : undefined} step={step || (type === "number" ? "1" : undefined)} value={form[key]} onChange={(event) => setForm({ ...form, [key]: event.target.value })} />}</label>)}</div>}{group.title === "Autobusi dhe shoferët" && <CharterAssignments assignments={assignmentDrafts} onChange={setAssignmentDrafts} numberOfBuses={form.number_of_buses} driversPerBus={form.drivers_per_bus} buses={buses} drivers={drivers} disabled={assignmentLoading} />}</fieldset>; })}{error && <p className="bt-inline-error" role="alert">{error}</p>}<div className="bt-shoferat-actions"><button className="bt-btn-primary" disabled={busy || assignmentLoading}>{busy ? "Duke ruajtur…" : assignmentLoading ? "Duke ngarkuar…" : "Ruaj"}</button><button type="button" className="bt-btn-secondary" disabled={busy} onClick={() => setForm(null)}>Anulo</button></div></form></Modal>}
+    {form && <Modal title={form.id != null ? "Ndrysho charter-in" : "Shto charter"} className="bt-shoferat-form-modal bt-charter-form-modal" onClose={() => { if (!busy) { assignmentLoadId.current += 1; setForm(null); } }}><form className="bt-shoferat-form bt-charter-form" onSubmit={save}>{formGroups.map((group) => { const groupFields = group.keys.map((key) => fields.find((field) => field.key === key)).filter((field) => field && (form.id != null || !createHidden.has(field.key))); return <fieldset className="bt-charter-form-group" key={group.title}><legend>{group.title}</legend>{group.title === "Agjenda" ? (form.id != null ? <DriverDocuments driver={{ id: form.id, emri: `Charter ${form.id}` }} entityType={DOCUMENT_ENTITY_TYPES.CHARTER} multiple documents={agendaDocuments[String(form.id)]} loadDocuments={loadAgendaDocuments} /> : <CharterAgendaDraft files={agendaDrafts} onChange={setAgendaDrafts} />) : <div className="bt-charter-form-grid">{groupFields.map(({ key, label, type, step }) => type === "datetime-local" ? <CharterDateTimeField key={key} label={label} value={form[key]} onChange={(value) => setForm((current) => ({ ...current, [key]: value }))} /> : <label key={key}><span>{label}</span>{key === "currency" ? <select value={form[key]} onChange={(event) => setForm({ ...form, [key]: event.target.value })}><option value="EUR">EUR</option><option value="MKD">MKD</option></select> : key === "billing_type" ? <select value={form[key]} onChange={(event) => setForm({ ...form, [key]: event.target.value })}><option value="">Zgjidh llojin</option><option value="CASH">Kesh</option><option value="INVOICE">Faturë</option></select> : type === "textarea" ? <textarea value={form[key]} onChange={(event) => setForm({ ...form, [key]: event.target.value })} rows={3} /> : <input type={type || "text"} min={type === "number" ? (["number_of_buses", "drivers_per_bus"].includes(key) ? 1 : 0) : undefined} step={step || (type === "number" ? "1" : undefined)} value={form[key]} onChange={(event) => setForm({ ...form, [key]: event.target.value })} />}</label>)}</div>}{group.title === "Autobusi dhe shoferët" && <CharterAssignments assignments={assignmentDrafts} onChange={setAssignmentDrafts} numberOfBuses={form.number_of_buses} driversPerBus={form.drivers_per_bus} buses={buses} drivers={drivers} disabled={assignmentLoading} />}</fieldset>; })}{error && <p className="bt-inline-error" role="alert">{error}</p>}<div className="bt-shoferat-actions"><button className="bt-btn-primary" disabled={busy || assignmentLoading}>{busy ? "Duke ruajtur…" : assignmentLoading ? "Duke ngarkuar…" : "Ruaj"}</button><button type="button" className="bt-btn-secondary" disabled={busy} onClick={() => setForm(null)}>Anulo</button></div></form></Modal>}
   </div>;
 }

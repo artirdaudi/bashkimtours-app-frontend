@@ -7003,6 +7003,7 @@
 .bt-paten-list > p { display: flex; align-items: center; gap: 7px; margin: 0; color: #637582; }
 .bt-paten-empty { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 14px; border: 1px solid #dce5eb; border-radius: 11px; }
 .bt-paten-empty p { margin: 0; color: #637582; }
+.bt-paten-empty .bt-btn-primary:disabled { cursor: not-allowed; }
 .bt-paten-bus { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 14px; border: 1px solid #dce5eb; border-radius: 11px; background: #f8fbfc; }
 .bt-paten-bus-main { display: grid; gap: 7px; min-width: 0; }
 .bt-paten-bus-main strong, .bt-paten-bus-main span, .bt-paten-serial { display: inline-flex; align-items: center; gap: 6px; }
