@@ -6995,6 +6995,10 @@
 .bt-paten-preview { display: grid; gap: 12px; }
 .bt-paten-preview-actions strong { color: #17364c; }
 .bt-paten-preview iframe { width: 100%; min-height: min(70vh, 750px); border: 1px solid #dce5eb; border-radius: 8px; background: #fff; }
+.bt-paten-pdf-pages > div { display: grid; justify-items: center; gap: 14px; min-width: 0; }
+.bt-paten-pdf-pages canvas { display: block; max-width: 100%; height: auto !important; border: 1px solid #dce5eb; border-radius: 4px; background: #fff; box-shadow: 0 3px 12px #152e421a; }
+.bt-paten-pdf-pages p { margin: 0; color: #b42318; }
+.bt-paten-preview iframe.bt-paten-print-frame { position: absolute; width: 1px; height: 1px; min-height: 0; opacity: 0; pointer-events: none; }
 .bt-charter-agenda-summary { display: flex; align-items: center; gap: 9px; min-width: 0; padding: 10px 21px; border-top: 1px solid #edf1f4; color: #185a88; }
 .bt-charter-agenda-summary > svg { flex: none; }
 .bt-charter-agenda-summary > span { display: grid; gap: 2px; flex: 1; min-width: 0; }
