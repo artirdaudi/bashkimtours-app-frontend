@@ -7,6 +7,13 @@ export function selectedCharterAssignments(drafts, busCount, driverCount) {
   })).filter((item) => item.busId);
 }
 
+export function charterAssignmentsPayload(drafts, busCount, driverCount) {
+  return selectedCharterAssignments(drafts, busCount, driverCount).map(({ busId, driverIds }) => ({
+    bus_id: Number(busId),
+    driver_ids: driverIds,
+  }));
+}
+
 export async function loadCharterAssignments(charterId) {
   const assignments = [];
   for (let offset = 0; ; offset += 100) {
@@ -23,24 +30,4 @@ export async function loadCharterAssignments(charterId) {
     }
     return { ...assignment, drivers };
   }));
-}
-
-export async function syncCharterAssignments(charterId, desired, existing) {
-  const wanted = new Set(desired.map((item) => String(item.busId)));
-  for (const assignment of existing) {
-    if (!wanted.has(String(assignment.bus_id))) await charterAssignmentsApi.removeBus(assignment.id);
-  }
-  for (const item of desired) {
-    const previous = existing.find((assignment) => String(assignment.bus_id) === String(item.busId));
-    const assignment = previous || await charterAssignmentsApi.assignBus(charterId, Number(item.busId));
-    const wantedDrivers = new Set(item.driverIds.map(String));
-    for (const driver of previous?.drivers || []) {
-      if (!wantedDrivers.has(String(driver.driver_id))) await charterAssignmentsApi.removeDriver(driver.id);
-    }
-    for (const driverId of wantedDrivers) {
-      if (!(previous?.drivers || []).some((driver) => String(driver.driver_id) === driverId)) {
-        await charterAssignmentsApi.assignDriver(assignment.id, driverId);
-      }
-    }
-  }
 }

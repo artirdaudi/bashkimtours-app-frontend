@@ -1,56 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Bus, Eye, FileText, LoaderCircle, Printer, UsersRound } from "lucide-react";
 import { patenNalogsApi } from "./api";
-import { loadCharterAssignments } from "./charterAssignmentSync";
 import { Modal } from "./PortalPages";
 
 const today = () => {
   const date = new Date();
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 };
-
-function PdfPages({ blob, onReady }) {
-  const pagesRef = useRef(null);
-  const [error, setError] = useState("");
-  useEffect(() => {
-    let active = true;
-    let documentTask;
-    let pdf;
-    const container = pagesRef.current;
-    container.replaceChildren();
-    async function renderPages() {
-      try {
-        const pdfjs = await import("pdfjs-dist/build/pdf.mjs");
-        pdfjs.GlobalWorkerOptions.workerSrc = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")).default;
-        documentTask = pdfjs.getDocument({ data: await blob.arrayBuffer() });
-        pdf = await documentTask.promise;
-        for (let number = 1; number <= pdf.numPages && active; number += 1) {
-          const page = await pdf.getPage(number);
-          const width = Math.min(container.clientWidth || 900, 900);
-          const base = page.getViewport({ scale: 1 });
-          const scale = width / base.width;
-          const viewport = page.getViewport({ scale });
-          const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-          const canvas = document.createElement("canvas");
-          canvas.width = Math.ceil(viewport.width * pixelRatio);
-          canvas.height = Math.ceil(viewport.height * pixelRatio);
-          canvas.style.width = `${viewport.width}px`;
-          canvas.style.height = `${viewport.height}px`;
-          canvas.setAttribute("aria-label", `Faqja ${number} nga ${pdf.numPages}`);
-          container.append(canvas);
-          await page.render({ canvasContext: canvas.getContext("2d"), viewport, transform: pixelRatio === 1 ? undefined : [pixelRatio, 0, 0, pixelRatio, 0, 0] }).promise;
-          page.cleanup();
-        }
-        if (active) onReady();
-      } catch {
-        if (active) setError("PDF-ja nuk mund të shfaqet. Hape dokumentin për ta parë në shfletues.");
-      }
-    }
-    renderPages();
-    return () => { active = false; documentTask?.destroy(); pdf?.destroy(); container.replaceChildren(); };
-  }, [blob, onReady]);
-  return <div className="bt-paten-pdf-pages">{error && <p role="alert">{error}</p>}<div ref={pagesRef} /></div>;
-}
 
 async function loadNalogs(charterId) {
   const all = [];
@@ -61,26 +17,31 @@ async function loadNalogs(charterId) {
   }
 }
 
-export default function CharterPatenNalogModal({ charter, buses, drivers, onClose }) {
-  const [assignments, setAssignments] = useState([]);
+export default function CharterPatenNalogModal({ charter, onClose }) {
+  const assignments = charter.assignments || [];
   const [nalogs, setNalogs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(assignments.length > 0);
   const [busy, setBusy] = useState(false);
+  const [loadingPdfId, setLoadingPdfId] = useState(null);
   const [error, setError] = useState("");
   const [creating, setCreating] = useState(null);
   const [preview, setPreview] = useState(null);
   const [pdfReady, setPdfReady] = useState(false);
   const frameRef = useRef(null);
-  const markPdfReady = useCallback(() => setPdfReady(true), []);
+  const nalogsRequestRef = useRef(null);
 
   useEffect(() => {
+    if (!assignments.length) return;
     let active = true;
-    Promise.all([loadCharterAssignments(charter.id), loadNalogs(charter.id)])
-      .then(([assigned, existing]) => { if (active) { setAssignments(assigned); setNalogs(existing); } })
+    if (nalogsRequestRef.current?.charterId !== charter.id) {
+      nalogsRequestRef.current = { charterId: charter.id, promise: loadNalogs(charter.id) };
+    }
+    nalogsRequestRef.current.promise
+      .then((existing) => { if (active) setNalogs(existing); })
       .catch((requestError) => { if (active) setError(requestError.message); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [charter.id]);
+  }, [charter.id, assignments.length]);
   useEffect(() => () => { if (preview?.url) URL.revokeObjectURL(preview.url); }, [preview]);
 
   async function create(event) {
@@ -99,29 +60,33 @@ export default function CharterPatenNalogModal({ charter, buses, drivers, onClos
   async function showPdf(nalog) {
     if (busy) return;
     setBusy(true);
+    setLoadingPdfId(nalog.id);
     setError("");
     try {
       const blob = await patenNalogsApi.pdf(nalog.id);
+      if (!blob.size || !(await blob.slice(0, 1024).text()).includes("%PDF-")) {
+        throw new Error("Serveri nuk ktheu një dokument PDF të vlefshëm.");
+      }
       const url = URL.createObjectURL(new Blob([blob], { type: "application/pdf" }));
       setPdfReady(false);
-      setPreview({ url, blob, serial: nalog.serial_number });
+      setPreview({ url, serial: nalog.serial_number });
     } catch (requestError) { setError(requestError.message); }
-    finally { setBusy(false); }
+    finally { setBusy(false); setLoadingPdfId(null); }
   }
 
   const close = () => { if (!busy) onClose(); };
   return <Modal title={`Paten Nalog · ${charter.contractor || `Charter ${charter.id}`}`} className="bt-paten-nalog-modal" onClose={close}>
-    {preview ? <div className="bt-paten-preview"><div className="bt-paten-preview-actions"><strong>Paten Nalog #{preview.serial}</strong><div><button type="button" className="bt-btn-secondary" onClick={() => setPreview(null)}>Kthehu te autobusët</button><a className="bt-btn-secondary" href={preview.url} target="_blank" rel="noopener noreferrer">Hap PDF</a><button type="button" className="bt-btn-primary" disabled={!pdfReady} onClick={() => frameRef.current?.contentWindow?.print()}><Printer size={16} /> Printo PDF</button></div></div><PdfPages blob={preview.blob} onReady={markPdfReady} /><iframe className="bt-paten-print-frame" ref={frameRef} title={`Paten Nalog ${preview.serial} për printim`} src={preview.url} /></div> : <div className="bt-paten-list">
+    {preview ? <div className="bt-paten-preview"><div className="bt-paten-preview-actions"><strong>Paten Nalog #{preview.serial}</strong><div><button type="button" className="bt-btn-secondary" onClick={() => setPreview(null)}>Kthehu te autobusët</button><a className="bt-btn-secondary" href={preview.url} target="_blank" rel="noopener noreferrer">Hap PDF</a><button type="button" className="bt-btn-primary" disabled={!pdfReady} onClick={() => frameRef.current?.contentWindow?.print()}><Printer size={16} /> Printo PDF</button></div></div>{!pdfReady && <p role="status"><LoaderCircle size={16} className="bt-spin" /> Duke shfaqur PDF…</p>}<iframe ref={frameRef} title={`Paten Nalog ${preview.serial}`} src={preview.url} onLoad={() => setPdfReady(true)} onError={() => setError("PDF-ja nuk mund të shfaqet në këtë shfletues. Përdor butonin Hap PDF.")} /></div> : <div className="bt-paten-list">
       <p className="bt-paten-intro">Paten Nalogu krijohet veçmas për çdo autobus që ka të paktën një shofer të caktuar.</p>
       {loading && <p role="status"><LoaderCircle size={16} className="bt-spin" /> Duke ngarkuar caktimet…</p>}
       {!loading && !assignments.length && !error && <div className="bt-paten-empty"><p>Nuk ka autobusë të caktuar për këtë charter.</p><button type="button" className="bt-btn-primary" disabled>Krijo Paten Nalog</button></div>}
       {!loading && assignments.map((assignment) => {
-        const bus = buses.find((item) => String(item.ID) === String(assignment.bus_id));
+        const bus = assignment.bus;
         const nalog = nalogs.find((item) => String(item.charter_bus_assignment_id) === String(assignment.id));
-        const names = assignment.drivers?.map((entry) => drivers.find((driver) => String(driver.id) === String(entry.driver_id))?.emri || `Shoferi #${entry.driver_id}`) || [];
-        return <section className="bt-paten-bus" key={assignment.id}><div className="bt-paten-bus-main"><strong><Bus size={18} /> {bus?.targa || `Autobusi #${assignment.bus_id}`}</strong><span><UsersRound size={16} /> {names.length ? names.join(", ") : "Nuk ka shoferë të caktuar"}</span></div><div className="bt-paten-bus-action">{nalog ? <><span className="bt-paten-serial"><FileText size={16} /> Nr. serik: <strong>{nalog.serial_number}</strong></span><button type="button" className="bt-btn-secondary" disabled={busy} onClick={() => showPdf(nalog)} aria-label={`Shiko PDF për Paten Nalog ${nalog.serial_number}`}><Eye size={16} /> Shiko PDF</button></> : <button type="button" className="bt-btn-primary" disabled={!names.length || busy} onClick={() => { setCreating(assignment); setError(""); }}>Krijo Paten Nalog</button>}</div></section>;
+        const names = assignment.drivers?.map((entry) => entry.driver?.emri || `Shoferi #${entry.driver_id}`) || [];
+        return <section className="bt-paten-bus" key={assignment.id}><div className="bt-paten-bus-main"><strong><Bus size={18} /> {bus?.targa || `Autobusi #${assignment.bus_id}`}</strong><span><UsersRound size={16} /> {names.length ? names.join(", ") : "Nuk ka shoferë të caktuar"}</span></div><div className="bt-paten-bus-action">{nalog ? <><span className="bt-paten-serial"><FileText size={16} /> Nr. serik: <strong>{nalog.serial_number}</strong></span><button type="button" className="bt-btn-secondary" disabled={busy} aria-busy={loadingPdfId === nalog.id} onClick={() => showPdf(nalog)} aria-label={`${loadingPdfId === nalog.id ? "Duke hapur" : "Shiko"} PDF për Paten Nalog ${nalog.serial_number}`}>{loadingPdfId === nalog.id ? <LoaderCircle size={16} className="bt-spin" /> : <Eye size={16} />} {loadingPdfId === nalog.id ? "Duke hapur PDF…" : "Shiko PDF"}</button></> : <button type="button" className="bt-btn-primary" disabled={!names.length || busy} onClick={() => { setCreating(assignment); setError(""); }}>Krijo Paten Nalog</button>}</div></section>;
       })}
-      {creating && <form className="bt-paten-create" onSubmit={create}><h3>Krijo Paten Nalog për {buses.find((item) => String(item.ID) === String(creating.bus_id))?.targa || `autobusin #${creating.bus_id}`}</h3><div><button type="button" className="bt-btn-secondary" disabled={busy} onClick={() => setCreating(null)}>Anulo</button><button type="submit" className="bt-btn-primary" disabled={busy}>{busy ? "Duke krijuar…" : "Krijo Paten Nalog"}</button></div></form>}
+      {creating && <form className="bt-paten-create" onSubmit={create}><h3>Krijo Paten Nalog për {creating.bus?.targa || `autobusin #${creating.bus_id}`}</h3><div><button type="button" className="bt-btn-secondary" disabled={busy} onClick={() => setCreating(null)}>Anulo</button><button type="submit" className="bt-btn-primary" disabled={busy}>{busy ? "Duke krijuar…" : "Krijo Paten Nalog"}</button></div></form>}
     </div>}
     {error && <p className="bt-inline-error" role="alert">{error}</p>}
   </Modal>;

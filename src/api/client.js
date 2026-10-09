@@ -1,4 +1,4 @@
-import { API_BASE_URL, clearToken, getToken, refreshAccessToken } from "../auth";
+import { API_BASE_URL, clearToken, getToken, invalidateUserProfile, refreshAccessToken } from "../auth";
 import { runMutation } from "./mutationState";
 const message = (data, fallback) =>
   Array.isArray(data?.detail)
@@ -14,7 +14,9 @@ export const query = (params = {}) => {
 export async function api(path, options = {}) {
   const method = (options.method || "GET").toUpperCase();
   if (method !== "GET" && method !== "HEAD") {
-    return runMutation(`${method}:${path}:${options.body instanceof FormData ? crypto.randomUUID() : options.body || ""}`, () => request(path, options));
+    const result = await runMutation(`${method}:${path}:${options.body instanceof FormData ? crypto.randomUUID() : options.body || ""}`, () => request(path, options));
+    if (/^\/auth\/(users|roles)(\/|$)/.test(path)) invalidateUserProfile();
+    return result;
   }
   return request(path, options);
 }

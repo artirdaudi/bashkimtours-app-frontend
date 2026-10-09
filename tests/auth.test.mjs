@@ -15,6 +15,7 @@ test('startup refresh, concurrent 401s, and logout use only memory and one refre
   localStorage.setItem('bashkimtours_access_token', 'old');
   let refreshes = 0;
   let logouts = 0;
+  let profileRequests = 0;
   let token = 'first';
   let gate;
   globalThis.fetch = async (url, options = {}) => {
@@ -30,6 +31,10 @@ test('startup refresh, concurrent 401s, and logout use only memory and one refre
       assert.equal(options.credentials, 'include');
       return Response.json({});
     }
+    if (url.endsWith('/auth/me')) {
+      profileRequests++;
+      return Response.json({ id: 7, role: 'admin', cash_register_assignments: [] });
+    }
     return options.headers.Authorization === `Bearer ${token}` && token === 'second'
       ? Response.json({ ok: true }) : new Response('{}', { status: 401 });
   };
@@ -37,14 +42,22 @@ test('startup refresh, concurrent 401s, and logout use only memory and one refre
   try {
     const auth = await server.ssrLoadModule('/src/auth.js');
     const { api } = await server.ssrLoadModule('/src/api/client.js');
+    const { authApi } = await server.ssrLoadModule('/src/api/global.js');
     await auth.initializeAuth();
     assert.equal(auth.getAuthStatus(), 'authenticated');
     assert.equal(localStorage.getItem('bashkimtours_access_token'), undefined);
     assert.equal(auth.getToken(), 'first');
+    assert.equal(profileRequests, 1);
+    assert.equal((await authApi.me()).id, 7);
+    assert.equal((await authApi.me()).id, 7);
+    assert.equal(profileRequests, 1);
     gate = new Promise((resolve) => setTimeout(resolve, 10));
-    const results = await Promise.all(['/maarif/students', '/maarif/cash-registers', '/maarif/payment-followup/summary', '/auth/me'].map((path) => api(path)));
-    assert.deepEqual(results, Array(4).fill({ ok: true }));
+    const results = await Promise.all(['/maarif/students', '/maarif/cash-registers', '/maarif/payment-followup/summary'].map((path) => api(path)));
+    assert.deepEqual(results, Array(3).fill({ ok: true }));
     assert.equal(refreshes, 2);
+    await api('/auth/users/7/cash-register-assignments', { method: 'POST', body: '{}' });
+    await authApi.me();
+    assert.equal(profileRequests, 2);
     await auth.logout();
     assert.equal(logouts, 1);
     assert.equal(auth.getToken(), null);

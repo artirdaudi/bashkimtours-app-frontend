@@ -12,7 +12,7 @@ test('charter assignments use the documented nested endpoints and bodies', async
   };
   const server = await createServer({ server: { middlewareMode: true }, appType: 'custom' });
   try {
-    const { charterAssignmentsApi, patenNalogsApi } = await server.ssrLoadModule('/src/api/global.js');
+    const { charterAssignmentsApi, chartersApi, patenNalogsApi } = await server.ssrLoadModule('/src/api/global.js');
     const { whatsappNotificationsApi } = await server.ssrLoadModule('/src/api/maarif.js');
     await charterAssignmentsApi.buses(7, { limit: 100, offset: 0 });
     await charterAssignmentsApi.assignBus(7, 12);
@@ -34,5 +34,7 @@ test('charter assignments use the documented nested endpoints and bodies', async
     assert.match(calls[7].url, /\/whatsapp\/charter-driver-assignment\/send$/);
     assert.equal(calls[7].method, 'POST');
     assert.equal(calls[7].body, JSON.stringify({ driver_bus_assignment_id: 23 }));
+    await chartersApi.overview({ page: 1, page_size: 20, search: 'Tetove', filter: 'all' });
+    assert.match(calls[8].url, /\/charters\/overview\?page=1&page_size=20&search=Tetove&filter=all$/);
   } finally { await server.close(); }
 });

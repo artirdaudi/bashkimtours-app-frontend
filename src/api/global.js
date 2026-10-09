@@ -1,7 +1,8 @@
 import { api, query, resource } from "./client";
+import { loadUserProfile } from "../auth";
 
 export const authApi = {
-  me: () => api("/auth/me"),
+  me: loadUserProfile,
   changePassword: (b) =>
     api("/auth/change-password", { method: "POST", body: JSON.stringify(b) }),
 };
@@ -48,6 +49,7 @@ export const busExtApi = {
 };
 export const chartersApi = {
   list: (params) => api(`/charters${query(params)}`),
+  overview: (params) => api(`/charters/overview${query(params)}`),
   get: (id) => api(`/charters/${id}`),
   create: (body) => api("/charters", { method: "POST", body: JSON.stringify(body) }),
   update: (id, body) => api(`/charters/${id}`, { method: "PUT", body: JSON.stringify(body) }),
@@ -64,6 +66,7 @@ export const charterAssignmentsApi = {
   removeDriver: (assignmentId) => api(`/charter-driver-bus-assignments/${assignmentId}`, { method: "DELETE" }),
 };
 export const charterPaymentsApi = {
+  all: (params) => api(`/charters/payments${query(params)}`),
   list: (charterId) => api(`/charters/${charterId}/payments`),
   summary: (charterId) => api(`/charters/${charterId}/payments/summary`),
   create: (charterId, body) => api(`/charters/${charterId}/payments`, { method: "POST", body: JSON.stringify(body) }),

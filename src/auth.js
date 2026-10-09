@@ -6,23 +6,56 @@ let accessToken = null;
 let authStatus = "initializing";
 let refreshPromise = null;
 let startupPromise = null;
+let userProfile = null;
+let userProfilePromise = null;
+let userProfileVersion = 0;
 let generation = 0;
 let tokenVersion = 0;
 const tokenWaiters = new Set();
 const channel = typeof BroadcastChannel === "undefined" ? null : new BroadcastChannel("bashkimtours-auth");
 channel?.addEventListener("message", (event) => {
-  if (event.data?.type === "token") { accessToken = event.data.token; tokenVersion += 1; tokenWaiters.forEach((resolve) => resolve(accessToken)); tokenWaiters.clear(); setStatus("authenticated"); }
+  if (event.data?.type === "token") { if (accessToken !== event.data.token) invalidateUserProfile(); accessToken = event.data.token; tokenVersion += 1; tokenWaiters.forEach((resolve) => resolve(accessToken)); tokenWaiters.clear(); setStatus("authenticated"); }
   if (event.data?.type === "logout") clearToken(false);
   if (event.data?.type === "request-token" && accessToken) channel?.postMessage({ type: "token", token: accessToken });
 });
 const listeners = new Set();
 
 export const getToken = () => accessToken;
+export const getUserProfile = () => userProfile;
+export function invalidateUserProfile() { userProfileVersion += 1; userProfile = null; userProfilePromise = null; }
+export function loadUserProfile() {
+  if (userProfile) return Promise.resolve(userProfile);
+  if (userProfilePromise) return userProfilePromise;
+  const version = userProfileVersion;
+  const request = async (token) => fetch(`${API_BASE_URL}/auth/me`, {
+    cache: "no-store",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const promise = (async () => {
+    let token = accessToken || await refreshAccessToken();
+    let response = await request(token);
+    if (response.status === 401) {
+      token = accessToken && accessToken !== token ? accessToken : await refreshAccessToken();
+      response = await request(token);
+    }
+    if (!response.ok) {
+      const error = new Error(`Profili nuk mund të ngarkohet (HTTP ${response.status}).`);
+      error.status = response.status;
+      throw error;
+    }
+    const profile = await response.json();
+    if (version === userProfileVersion) userProfile = profile;
+    return profile;
+  })();
+  userProfilePromise = promise;
+  promise.finally(() => { if (userProfilePromise === promise) userProfilePromise = null; }).catch(() => {});
+  return promise;
+}
 export const getAuthStatus = () => authStatus;
 export const subscribeAuth = (listener) => { listeners.add(listener); return () => listeners.delete(listener); };
 function setStatus(status) { authStatus = status; listeners.forEach((listener) => listener()); }
 export function saveToken(token) { accessToken = token; tokenVersion += 1; tokenWaiters.forEach((resolve) => resolve(token)); tokenWaiters.clear(); setStatus("authenticated"); channel?.postMessage({ type: "token", token }); }
-export function clearToken(broadcast = true) { accessToken = null; generation += 1; setStatus("unauthenticated"); if (broadcast) channel?.postMessage({ type: "logout" }); }
+export function clearToken(broadcast = true) { accessToken = null; invalidateUserProfile(); generation += 1; setStatus("unauthenticated"); if (broadcast) channel?.postMessage({ type: "logout" }); }
 export const clearLegacyToken = () => {
   localStorage.removeItem(TOKEN_KEY);
   sessionStorage.removeItem(TOKEN_KEY);
@@ -75,7 +108,7 @@ export async function refreshAccessToken() {
 export function initializeAuth() {
   if (startupPromise) return startupPromise;
   clearLegacyToken();
-  startupPromise = refreshAccessToken().catch((error) => {
+  startupPromise = refreshAccessToken().then(() => loadUserProfile().catch(() => {})).catch((error) => {
     if (authStatus === "initializing") {
       // A network outage is not evidence that the cookie was revoked.
       setStatus(error.status ? "unauthenticated" : "unavailable");
@@ -99,7 +132,9 @@ export async function login(username, password) {
   if (typeof data.access_token !== "string" || !data.access_token.trim()) {
     throw new Error("Përgjigjja e serverit nuk përmban një sesion të vlefshëm.");
   }
+  invalidateUserProfile();
   saveToken(data.access_token);
+  await loadUserProfile().catch(() => {});
   return data;
 }
 
