@@ -67,6 +67,13 @@ export const fuelTransactionsApi = {
   get: (id) => api(`/fuel/transactions/${id}`),
   createIncoming: (body) => api("/fuel/transactions/incoming", { method: "POST", body: JSON.stringify(body) }),
 };
+export const fuelSuppliersApi = {
+  list: (params) => api(`/fuel/suppliers${query(params)}`),
+  get: (id) => api(`/fuel/suppliers/${id}`),
+  create: (body) => api("/fuel/suppliers", { method: "POST", body: JSON.stringify(body) }),
+  update: (id, body) => api(`/fuel/suppliers/${id}`, { method: "PUT", body: JSON.stringify(body) }),
+  remove: (id) => api(`/fuel/suppliers/${id}`, { method: "DELETE" }),
+};
 export const charterAssignmentsApi = {
   buses: (charterId, params) => api(`/charters/${charterId}/bus-assignments${query(params)}`),
   assignBus: (charterId, busId) => api(`/charters/${charterId}/bus-assignments`, { method: "POST", body: JSON.stringify({ bus_id: busId }) }),

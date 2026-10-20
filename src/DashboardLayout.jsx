@@ -1,4 +1,4 @@
-import { Banknote, BellRing, Bus, ChevronDown, CreditCard, FileText, Fuel, LogOut, Menu, Route, ScanLine, Settings, ShieldCheck, UserCircle, UsersRound, Wallet, X } from "lucide-react";
+import { Banknote, BellRing, Bus, ChevronDown, CreditCard, FileText, Fuel, LogOut, Menu, Route, ScanLine, Settings, ShieldCheck, Truck, UserCircle, UsersRound, Wallet, X } from "lucide-react";
 import { useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { logout as endSession } from "./auth";
@@ -10,6 +10,7 @@ export default function DashboardLayout() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
   const inCharters = location.pathname === "/charters" || location.pathname.startsWith("/charters/");
+  const inFuel = location.pathname === "/fuel" || location.pathname.startsWith("/fuel/");
   const inSettings = ["/messages", "/settings/accounts-roles", "/settings/cash-registers", "/settings/document-types"].includes(location.pathname);
   const [settingsOpen, setSettingsOpen] = useState(inSettings);
   const [loginArrival] = useState(() => {
@@ -126,19 +127,24 @@ export default function DashboardLayout() {
       <main className="bt-main">
         <Outlet />
       </main>
-      <nav className="bt-mobile-bottom-nav" aria-label={inCharters ? "Navigimi Charterët" : "Navigimi kryesor"}>
+      <nav className="bt-mobile-bottom-nav" aria-label={inCharters ? "Navigimi Charterët" : inFuel ? "Navigimi Nafta" : "Navigimi kryesor"}>
         {inCharters ? <>
           <NavLink to="/charters/payments"><CreditCard /><span>Pagesat</span></NavLink>
           <NavLink to="/charters/cash"><Wallet /><span>Arka</span></NavLink>
           <NavLink to="/charters" end><Route /><span>Charters</span></NavLink>
           <NavLink to="/students"><UsersRound /><span>Maarif</span></NavLink>
+        </> : inFuel ? <>
+          <NavLink to="/fuel" end><Fuel /><span>Rezervari</span></NavLink>
+          <NavLink to="/fuel/suppliers"><Truck /><span>Furnitorët</span></NavLink>
+          <NavLink to="/students"><UsersRound /><span>Maarif</span></NavLink>
+          <NavLink to="/payments"><CreditCard /><span>Pagesat</span></NavLink>
         </> : <>
           <NavLink to="/students"><UsersRound /><span>Nxënësit</span></NavLink>
           <NavLink to="/payments"><CreditCard /><span>Pagesat</span></NavLink>
           <NavLink to="/arka"><Wallet /><span>Arka</span></NavLink>
           <NavLink to="/skano" onClick={prepareScanAudio}><ScanLine /><span>Skano</span></NavLink>
         </>}
-        <button type="button" className={open || (!inCharters && !["/students", "/payments", "/arka", "/skano"].includes(location.pathname)) ? "active" : ""} onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-label="Më shumë faqe"><Menu /><span>Më shumë</span></button>
+        <button type="button" className={open || (!inCharters && !inFuel && !["/students", "/payments", "/arka", "/skano"].includes(location.pathname)) ? "active" : ""} onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-label="Më shumë faqe"><Menu /><span>Më shumë</span></button>
       </nav>
     </div>
   );

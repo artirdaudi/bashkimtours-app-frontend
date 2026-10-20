@@ -3405,25 +3405,37 @@
 .bt-fuel-low { display: inline-block; margin-left: 8px; padding: 3px 6px; border-radius: 5px; background: #fef3c7; color: #92400e; font-size: 11px; font-weight: 700; }
 .bt-fuel-pagination { justify-content: flex-end; align-items: center; margin-top: 16px; }
 .bt-fuel-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: 20px; }
-.bt-fuel-card { padding: 24px; border: 1px solid #dce5eb; border-radius: 16px; background: #fff; box-shadow: 0 10px 28px #1734510d; }
+.bt-fuel-card { position: relative; overflow: hidden; padding: 26px; border: 1px solid #bdd7f0; border-radius: 18px; background: linear-gradient(135deg, #eef6ff 0%, #f8fbff 50%, #fff 100%); box-shadow: 0 16px 40px #1257a01c, 0 2px 8px #1734510d; }
+.bt-fuel-card::before { content: ""; position: absolute; inset: 0 0 auto; height: 5px; background: linear-gradient(90deg, #1257a0, #2fa3e0); }
+.bt-fuel-card.is-warning { border-color: #f0d28a; background: linear-gradient(135deg, #fff8e8 0%, #fffdfa 55%, #fff 100%); box-shadow: 0 16px 40px #ad771a1a, 0 2px 8px #1734510d; }
+.bt-fuel-card.is-warning::before { background: linear-gradient(90deg, #c28419, #efbd54); }
+.bt-fuel-card.is-critical { border-color: #efb4ac; background: linear-gradient(135deg, #fff1ef 0%, #fffaf9 55%, #fff 100%); box-shadow: 0 16px 40px #b423181c, 0 2px 8px #1734510d; }
+.bt-fuel-card.is-critical::before { background: linear-gradient(90deg, #b42318, #ef6b5a); }
 .bt-fuel-card-head { display: flex; align-items: center; gap: 14px; }
 .bt-fuel-card-head > div:not(.bt-fuel-card-actions) { flex: 1; min-width: 0; }
-.bt-fuel-card-head h2 { margin: 2px 0; font-size: 22px; }
+.bt-fuel-card-head h2 { margin: 2px 0 4px; color: #123b62; font-size: 25px; }
 .bt-fuel-card-head p { margin: 0; color: #637582; }
 .bt-fuel-card-actions { display: flex; align-items: flex-start; gap: 8px; flex: 0 0 auto; }
 .bt-fuel-card-actions .bt-btn-primary { white-space: nowrap; }
 .bt-fuel-edit { display: grid; place-items: center; align-self: flex-start; flex: 0 0 36px; width: 36px; height: 36px; border: 1px solid #dce5eb; border-radius: 9px; background: #fff; color: #1257a0; cursor: pointer; }
 .bt-fuel-edit:hover { background: #eaf3ff; }
-.bt-fuel-card-icon { display: grid; place-items: center; width: 52px; height: 52px; flex: 0 0 52px; border-radius: 14px; background: #eaf3ff; color: #1257a0; }
-.bt-fuel-card-quantity { display: grid; gap: 6px; margin: 24px 0; }
+.bt-fuel-card-icon { display: grid; place-items: center; width: 58px; height: 58px; flex: 0 0 58px; border-radius: 16px; background: #dceeff; color: #1257a0; box-shadow: inset 0 0 0 1px #c5def5; }
+.bt-fuel-card.is-warning .bt-fuel-card-icon { background: #fff0c9; color: #a26a10; box-shadow: inset 0 0 0 1px #f3dfa7; }
+.bt-fuel-card.is-critical .bt-fuel-card-icon { background: #ffe1dc; color: #b42318; box-shadow: inset 0 0 0 1px #f4beb5; }
+.bt-fuel-card-quantity { display: grid; gap: 9px; margin: 24px 0 0; padding: 20px 22px; border: 1px solid #d9e8f6; border-radius: 14px; background: #ffffffd9; }
+.bt-fuel-card.is-warning .bt-fuel-card-quantity { border-color: #f1dfaf; }
+.bt-fuel-card.is-critical .bt-fuel-card-quantity { border-color: #f2c7c1; }
 .bt-fuel-quantity-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .bt-fuel-quantity-heading > span:first-child { color: #637582; font-size: 13px; }
 .bt-fuel-quantity-heading .bt-fuel-low { margin: 0; padding: 5px 9px; border: 1px solid #f7d77d; border-radius: 999px; background: #fffbeb; color: #92400e; font-size: 11px; }
-.bt-fuel-card-quantity.is-low strong { color: #92400e; }
-.bt-fuel-card-quantity.is-low .bt-fuel-meter > span { background: #e7a827; }
+.bt-fuel-card-quantity.is-warning strong { color: #92400e; }
+.bt-fuel-card-quantity.is-warning .bt-fuel-meter > span { background: #e7a827; }
+.bt-fuel-card-quantity.is-critical strong { color: #b42318; }
+.bt-fuel-card-quantity.is-critical .bt-fuel-meter > span { background: #d92d20; }
+.bt-fuel-card-quantity.is-critical .bt-fuel-low { border-color: #f2b6ae; background: #fff0ee; color: #b42318; }
 .bt-fuel-card-quantity > span, .bt-fuel-card-quantity small { color: #637582; font-size: 13px; }
-.bt-fuel-card-quantity strong { font-size: clamp(38px, 5vw, 48px); line-height: 1.1; color: #173451; }
-.bt-fuel-meter { overflow: hidden; height: 10px; border-radius: 20px; background: #e5ebef; }
+.bt-fuel-card-quantity strong { font-size: clamp(40px, 5vw, 52px); line-height: 1.1; color: #123b62; }
+.bt-fuel-meter { overflow: hidden; height: 12px; border-radius: 20px; background: #e3ebf3; }
 .bt-fuel-meter > span { display: block; height: 100%; border-radius: inherit; background: #1976d2; }
 .bt-fuel-card-details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; padding-top: 20px; border-top: 1px solid #e5ebef; }
 .bt-fuel-card-details dt { color: #637582; font-size: 12px; }
@@ -3431,12 +3443,37 @@
 .bt-fuel-card > .bt-fuel-actions { margin-top: 20px; }
 .bt-fuel-group { min-width: 0; }
 .bt-fuel-incoming-modal .bt-fuel-form { margin: 0; padding: 0; border: 0; }
+.bt-fuel-incoming-group { min-width: 0; margin: 0 0 18px; padding: 14px 16px 16px; border: 1px solid #dce5eb; border-radius: 12px; background: #fbfdff; }
+.bt-fuel-incoming-group legend { padding: 0 7px; color: #17364c; font-size: 14px; font-weight: 800; }
+.bt-fuel-incoming-group .bt-fuel-fields { margin: 0; align-items: stretch; }
+.bt-fuel-incoming-group .bt-fuel-fields > label, .bt-fuel-incoming-group .bt-fuel-fields > .bt-fuel-supplier-field, .bt-fuel-incoming-group .bt-fuel-fields > .bt-fuel-currency-field { flex: 1 1 220px; min-width: 0; }
+.bt-fuel-supplier-field, .bt-fuel-currency-field { display: grid; align-content: start; gap: 6px; color: #637582; font-size: 13px; }
+.bt-fuel-supplier-field .bt-charter-reference-picker { width: 100%; }
+.bt-fuel-supplier-field .bt-charter-reference-picker input { min-height: 44px; }
+.bt-fuel-currency-options { display: flex; gap: 4px; min-height: 44px; padding: 4px; border: 1px solid #dce5eb; border-radius: 9px; background: #f1f5f9; }
+.bt-fuel-currency-options button { flex: 1; border: 0; border-radius: 6px; background: transparent; color: #637582; font: inherit; font-weight: 800; cursor: pointer; }
+.bt-fuel-currency-options button.active { background: #fff; color: #1257a0; box-shadow: 0 1px 4px #17345122; }
+.bt-fuel-currency-options button:focus-visible { outline: 2px solid #1257a0; outline-offset: 2px; }
 .bt-fuel-incoming-modal .bt-charter-date-field { flex: 1 1 260px; min-width: 0; }
+.bt-fuel-incoming-modal .bt-fuel-fields textarea { width: 100%; padding: 10px 12px; border: 1px solid #dce5eb; border-radius: 9px; font: inherit; resize: vertical; }
+.bt-fuel-incoming-group .bt-fuel-fields > .bt-fuel-comment-field { flex: 1 1 100%; width: 100%; }
+.bt-fuel-transaction-detail { flex: 0 0 auto; border: 0; background: transparent; color: #1257a0; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.bt-fuel-transaction-detail:hover { text-decoration: underline; }
+.bt-fuel-transaction-details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 0; }
+.bt-fuel-transaction-details dt { color: #637582; font-size: 13px; }
+.bt-fuel-transaction-details dd { margin: 4px 0 0; font-weight: 700; overflow-wrap: anywhere; }
+.bt-fuel-transaction-details .bt-fuel-comment-detail { grid-column: 1 / -1; }
+.bt-fuel-detail-note { margin: 18px 0 0; color: #637582; font-size: 13px; }
 .bt-fuel-transactions { margin-top: 16px; overflow: hidden; border: 1px solid #dce5eb; border-radius: 16px; background: #fff; }
 .bt-fuel-transactions-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 20px 24px; border-bottom: 1px solid #e5ebef; }
 .bt-fuel-transactions-head h3 { margin: 0; font-size: 18px; }
 .bt-fuel-transactions-head p { margin: 4px 0 0; color: #637582; font-size: 13px; }
 .bt-fuel-transactions-head button { white-space: nowrap; }
+.bt-fuel-transaction-filters { display: flex; flex: 0 0 auto; gap: 4px; padding: 4px; border: 1px solid #dce5eb; border-radius: 9px; background: #f1f5f9; }
+.bt-fuel-transaction-filters button { min-height: 34px; padding: 6px 10px; border: 0; border-radius: 6px; background: transparent; color: #637582; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.bt-fuel-transaction-filters button.active { background: #fff; color: #1257a0; box-shadow: 0 1px 4px #17345122; }
+.bt-fuel-transaction-filters button:focus-visible { outline: 2px solid #1257a0; outline-offset: 2px; }
+.bt-fuel-transaction-filters button:disabled { cursor: wait; }
 .bt-fuel-transactions-empty { margin: 0; padding: 24px; color: #637582; }
 .bt-fuel-transaction-list { margin: 0; padding: 0; list-style: none; }
 .bt-fuel-transaction-list li { display: flex; align-items: center; gap: 12px; padding: 14px 24px; border-bottom: 1px solid #edf1f4; }
@@ -3451,7 +3488,25 @@
 .bt-fuel-transaction-list .is-outgoing { background: #fff9f9; }
 .bt-fuel-transaction-list .is-outgoing .bt-fuel-transaction-icon { background: #fee2e2; color: #b42318; }
 .bt-fuel-transaction-list .is-outgoing b { color: #b42318; }
-@media (max-width: 520px) { .bt-fuel-transactions-head { align-items: flex-start; flex-direction: column; }.bt-fuel-transactions-head button { width: 100%; justify-content: center; } }
+.bt-fuel-transaction-pagination { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 14px 24px; border-top: 1px solid #e5ebef; }
+.bt-fuel-transaction-pagination span { color: #637582; font-size: 13px; white-space: nowrap; }
+.bt-fuel-tabs { gap: 8px; }
+.bt-fuel-tabs a { min-width: 130px; justify-content: center; }
+.bt-fuel-supplier-search { display: flex; align-items: center; gap: 10px; max-width: 560px; margin: 22px 0; padding: 8px 8px 8px 14px; border: 1px solid #dce5eb; border-radius: 11px; background: #fff; color: #637582; }
+.bt-fuel-supplier-search input { flex: 1; min-width: 0; border: 0; outline: 0; font: inherit; color: #253743; }
+.bt-fuel-supplier-list { display: grid; gap: 12px; }
+.bt-fuel-supplier-card { display: flex; align-items: center; gap: 15px; padding: 18px 20px; border: 1px solid #dce5eb; border-radius: 13px; background: #fff; }
+.bt-fuel-supplier-icon { display: grid; place-items: center; flex: 0 0 44px; width: 44px; height: 44px; border-radius: 12px; background: #eaf3ff; color: #1257a0; }
+.bt-fuel-supplier-info { flex: 1; min-width: 0; }
+.bt-fuel-supplier-info h2 { margin: 0 0 5px; font-size: 17px; overflow-wrap: anywhere; }
+.bt-fuel-supplier-info a, .bt-fuel-supplier-info span { display: inline-flex; align-items: center; gap: 5px; color: #637582; font-size: 13px; }
+.bt-fuel-supplier-actions { display: flex; gap: 7px; }
+.bt-fuel-delete { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid #f6d4d1; border-radius: 9px; background: #fff; color: #b42318; cursor: pointer; }
+.bt-fuel-delete:hover { background: #fff1f0; }
+.bt-fuel-suppliers-empty { padding: 24px; border: 1px solid #dce5eb; border-radius: 12px; background: #fff; color: #637582; }
+@media (max-width: 800px) { .bt-fuel-shell .bt-route-stage > .bt-page { padding-top: 24px; } }
+@media (max-width: 520px) { .bt-fuel-supplier-card { flex-wrap: wrap; }.bt-fuel-supplier-actions { margin-left: auto; }.bt-fuel-supplier-search { flex-wrap: wrap; }.bt-fuel-supplier-search button { width: 100%; justify-content: center; } }
+@media (max-width: 520px) { .bt-fuel-transactions-head { align-items: flex-start; flex-direction: column; }.bt-fuel-transaction-filters { width: 100%; }.bt-fuel-transaction-filters button { flex: 1; justify-content: center; } }
 @media (max-width: 600px) { .bt-fuel-card-head { flex-wrap: wrap; }.bt-fuel-card-actions { width: 100%; justify-content: flex-end; } }
 .bt-messages-page .bt-messages-service-tabs button { border-bottom-color: transparent; color: #637582; cursor: pointer; }
 .bt-messages-page .bt-messages-service-tabs button.active { border-bottom-color: #185a88; color: #185a88; }
@@ -7215,4 +7270,8 @@ html.bt-pwa-standalone .bt-charter-form-modal :is(input, select, textarea) { box
   .bt-charter-payments-table tbody td::before { flex: 0 0 36%; color: var(--bt-muted); font-size: 12px; font-weight: 600; text-align: left; }
   .bt-charter-payments-table tbody td:last-child { width: 100%; text-align: right; }
   .bt-charter-payments-table tbody td:nth-child(8)::before { content: "Printo"; }
+}
+
+@media (max-width: 800px) {
+  .bt-fuel-tabs { display: none; }
 }

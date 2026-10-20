@@ -97,7 +97,7 @@ export default function PwaSupport() {
       <section>
         <img src="/icons/icon-192.png" width="96" height="96" alt="Bashkim Tours" />
         <h1 id="bt-offline-title">Nuk ka lidhje interneti</h1>
-        <p id="bt-offline-description">Pagesat, të dhënat e nxënësve dhe verifikimi i kartelave kërkojnë internet. Rilidhuni për të vazhduar. Të dhënat e formularit mbeten në këtë dritare.</p>
+        <p id="bt-offline-description">Pagesat, të dhënat e naftës dhe të nxënësve, si dhe verifikimi i kartelave kërkojnë internet. Rilidhuni për të vazhduar. Të dhënat e formularit mbeten në këtë dritare.</p>
         <button type="button" onClick={() => { if (navigator.onLine) setOffline(false); }}>Provo përsëri</button>
       </section>
     </div>
