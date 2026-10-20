@@ -55,6 +55,18 @@ export const chartersApi = {
   update: (id, body) => api(`/charters/${id}`, { method: "PUT", body: JSON.stringify(body) }),
   remove: (id) => api(`/charters/${id}`, { method: "DELETE" }),
 };
+export const fuelTanksApi = {
+  list: (params) => api(`/fuel/tanks${query(params)}`),
+  get: (id) => api(`/fuel/tanks/${id}`),
+  create: (body) => api("/fuel/tanks", { method: "POST", body: JSON.stringify(body) }),
+  update: (id, body) => api(`/fuel/tanks/${id}`, { method: "PUT", body: JSON.stringify(body) }),
+  remove: (id) => api(`/fuel/tanks/${id}`, { method: "DELETE" }),
+};
+export const fuelTransactionsApi = {
+  list: (params) => api(`/fuel/transactions${query(params)}`),
+  get: (id) => api(`/fuel/transactions/${id}`),
+  createIncoming: (body) => api("/fuel/transactions/incoming", { method: "POST", body: JSON.stringify(body) }),
+};
 export const charterAssignmentsApi = {
   buses: (charterId, params) => api(`/charters/${charterId}/bus-assignments${query(params)}`),
   assignBus: (charterId, busId) => api(`/charters/${charterId}/bus-assignments`, { method: "POST", body: JSON.stringify({ bus_id: busId }) }),

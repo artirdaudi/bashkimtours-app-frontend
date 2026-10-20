@@ -8,6 +8,7 @@ import StudentsPage from "./StudentsPage";
 import VehiclesManagementPage from "./VehiclesManagementPage";
 import { AccountPage, AreasPage, DriversPage } from "./PortalPages";
 import IncomePage from "./IncomePage";
+import FuelTanksPage from "./FuelTanksPage";
 import ShoferatPage from "./ShoferatPage";
 import AutobusatPage from "./AutobusatPage";
 import ChartersPage from "./ChartersPage";
@@ -70,6 +71,7 @@ export default function BashkimToursApp() {
         </Route>
         <Route path="account" element={<AccountPage />} />
         <Route path="income" element={<IncomePage />} />
+        <Route path="fuel" element={<FuelTanksPage />} />
         <Route path="shoferat" element={<ShoferatPage />} />
         <Route path="autobusat" element={<AutobusatPage />} />
         <Route path="charters" element={<CharterTabs />}>

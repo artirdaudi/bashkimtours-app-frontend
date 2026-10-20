@@ -3388,6 +3388,71 @@
 
 .bt-sidebar-new .bt-nav a.bt-charter-nav-feature { position: relative; padding-right: 35px; }
 .bt-sidebar-new .bt-nav .bt-charter-nav-ribbon { position: absolute; top: 3px; right: -6px; display: grid; place-items: center; width: 33px; height: 16px; border-radius: 3px; background: var(--bt-blue); color: #fff; box-shadow: 0 2px 5px #07387830; font-size: 8px; font-weight: 800; letter-spacing: .08em; line-height: 1; transform: rotate(16deg); }
+.bt-sidebar-new .bt-nav .bt-fuel-nav-ribbon { width: 86px; background: #facc15; color: #3f3200; box-shadow: 0 2px 5px #8b690030; font-size: 7px; }
+.bt-sidebar-new .bt-nav a:has(.bt-fuel-nav-ribbon) { padding-right: 84px; }
+.bt-fuel-filters, .bt-fuel-fields, .bt-fuel-actions, .bt-fuel-heading, .bt-fuel-pagination { display: flex; align-items: end; gap: 12px; flex-wrap: wrap; }
+.bt-fuel-filters, .bt-fuel-form, .bt-fuel-detail { margin: 20px 0; padding: 20px; border: 1px solid #dce5eb; border-radius: 12px; background: #fff; }
+.bt-fuel-modal .bt-fuel-form { margin: 0; padding: 0; border: 0; }
+.bt-fuel-modal .bt-fuel-fields { align-items: stretch; }
+.bt-fuel-filters label, .bt-fuel-fields label { display: grid; gap: 6px; min-width: 180px; flex: 1; font-size: 13px; color: #637582; }
+.bt-fuel-filters input, .bt-fuel-filters select, .bt-fuel-fields input, .bt-fuel-fields select { width: 100%; padding: 10px 12px; border: 1px solid #dce5eb; border-radius: 9px; background: #fff; font: inherit; color: #253743; }
+.bt-fuel-fields { margin: 16px 0; }
+.bt-fuel-heading { justify-content: space-between; align-items: center; }
+.bt-fuel-detail dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; }
+.bt-fuel-detail dt { color: #637582; font-size: 13px; }.bt-fuel-detail dd { margin: 4px 0 0; font-weight: 700; }
+.bt-fuel-table { width: 100%; border-collapse: collapse; min-width: 760px; }.bt-fuel-table th, .bt-fuel-table td { padding: 12px; border-bottom: 1px solid #e5ebef; text-align: left; }.bt-fuel-table th { color: #637582; font-size: 13px; }
+.bt-fuel-table .bt-fuel-actions { align-items: center; gap: 6px; flex-wrap: nowrap; }.bt-fuel-table .bt-fuel-actions button { white-space: nowrap; }
+.bt-fuel-low { display: inline-block; margin-left: 8px; padding: 3px 6px; border-radius: 5px; background: #fef3c7; color: #92400e; font-size: 11px; font-weight: 700; }
+.bt-fuel-pagination { justify-content: flex-end; align-items: center; margin-top: 16px; }
+.bt-fuel-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); gap: 20px; }
+.bt-fuel-card { padding: 24px; border: 1px solid #dce5eb; border-radius: 16px; background: #fff; box-shadow: 0 10px 28px #1734510d; }
+.bt-fuel-card-head { display: flex; align-items: center; gap: 14px; }
+.bt-fuel-card-head > div:not(.bt-fuel-card-actions) { flex: 1; min-width: 0; }
+.bt-fuel-card-head h2 { margin: 2px 0; font-size: 22px; }
+.bt-fuel-card-head p { margin: 0; color: #637582; }
+.bt-fuel-card-actions { display: flex; align-items: flex-start; gap: 8px; flex: 0 0 auto; }
+.bt-fuel-card-actions .bt-btn-primary { white-space: nowrap; }
+.bt-fuel-edit { display: grid; place-items: center; align-self: flex-start; flex: 0 0 36px; width: 36px; height: 36px; border: 1px solid #dce5eb; border-radius: 9px; background: #fff; color: #1257a0; cursor: pointer; }
+.bt-fuel-edit:hover { background: #eaf3ff; }
+.bt-fuel-card-icon { display: grid; place-items: center; width: 52px; height: 52px; flex: 0 0 52px; border-radius: 14px; background: #eaf3ff; color: #1257a0; }
+.bt-fuel-card-quantity { display: grid; gap: 6px; margin: 24px 0; }
+.bt-fuel-quantity-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.bt-fuel-quantity-heading > span:first-child { color: #637582; font-size: 13px; }
+.bt-fuel-quantity-heading .bt-fuel-low { margin: 0; padding: 5px 9px; border: 1px solid #f7d77d; border-radius: 999px; background: #fffbeb; color: #92400e; font-size: 11px; }
+.bt-fuel-card-quantity.is-low strong { color: #92400e; }
+.bt-fuel-card-quantity.is-low .bt-fuel-meter > span { background: #e7a827; }
+.bt-fuel-card-quantity > span, .bt-fuel-card-quantity small { color: #637582; font-size: 13px; }
+.bt-fuel-card-quantity strong { font-size: clamp(38px, 5vw, 48px); line-height: 1.1; color: #173451; }
+.bt-fuel-meter { overflow: hidden; height: 10px; border-radius: 20px; background: #e5ebef; }
+.bt-fuel-meter > span { display: block; height: 100%; border-radius: inherit; background: #1976d2; }
+.bt-fuel-card-details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; padding-top: 20px; border-top: 1px solid #e5ebef; }
+.bt-fuel-card-details dt { color: #637582; font-size: 12px; }
+.bt-fuel-card-details dd { margin: 4px 0 0; font-weight: 700; overflow-wrap: anywhere; }
+.bt-fuel-card > .bt-fuel-actions { margin-top: 20px; }
+.bt-fuel-group { min-width: 0; }
+.bt-fuel-incoming-modal .bt-fuel-form { margin: 0; padding: 0; border: 0; }
+.bt-fuel-incoming-modal .bt-charter-date-field { flex: 1 1 260px; min-width: 0; }
+.bt-fuel-transactions { margin-top: 16px; overflow: hidden; border: 1px solid #dce5eb; border-radius: 16px; background: #fff; }
+.bt-fuel-transactions-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 20px 24px; border-bottom: 1px solid #e5ebef; }
+.bt-fuel-transactions-head h3 { margin: 0; font-size: 18px; }
+.bt-fuel-transactions-head p { margin: 4px 0 0; color: #637582; font-size: 13px; }
+.bt-fuel-transactions-head button { white-space: nowrap; }
+.bt-fuel-transactions-empty { margin: 0; padding: 24px; color: #637582; }
+.bt-fuel-transaction-list { margin: 0; padding: 0; list-style: none; }
+.bt-fuel-transaction-list li { display: flex; align-items: center; gap: 12px; padding: 14px 24px; border-bottom: 1px solid #edf1f4; }
+.bt-fuel-transaction-list li:last-child { border-bottom: 0; }
+.bt-fuel-transaction-icon { display: grid; place-items: center; width: 38px; height: 38px; flex: 0 0 38px; border-radius: 10px; }
+.bt-fuel-transaction-list li > div { display: grid; gap: 3px; flex: 1; min-width: 0; }
+.bt-fuel-transaction-list time { color: #637582; font-size: 12px; }
+.bt-fuel-transaction-list b { white-space: nowrap; font-size: 17px; }
+.bt-fuel-transaction-list .is-incoming { background: #f8fdf9; }
+.bt-fuel-transaction-list .is-incoming .bt-fuel-transaction-icon { background: #dcfce7; color: #15803d; }
+.bt-fuel-transaction-list .is-incoming b { color: #15803d; }
+.bt-fuel-transaction-list .is-outgoing { background: #fff9f9; }
+.bt-fuel-transaction-list .is-outgoing .bt-fuel-transaction-icon { background: #fee2e2; color: #b42318; }
+.bt-fuel-transaction-list .is-outgoing b { color: #b42318; }
+@media (max-width: 520px) { .bt-fuel-transactions-head { align-items: flex-start; flex-direction: column; }.bt-fuel-transactions-head button { width: 100%; justify-content: center; } }
+@media (max-width: 600px) { .bt-fuel-card-head { flex-wrap: wrap; }.bt-fuel-card-actions { width: 100%; justify-content: flex-end; } }
 .bt-messages-page .bt-messages-service-tabs button { border-bottom-color: transparent; color: #637582; cursor: pointer; }
 .bt-messages-page .bt-messages-service-tabs button.active { border-bottom-color: #185a88; color: #185a88; }
 .bt-charter-whatsapp-modal { width: min(780px, 100%); }

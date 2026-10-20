@@ -1,4 +1,4 @@
-import { Banknote, BellRing, Bus, ChevronDown, CreditCard, FileText, LogOut, Menu, Route, ScanLine, Settings, ShieldCheck, UserCircle, UsersRound, Wallet, X } from "lucide-react";
+import { Banknote, BellRing, Bus, ChevronDown, CreditCard, FileText, Fuel, LogOut, Menu, Route, ScanLine, Settings, ShieldCheck, UserCircle, UsersRound, Wallet, X } from "lucide-react";
 import { useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { logout as endSession } from "./auth";
@@ -55,6 +55,11 @@ export default function DashboardLayout() {
             <NavLink to="/charters/payments" onClick={() => setOpen(false)}>Pagesat Charter</NavLink>
             <NavLink to="/charters/cash" onClick={() => setOpen(false)}>Arka</NavLink>
           </div>
+          <NavLink to="/fuel" className="bt-charter-nav-feature" onClick={() => setOpen(false)}>
+            <Fuel />
+            <span>Nafta</span>
+            <small className="bt-charter-nav-ribbon bt-fuel-nav-ribbon">NË PËRPUNIM</small>
+          </NavLink>
           <NavLink to="/income" onClick={() => setOpen(false)}>
             <Banknote />
             <span>Të hyrat</span>
