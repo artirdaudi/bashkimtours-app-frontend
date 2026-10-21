@@ -1,5 +1,5 @@
 import { Banknote, BellRing, Bus, ChevronDown, CreditCard, FileText, Fuel, LogOut, Menu, Route, ScanLine, Settings, ShieldCheck, Truck, UserCircle, UsersRound, Wallet, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { logout as endSession } from "./auth";
 import logo from "./assets/bashkimtours_logo.png";
@@ -12,10 +12,20 @@ const maarifPages = [
   ["/vehicles", "Automjetet", Bus], ["/drivers", "Shoferët", UsersRound],
   ["/areas", "Zonat", Route], ["/calendar", "Kalendari", BellRing],
   ["/cards", "Kartelat", CreditCard], ["/debts", "Borxhet", Banknote],
-  ["/followup-rules", "Rregullat", FileText],
+  ["/followup-rules", "Rregullat e pagesave", FileText],
 ];
 const fuelPages = [["/fuel", "Rezervari", Fuel], ["/fuel/suppliers", "Furnitorët", Truck]];
 const charterPages = [["/charters", "Rezervimet", Route], ["/charters/payments", "Pagesat", CreditCard], ["/charters/cash", "Arka", Wallet]];
+const otherPages = [
+  ["/income", "Të hyrat", Banknote], ["/autobusat", "Autobusët", Bus],
+  ["/shoferat", "Shoferat dhe Staff", UsersRound], ["/messages", "WhatsApp Messages", BellRing],
+  ["/settings/accounts-roles", "Llogaritë dhe rolet", ShieldCheck],
+  ["/settings/cash-registers", "Arkat", Wallet],
+  ["/settings/document-types", "Llojet e dokumentave", FileText],
+  ["/account", "Llogaria ime", UserCircle],
+];
+const mainModules = [["/students", "Maarif", UsersRound], ["/charters", "Charterët", Route], ["/fuel", "Nafta", Fuel]];
+const maarifPrimary = maarifPages.slice(0, 4);
 
 export default function DashboardLayout() {
   const [open, setOpen] = useState(false);
@@ -25,8 +35,9 @@ export default function DashboardLayout() {
   const inMaarif = maarifPages.some(([path]) => location.pathname === path);
   const moduleName = inFuel ? "Nafta" : inCharters ? "Charterët" : inMaarif ? "Maarif" : "Bashkim Tours";
   const modulePages = inFuel ? fuelPages : inCharters ? charterPages : inMaarif ? maarifPages : [];
-  const currentPage = modulePages.find(([path]) => location.pathname === path)?.[1];
-  const mobileNavRef = useRef(null);
+  const primaryPages = inFuel ? fuelPages : inCharters ? charterPages : inMaarif ? maarifPrimary : mainModules;
+  const currentPage = [...modulePages, ...otherPages].find(([path]) => location.pathname === path)?.[1];
+  const moreActive = open || (!primaryPages.some(([path]) => location.pathname === path));
   const inSettings = ["/messages", "/settings/accounts-roles", "/settings/cash-registers", "/settings/document-types"].includes(location.pathname);
   const [settingsOpen, setSettingsOpen] = useState(inSettings);
   const [loginArrival] = useState(() => {
@@ -34,11 +45,6 @@ export default function DashboardLayout() {
     sessionStorage.removeItem("bt_login_transition");
     return active;
   });
-  useEffect(() => {
-    const scroller = mobileNavRef.current;
-    const active = scroller?.querySelector("a.active");
-    if (active) scroller.scrollTo({ left: active.offsetLeft - scroller.offsetLeft - scroller.clientWidth / 2 + active.clientWidth / 2, behavior: "smooth" });
-  }, [location.pathname]);
   const logout = async () => {
     await endSession();
     window.location.replace("/");
@@ -144,12 +150,9 @@ export default function DashboardLayout() {
         {currentPage && <div className="bt-mobile-module-context"><span>{moduleName}</span><strong>{currentPage}</strong></div>}
         <Outlet />
       </main>
-      <nav className="bt-mobile-bottom-nav" aria-label={`Navigimi ${moduleName}`}>
-        <div className="bt-mobile-nav-module"><span>MODULI</span><strong>{moduleName}</strong></div>
-        <div className="bt-mobile-nav-scroller" ref={mobileNavRef}>
-          {modulePages.map(([path, label, Icon]) => <NavLink key={path} to={path} end={path === "/fuel" || path === "/charters"} onClick={path === "/skano" ? prepareScanAudio : undefined}><Icon /><span>{label}</span></NavLink>)}
-        </div>
-        <button type="button" className={open ? "active bt-mobile-more" : "bt-mobile-more"} onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-label="Më shumë faqe"><Menu /><span>Më shumë</span></button>
+      <nav className="bt-mobile-bottom-nav" aria-label={`Navigimi ${moduleName}`} style={{ "--bt-nav-count": primaryPages.length + 1 }}>
+        {primaryPages.map(([path, label, Icon]) => <NavLink key={path} to={path} end={path === "/fuel" || path === "/charters"} onClick={path === "/skano" ? prepareScanAudio : undefined}><Icon aria-hidden="true" /><span>{label}</span></NavLink>)}
+        <button type="button" className={moreActive ? "active bt-mobile-more" : "bt-mobile-more"} onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-label="Më shumë faqe"><Menu aria-hidden="true" /><span>Më shumë</span></button>
       </nav>
     </div>
   );
