@@ -8,7 +8,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { monthlyPaymentsApi } from "./api";
-import DateInput from "./DateInput";
+import FilterDatePicker from "./FilterDatePicker";
 import { formatDate, formatDateTime } from "./dateUtils";
 import { PaymentReceipt } from "./StudentsPage";
 import { groupRelatedMonthlyPayments } from "./monthlyPaymentGrouping";
@@ -236,12 +236,9 @@ export default function MonthlyPaymentsPage() {
           <button className={period === "month" ? "active" : ""} onClick={() => setPeriod("month")}>Mujore</button>
           <button className={period === "year" ? "active" : ""} onClick={() => setPeriod("year")}>Vjetore</button>
         </div>
-        <label className="bt-payment-period-input">
-          <CalendarDays />
-          {period === "day" && <DateInput value={day} onChange={setDay} required />}
-          {period === "month" && <input type="month" value={month} onChange={(event) => setMonth(event.target.value)} />}
-          {period === "year" && <input type="number" min="2000" max="2100" value={year} onChange={(event) => setYear(event.target.value)} />}
-        </label>
+        <div className="bt-payment-period-input">
+          {period === "day" ? <FilterDatePicker label="Dita" value={day} onChange={setDay} /> : <><CalendarDays />{period === "month" && <input type="month" value={month} onChange={(event) => setMonth(event.target.value)} />}{period === "year" && <input type="number" min="2000" max="2100" value={year} onChange={(event) => setYear(event.target.value)} />}</>}
+        </div>
         <label className="bt-payment-search">
           <Search />
           <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Kërko nxënës, prind, zonë ose zyrë…" />

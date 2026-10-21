@@ -1869,18 +1869,18 @@
   border-radius: 13px;
   box-shadow: 0 4px 16px rgba(16, 35, 64, 0.035);
 }
-.bt-finance-filterbar label {
+.bt-finance-filterbar :is(label, .bt-finance-date-filter) {
   display: grid;
   gap: 6px;
 }
-.bt-finance-filterbar label > span {
+.bt-finance-filterbar :is(label, .bt-finance-date-filter) > span {
   color: #667085;
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.03em;
   text-transform: uppercase;
 }
-.bt-finance-filterbar label > div {
+.bt-finance-filterbar :is(label, .bt-finance-date-filter) > div {
   display: flex;
   align-items: center;
   gap: 9px;
@@ -3387,6 +3387,25 @@
 }
 
 .bt-sidebar-new .bt-nav a.bt-charter-nav-feature { position: relative; padding-right: 35px; }
+.bt-sidebar-new .bt-nav .bt-module-toggle { position: relative; display: flex; align-items: center; gap: 12px; width: 100%; min-height: 47px; margin-bottom: 3px; padding: 11px 14px; border: 0; border-radius: 9px; background: transparent; color: #657184; font: 600 14px inherit; text-align: left; cursor: pointer; }
+.bt-sidebar-new .bt-nav .bt-module-toggle:hover, .bt-sidebar-new .bt-nav .bt-module-toggle.active { color: var(--bt-blue); background: #eaf2fc; }
+.bt-sidebar-new .bt-nav .bt-module-toggle.bt-charter-nav-feature { padding-right: 39px; }
+.bt-sidebar-new .bt-nav .bt-module-toggle:has(.bt-fuel-nav-ribbon) { padding-right: 86px; }
+.bt-sidebar-new .bt-nav .bt-module-toggle svg { width: 19px; height: 19px; flex: 0 0 auto; }
+.bt-sidebar-new .bt-nav .bt-module-chevron { position: absolute; right: 11px; bottom: 8px; width: 15px; height: 15px; transition: transform .18s ease; }
+.bt-sidebar-new .bt-nav .bt-module-chevron.open { transform: rotate(180deg); }
+.bt-mobile-module-links { display: grid; gap: 2px; margin: 0 0 10px 17px; padding-left: 9px; border-left: 2px solid var(--bt-line); }
+.bt-sidebar-new .bt-mobile-module-links a { width: 100%; min-height: 38px; margin-bottom: 0; padding: 8px 10px; font-size: 13px; }
+.bt-filter-date-picker { position: relative; flex: 1; min-width: 0; }
+.bt-filter-date-trigger { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 42px; padding: 8px 10px; border: 1px solid #dce5eb; border-radius: 8px; background: #fff; color: #253743; font: inherit; text-align: left; cursor: pointer; }
+.bt-filter-date-trigger span { flex: 1; white-space: nowrap; }
+.bt-filter-date-trigger:hover, .bt-filter-date-trigger:focus-visible { border-color: var(--bt-blue); outline: none; }
+.bt-filter-date-clear { position: absolute; top: 3px; right: 3px; display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border: 0; border-radius: 6px; background: #fff; color: #637582; cursor: pointer; }
+.bt-filter-date-calendar { position: absolute; z-index: 80; top: calc(100% + 6px); left: 0; width: min(310px, calc(100vw - 32px)); padding: 12px; border: 1px solid #dce5eb; border-radius: 12px; background: #fff; box-shadow: 0 14px 36px #17364c30; }
+.bt-filter-date-calendar .bt-charter-calendar-days button { min-height: 40px; }
+.bt-payment-period-input:has(.bt-filter-date-picker) { padding: 0; border: 0; }
+.bt-finance-date-filter > div:has(.bt-filter-date-picker) { padding: 0 !important; background: transparent !important; border: 0 !important; }
+@media (max-width: 800px) { .bt-filter-date-calendar { left: auto; right: 0; } }
 .bt-sidebar-new .bt-nav .bt-charter-nav-ribbon { position: absolute; top: 3px; right: -6px; display: grid; place-items: center; width: 33px; height: 16px; border-radius: 3px; background: var(--bt-blue); color: #fff; box-shadow: 0 2px 5px #07387830; font-size: 8px; font-weight: 800; letter-spacing: .08em; line-height: 1; transform: rotate(16deg); }
 .bt-sidebar-new .bt-nav .bt-fuel-nav-ribbon { width: 86px; background: #facc15; color: #3f3200; box-shadow: 0 2px 5px #8b690030; font-size: 7px; }
 .bt-sidebar-new .bt-nav a:has(.bt-fuel-nav-ribbon) { padding-right: 84px; }
@@ -6808,6 +6827,7 @@
 @media (max-width: 650px) { .bt-cash-close-section { align-items: stretch; flex-direction: column; } }
 .bt-cash-history-filters { display: flex; flex-wrap: wrap; gap: 12px; margin: 14px 0 20px; }
 .bt-cash-history-filters label { display: grid; gap: 5px; color: var(--bt-muted); font-size: 13px; }
+.bt-cash-history-filters .bt-cash-date-filter { display: grid; gap: 5px; color: var(--bt-muted); font-size: 13px; }
 .bt-cash-history-filters input, .bt-cash-history-filters select { min-height: 40px; padding: 8px 10px; border: 1px solid var(--bt-line); border-radius: 8px; color: var(--bt-ink); font: inherit; }
 .bt-cash-history-pages { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 .bt-cash-history-pages span { margin-right: auto; color: var(--bt-muted); font-size: 13px; }
@@ -6843,13 +6863,11 @@
 
 /* Installed-app navigation and keyboard-safe forms. */
 .bt-mobile-bottom-nav { display: none; }
-.bt-mobile-module-links { display: none; }
 .bt-mobile-module-context { display: none; }
 @media (max-width: 800px) {
-  .bt-mobile-module-links { display: grid; gap: 2px; margin: -2px 0 12px 17px; padding-left: 9px; border-left: 2px solid var(--bt-line); }
-  .bt-mobile-submenu-title { padding: 5px 10px; color: var(--bt-blue); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
-  .bt-sidebar-new .bt-mobile-module-links a { width: 100%; min-height: 40px; padding: 8px 10px; font-size: 13px; }
-  .bt-sidebar-new .bt-nav a.bt-module-active { color: var(--bt-blue); background: #eaf2fc; }
+  .bt-mobile-module-links { margin-bottom: 12px; }
+  .bt-sidebar-new .bt-mobile-module-links a { min-height: 44px; }
+  .bt-sidebar-new { padding-bottom: calc(92px + env(safe-area-inset-bottom)); }
   .bt-mobile-menu { display: none; }
   .bt-maarif-tabs { display: none; }
   .bt-mobile-module-context { display: grid; gap: 2px; min-width: 0; padding: 10px 18px 11px; border-bottom: 1px solid var(--bt-line); background: #fff; }
@@ -6887,8 +6905,8 @@
     cursor: pointer;
   }
   .bt-mobile-bottom-nav :is(a, button).active { color: var(--bt-blue); background: #eaf2fc; }
-  .bt-mobile-bottom-nav svg { width: 26px; height: 26px; stroke-width: 2.1; }
-  .bt-mobile-bottom-nav .bt-mobile-more svg { width: 27px; height: 27px; }
+  .bt-mobile-bottom-nav svg { width: 23px; height: 23px; stroke-width: 2; }
+  .bt-mobile-bottom-nav .bt-mobile-more svg { width: 23px; height: 23px; }
   .bt-main { padding-bottom: calc(82px + env(safe-area-inset-bottom)); }
   .bt-dashboard:has(.bt-maarif-shell--scan),
   .bt-main:has(> .bt-maarif-shell--scan),

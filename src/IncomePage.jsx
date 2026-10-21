@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { monthlyPaymentsApi, maarifReportingApi } from "./api";
 import maarifLogo from "./assets/maarif_logo.jpeg";
-import DateInput from "./DateInput";
+import FilterDatePicker from "./FilterDatePicker";
 
 const euro = new Intl.NumberFormat("sq-AL", {
   style: "currency",
@@ -246,13 +246,13 @@ export default function IncomePage() {
             <button className={period === "year" ? "active" : ""} onClick={() => setPeriod("year")}>Vit</button>
           </div>
         </div>
-        <label>
+        <div className="bt-finance-date-filter">
           <span>{period === "day" ? "Dita" : period === "month" ? "Muaji" : "Viti"}</span>
           <div>
-            <CalendarDays />
             {period === "day" ? (
-              <DateInput value={selectedDay} onChange={setSelectedDay} required />
+              <FilterDatePicker label="Dita" value={selectedDay} onChange={setSelectedDay} />
             ) : period === "month" ? (
+              <><CalendarDays />
               <div className="bt-finance-month-picker">
                 <select
                   aria-label="Muaji"
@@ -268,14 +268,14 @@ export default function IncomePage() {
                 >
                   {years.map((year) => <option value={year} key={year}>{year}</option>)}
                 </select>
-              </div>
+              </div></>
             ) : (
-              <select value={selectedYear} onChange={(event) => setSelectedYear(event.target.value)}>
+              <><CalendarDays /><select value={selectedYear} onChange={(event) => setSelectedYear(event.target.value)}>
                 {years.map((year) => <option value={year} key={year}>{year}</option>)}
-              </select>
+              </select></>
             )}
           </div>
-        </label>
+        </div>
       </section>
 
       {error && <p className="bt-inline-error">{error}</p>}

@@ -33,6 +33,9 @@ export default function DashboardLayout() {
   const inCharters = location.pathname === "/charters" || location.pathname.startsWith("/charters/");
   const inFuel = location.pathname === "/fuel" || location.pathname.startsWith("/fuel/");
   const inMaarif = maarifPages.some(([path]) => location.pathname === path);
+  const activeModule = inFuel ? "fuel" : inCharters ? "charters" : inMaarif ? "maarif" : "";
+  const [drawerSelection, setDrawerSelection] = useState({ path: location.pathname, module: activeModule });
+  const expandedModule = drawerSelection.path === location.pathname ? drawerSelection.module : activeModule;
   const moduleName = inFuel ? "Nafta" : inCharters ? "Charterët" : inMaarif ? "Maarif" : "Bashkim Tours";
   const modulePages = inFuel ? fuelPages : inCharters ? charterPages : inMaarif ? maarifPages : [];
   const primaryPages = inFuel ? fuelPages : inCharters ? charterPages : inMaarif ? maarifPrimary : mainModules;
@@ -45,6 +48,7 @@ export default function DashboardLayout() {
     sessionStorage.removeItem("bt_login_transition");
     return active;
   });
+  const toggleModule = (module) => setDrawerSelection({ path: location.pathname, module: expandedModule === module ? "" : module });
   const logout = async () => {
     await endSession();
     window.location.replace("/");
@@ -62,27 +66,30 @@ export default function DashboardLayout() {
       <aside className={`bt-sidebar bt-sidebar-new ${open ? "open" : ""}`}>
         <img className="bt-sidebar-logo" src={logo} alt="Bashkim Tours" />
         <nav className="bt-nav">
-          <NavLink to="/students" className={inMaarif ? "bt-module-active" : ""} onClick={() => setOpen(false)}>
+          <button type="button" className={`bt-module-toggle ${inMaarif ? "active" : ""}`} aria-expanded={expandedModule === "maarif"} aria-controls="bt-maarif-links" onClick={() => toggleModule("maarif")}>
             <img className="bt-menu-logo" src={maarifLogo} alt="" />
             <span>Maarif</span>
-          </NavLink>
-          {inMaarif && <div className="bt-mobile-module-links" aria-label="Nënmenytë Maarif"><strong className="bt-mobile-submenu-title">Maarif</strong>
+            <ChevronDown className={`bt-module-chevron ${expandedModule === "maarif" ? "open" : ""}`} aria-hidden="true" />
+          </button>
+          {expandedModule === "maarif" && <div id="bt-maarif-links" className="bt-mobile-module-links" aria-label="Nënmenytë Maarif">
             {maarifPages.map(([path, label]) => <NavLink key={path} to={path} onClick={() => setOpen(false)}>{label}</NavLink>)}
           </div>}
-          <NavLink to="/charters" className={`bt-charter-nav-feature ${inCharters ? "bt-module-active" : ""}`} onClick={() => setOpen(false)}>
+          <button type="button" className={`bt-module-toggle bt-charter-nav-feature ${inCharters ? "active" : ""}`} aria-expanded={expandedModule === "charters"} aria-controls="bt-charter-links" onClick={() => toggleModule("charters")}>
             <Route />
             <span>Charterët Rezervim</span>
             <small className="bt-charter-nav-ribbon">NEW</small>
-          </NavLink>
-          {inCharters && <div className="bt-mobile-module-links" aria-label="Nënmenytë Charterët"><strong className="bt-mobile-submenu-title">Charterët</strong>
+            <ChevronDown className={`bt-module-chevron ${expandedModule === "charters" ? "open" : ""}`} aria-hidden="true" />
+          </button>
+          {expandedModule === "charters" && <div id="bt-charter-links" className="bt-mobile-module-links" aria-label="Nënmenytë Charterët">
             {charterPages.map(([path, label]) => <NavLink key={path} to={path} end={path === "/charters"} onClick={() => setOpen(false)}>{label}</NavLink>)}
           </div>}
-          <NavLink to="/fuel" className={`bt-charter-nav-feature ${inFuel ? "bt-module-active" : ""}`} onClick={() => setOpen(false)}>
+          <button type="button" className={`bt-module-toggle bt-charter-nav-feature ${inFuel ? "active" : ""}`} aria-expanded={expandedModule === "fuel"} aria-controls="bt-fuel-links" onClick={() => toggleModule("fuel")}>
             <Fuel />
             <span>Nafta</span>
             <small className="bt-charter-nav-ribbon bt-fuel-nav-ribbon">NË PËRPUNIM</small>
-          </NavLink>
-          {inFuel && <div className="bt-mobile-module-links" aria-label="Nënmenytë Nafta"><strong className="bt-mobile-submenu-title">Nafta</strong><NavLink to="/fuel" end onClick={() => setOpen(false)}>Rezervari</NavLink><NavLink to="/fuel/suppliers" onClick={() => setOpen(false)}>Furnitorët</NavLink></div>}
+            <ChevronDown className={`bt-module-chevron ${expandedModule === "fuel" ? "open" : ""}`} aria-hidden="true" />
+          </button>
+          {expandedModule === "fuel" && <div id="bt-fuel-links" className="bt-mobile-module-links" aria-label="Nënmenytë Nafta"><NavLink to="/fuel" end onClick={() => setOpen(false)}>Rezervari</NavLink><NavLink to="/fuel/suppliers" onClick={() => setOpen(false)}>Furnitorët</NavLink></div>}
           <NavLink to="/income" onClick={() => setOpen(false)}>
             <Banknote />
             <span>Të hyrat</span>
