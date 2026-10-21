@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import "./pwa.css";
 
@@ -10,11 +10,18 @@ export default function PwaSupport() {
   const [installed, setInstalled] = useState(isStandalone);
   const [dismissed, setDismissed] = useState(false);
   const [updateDismissed, setUpdateDismissed] = useState(false);
+  const webUpdateStarted = useRef(false);
   const [error, setError] = useState("");
   const { needRefresh: [needRefresh], updateServiceWorker } = useRegisterSW({
     onRegisterError: () => isStandalone() && setError("Përditësimi automatik nuk është gati. Rifreskoni faqen për të provuar përsëri."),
   });
   const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+  useEffect(() => {
+    if (!needRefresh || isStandalone() || webUpdateStarted.current) return;
+    webUpdateStarted.current = true;
+    void updateServiceWorker(true);
+  }, [needRefresh, updateServiceWorker]);
 
   useEffect(() => {
     const displayMode = window.matchMedia("(display-mode: standalone)");
@@ -103,7 +110,7 @@ export default function PwaSupport() {
     </div>
   );
 
-  const showUpdate = needRefresh && !updateDismissed;
+  const showUpdate = needRefresh && isStandalone() && !updateDismissed;
   if (!showUpdate && !error && (installed || dismissed || (!installPrompt && !ios))) return null;
   return (
     <aside className="bt-pwa-notice" aria-label="Bashkim Tours aplikacioni">
