@@ -1,16 +1,32 @@
 import { Banknote, BellRing, Bus, ChevronDown, CreditCard, FileText, Fuel, LogOut, Menu, Route, ScanLine, Settings, ShieldCheck, Truck, UserCircle, UsersRound, Wallet, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { logout as endSession } from "./auth";
 import logo from "./assets/bashkimtours_logo.png";
 import maarifLogo from "./assets/maarif_logo.jpeg";
 import { prepareScanAudio } from "./scanAudio";
 
+const maarifPages = [
+  ["/students", "Nxënësit", UsersRound], ["/payments", "Pagesat", CreditCard],
+  ["/arka", "Arka", Wallet], ["/skano", "Skano", ScanLine],
+  ["/vehicles", "Automjetet", Bus], ["/drivers", "Shoferët", UsersRound],
+  ["/areas", "Zonat", Route], ["/calendar", "Kalendari", BellRing],
+  ["/cards", "Kartelat", CreditCard], ["/debts", "Borxhet", Banknote],
+  ["/followup-rules", "Rregullat", FileText],
+];
+const fuelPages = [["/fuel", "Rezervari", Fuel], ["/fuel/suppliers", "Furnitorët", Truck]];
+const charterPages = [["/charters", "Rezervimet", Route], ["/charters/payments", "Pagesat", CreditCard], ["/charters/cash", "Arka", Wallet]];
+
 export default function DashboardLayout() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
   const inCharters = location.pathname === "/charters" || location.pathname.startsWith("/charters/");
   const inFuel = location.pathname === "/fuel" || location.pathname.startsWith("/fuel/");
+  const inMaarif = maarifPages.some(([path]) => location.pathname === path);
+  const moduleName = inFuel ? "Nafta" : inCharters ? "Charterët" : inMaarif ? "Maarif" : "Bashkim Tours";
+  const modulePages = inFuel ? fuelPages : inCharters ? charterPages : inMaarif ? maarifPages : [];
+  const currentPage = modulePages.find(([path]) => location.pathname === path)?.[1];
+  const mobileNavRef = useRef(null);
   const inSettings = ["/messages", "/settings/accounts-roles", "/settings/cash-registers", "/settings/document-types"].includes(location.pathname);
   const [settingsOpen, setSettingsOpen] = useState(inSettings);
   const [loginArrival] = useState(() => {
@@ -18,6 +34,11 @@ export default function DashboardLayout() {
     sessionStorage.removeItem("bt_login_transition");
     return active;
   });
+  useEffect(() => {
+    const scroller = mobileNavRef.current;
+    const active = scroller?.querySelector("a.active");
+    if (active) scroller.scrollTo({ left: active.offsetLeft - scroller.offsetLeft - scroller.clientWidth / 2 + active.clientWidth / 2, behavior: "smooth" });
+  }, [location.pathname]);
   const logout = async () => {
     await endSession();
     window.location.replace("/");
@@ -35,32 +56,27 @@ export default function DashboardLayout() {
       <aside className={`bt-sidebar bt-sidebar-new ${open ? "open" : ""}`}>
         <img className="bt-sidebar-logo" src={logo} alt="Bashkim Tours" />
         <nav className="bt-nav">
-          <NavLink to="/students" onClick={() => setOpen(false)}>
+          <NavLink to="/students" className={inMaarif ? "bt-module-active" : ""} onClick={() => setOpen(false)}>
             <img className="bt-menu-logo" src={maarifLogo} alt="" />
             <span>Maarif</span>
           </NavLink>
-          <div className="bt-mobile-module-links" aria-label="Modulet Maarif">
-            {[
-              ["/vehicles", "Automjetet"], ["/drivers", "Shoferët Maarif"],
-              ["/areas", "Zonat"], ["/calendar", "Kalendari"],
-              ["/cards", "Kartelat"], ["/debts", "Borxhet"],
-              ["/followup-rules", "Rregullat e pagesave"],
-            ].map(([path, label]) => <NavLink key={path} to={path} onClick={() => setOpen(false)}>{label}</NavLink>)}
-          </div>
-          <NavLink to="/charters" className="bt-charter-nav-feature" onClick={() => setOpen(false)}>
+          {inMaarif && <div className="bt-mobile-module-links" aria-label="Nënmenytë Maarif"><strong className="bt-mobile-submenu-title">Maarif</strong>
+            {maarifPages.map(([path, label]) => <NavLink key={path} to={path} onClick={() => setOpen(false)}>{label}</NavLink>)}
+          </div>}
+          <NavLink to="/charters" className={`bt-charter-nav-feature ${inCharters ? "bt-module-active" : ""}`} onClick={() => setOpen(false)}>
             <Route />
             <span>Charterët Rezervim</span>
             <small className="bt-charter-nav-ribbon">NEW</small>
           </NavLink>
-          <div className="bt-mobile-module-links" aria-label="Modulet Charterët">
-            <NavLink to="/charters/payments" onClick={() => setOpen(false)}>Pagesat Charter</NavLink>
-            <NavLink to="/charters/cash" onClick={() => setOpen(false)}>Arka</NavLink>
-          </div>
-          <NavLink to="/fuel" className="bt-charter-nav-feature" onClick={() => setOpen(false)}>
+          {inCharters && <div className="bt-mobile-module-links" aria-label="Nënmenytë Charterët"><strong className="bt-mobile-submenu-title">Charterët</strong>
+            {charterPages.map(([path, label]) => <NavLink key={path} to={path} end={path === "/charters"} onClick={() => setOpen(false)}>{label}</NavLink>)}
+          </div>}
+          <NavLink to="/fuel" className={`bt-charter-nav-feature ${inFuel ? "bt-module-active" : ""}`} onClick={() => setOpen(false)}>
             <Fuel />
             <span>Nafta</span>
             <small className="bt-charter-nav-ribbon bt-fuel-nav-ribbon">NË PËRPUNIM</small>
           </NavLink>
+          {inFuel && <div className="bt-mobile-module-links" aria-label="Nënmenytë Nafta"><strong className="bt-mobile-submenu-title">Nafta</strong><NavLink to="/fuel" end onClick={() => setOpen(false)}>Rezervari</NavLink><NavLink to="/fuel/suppliers" onClick={() => setOpen(false)}>Furnitorët</NavLink></div>}
           <NavLink to="/income" onClick={() => setOpen(false)}>
             <Banknote />
             <span>Të hyrat</span>
@@ -125,26 +141,15 @@ export default function DashboardLayout() {
         />
       )}
       <main className="bt-main">
+        {currentPage && <div className="bt-mobile-module-context"><span>{moduleName}</span><strong>{currentPage}</strong></div>}
         <Outlet />
       </main>
-      <nav className="bt-mobile-bottom-nav" aria-label={inCharters ? "Navigimi Charterët" : inFuel ? "Navigimi Nafta" : "Navigimi kryesor"}>
-        {inCharters ? <>
-          <NavLink to="/charters/payments"><CreditCard /><span>Pagesat</span></NavLink>
-          <NavLink to="/charters/cash"><Wallet /><span>Arka</span></NavLink>
-          <NavLink to="/charters" end><Route /><span>Charters</span></NavLink>
-          <NavLink to="/students"><UsersRound /><span>Maarif</span></NavLink>
-        </> : inFuel ? <>
-          <NavLink to="/fuel" end><Fuel /><span>Rezervari</span></NavLink>
-          <NavLink to="/fuel/suppliers"><Truck /><span>Furnitorët</span></NavLink>
-          <NavLink to="/students"><UsersRound /><span>Maarif</span></NavLink>
-          <NavLink to="/payments"><CreditCard /><span>Pagesat</span></NavLink>
-        </> : <>
-          <NavLink to="/students"><UsersRound /><span>Nxënësit</span></NavLink>
-          <NavLink to="/payments"><CreditCard /><span>Pagesat</span></NavLink>
-          <NavLink to="/arka"><Wallet /><span>Arka</span></NavLink>
-          <NavLink to="/skano" onClick={prepareScanAudio}><ScanLine /><span>Skano</span></NavLink>
-        </>}
-        <button type="button" className={open || (!inCharters && !inFuel && !["/students", "/payments", "/arka", "/skano"].includes(location.pathname)) ? "active" : ""} onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-label="Më shumë faqe"><Menu /><span>Më shumë</span></button>
+      <nav className="bt-mobile-bottom-nav" aria-label={`Navigimi ${moduleName}`}>
+        <div className="bt-mobile-nav-module"><span>MODULI</span><strong>{moduleName}</strong></div>
+        <div className="bt-mobile-nav-scroller" ref={mobileNavRef}>
+          {modulePages.map(([path, label, Icon]) => <NavLink key={path} to={path} end={path === "/fuel" || path === "/charters"} onClick={path === "/skano" ? prepareScanAudio : undefined}><Icon /><span>{label}</span></NavLink>)}
+        </div>
+        <button type="button" className={open ? "active bt-mobile-more" : "bt-mobile-more"} onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-label="Më shumë faqe"><Menu /><span>Më shumë</span></button>
       </nav>
     </div>
   );

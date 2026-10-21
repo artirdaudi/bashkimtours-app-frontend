@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowDownLeft, ArrowUpRight, Fuel, Info, Pencil, Plus } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Fuel, Info, LoaderCircle, Pencil, Plus } from "lucide-react";
 import { fuelSuppliersApi, fuelTanksApi, fuelTransactionsApi } from "./api";
 import { Modal } from "./PortalPages";
 import CharterDateTimeField from "./CharterDateTimeField";
@@ -9,6 +9,7 @@ import { formatDateTime } from "./dateUtils";
 const fuelTypes = { DIESEL: "Naftë", PETROL: "Benzinë", ADBLUE: "AdBlue" };
 const liters = (value) => `${new Intl.NumberFormat("sq-AL", { maximumFractionDigits: 2 }).format(Number(value || 0))} L`;
 const money = (value, currency) => value == null ? "—" : new Intl.NumberFormat("sq-AL", currency ? { style: "currency", currency } : { maximumFractionDigits: 2 }).format(Number(value));
+const detailValue = (value) => value == null || value === "" ? "—" : value;
 const calculatedTotal = (quantity, unitPrice) => {
   if (quantity === "" || unitPrice === "") return "";
   const total = Number(quantity) * Number(unitPrice);
@@ -27,6 +28,7 @@ export default function FuelTanksPage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [transactionError, setTransactionError] = useState("");
   const [form, setForm] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [incoming, setIncoming] = useState(null);
@@ -34,17 +36,23 @@ export default function FuelTanksPage() {
   const [supplierLoading, setSupplierLoading] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const initialLoadStarted = useRef(false);
+  const transactionsRef = useRef(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError("");
+    setTransactionError("");
     try {
-      const [tank, history] = await Promise.all([
+      const [tankResult, historyResult] = await Promise.allSettled([
         fuelTanksApi.get(tankId),
         fuelTransactionsApi.list({ tank_id: tankId, transaction_type: transactionFilter, limit: pageSize + 1, offset: 0 }),
       ]);
-      setTanks([tank]);
-      setTransactions({ [tankId]: { items: history.slice(0, pageSize), hasNext: history.length > pageSize } });
+      if (tankResult.status === "fulfilled") setTanks([tankResult.value]);
+      else setError(`Rezervari: ${tankResult.reason.message}`);
+      if (historyResult.status === "fulfilled") {
+        const history = historyResult.value;
+        setTransactions({ [tankId]: { items: history.slice(0, pageSize), hasNext: history.length > pageSize } });
+      } else setTransactionError(`Transaksionet: ${historyResult.reason.message}`);
       setTransactionPages({});
     } catch (cause) { setError(cause.message); }
     finally { setLoading(false); }
@@ -76,6 +84,7 @@ export default function FuelTanksPage() {
       const rows = await fuelTransactionsApi.list({ tank_id: tankId, transaction_type: transactionFilter, limit: pageSize + 1, offset: nextPage * pageSize });
       setTransactions((current) => ({ ...current, [tankId]: { items: rows.slice(0, pageSize), hasNext: rows.length > pageSize } }));
       setTransactionPages((current) => ({ ...current, [tankId]: nextPage }));
+      requestAnimationFrame(() => transactionsRef.current?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }));
     } catch (cause) { setError(cause.message); }
     finally { setLoadingPageId(null); }
   };
@@ -172,9 +181,11 @@ export default function FuelTanksPage() {
       return <div className="bt-fuel-group" key={tank.id}><article className={`bt-fuel-card ${levelClass}`}>
         <div className="bt-fuel-card-head"><span className="bt-fuel-card-icon"><Fuel size={27} aria-hidden="true" /></span><div><h2>{tank.name}</h2><p>{fuelTypes[tank.fuel_type] || tank.fuel_type}</p></div><div className="bt-fuel-card-actions"><button type="button" className="bt-btn-primary" onClick={() => openIncoming(tank.id)}><Plus size={17} /> Shto hyrje</button><button type="button" className="bt-fuel-edit" aria-label={`Ndrysho rezervarin ${tank.name}`} title="Ndrysho" onClick={() => edit(tank)}><Pencil size={18} /></button></div></div>
         <div className={`bt-fuel-card-quantity ${levelClass}`}><div className="bt-fuel-quantity-heading"><span>Sasia aktuale</span>{critical && <span className="bt-fuel-low">Nivel kritik</span>}{warning && <span className="bt-fuel-low">Afër nivelit të ulët</span>}</div><strong>{liters(tank.current_quantity_liters)}</strong><div className="bt-fuel-meter" role="meter" aria-label={`Mbushja e rezervarit ${tank.name}`} aria-valuemin={0} aria-valuemax={capacity} aria-valuenow={quantity}><span style={{ width: `${fill}%` }} /></div><small>{Math.round(fill)}% e kapacitetit prej {liters(tank.capacity_liters)}</small></div>
-      </article><section className="bt-fuel-transactions" aria-label={`Transaksionet e rezervarit ${tank.name}`}><div className="bt-fuel-transactions-head"><div><h3>Transaksionet</h3><p>Hyrjet dhe daljet e karburantit</p></div><div className="bt-fuel-transaction-filters" role="group" aria-label="Filtro transaksionet">{[["", "Të gjitha"], ["INCOMING", "Hyrëse"], ["OUTGOING", "Dalëse"]].map(([type, label]) => <button key={type} type="button" className={transactionFilter === type ? "active" : ""} aria-pressed={transactionFilter === type} disabled={loadingPageId != null} onClick={() => changeFilter(type)}>{label}</button>)}</div></div>
-        {!transactions[tank.id]?.items.length ? <p className="bt-fuel-transactions-empty">Nuk ka transaksione në këtë faqe.</p> : <ul className="bt-fuel-transaction-list">{transactions[tank.id].items.map((transaction) => { const isIncoming = transaction.transaction_type === "INCOMING"; return <li className={isIncoming ? "is-incoming" : "is-outgoing"} key={transaction.id}><span className="bt-fuel-transaction-icon">{isIncoming ? <ArrowDownLeft size={20} /> : <ArrowUpRight size={20} />}</span><div><strong>{isIncoming ? "Hyrje" : "Dalje"}</strong><time dateTime={transaction.transaction_date}>{formatDateTime(transaction.transaction_date)}</time></div><b>{isIncoming ? "+" : "−"}{liters(transaction.quantity_liters)}</b><button type="button" className="bt-fuel-transaction-detail" onClick={() => showTransaction(transaction)}>Detaje</button></li>; })}</ul>}
-        {((transactionPages[tank.id] || 0) > 0 || transactions[tank.id]?.hasNext) && <div className="bt-fuel-transaction-pagination"><button type="button" className="bt-btn-secondary" disabled={loadingPageId != null || (transactionPages[tank.id] || 0) === 0} onClick={() => changePage(tank.id, (transactionPages[tank.id] || 0) - 1)}>Mbrapa</button><span>Faqja {(transactionPages[tank.id] || 0) + 1}</span><button type="button" className="bt-btn-secondary" disabled={loadingPageId != null || !transactions[tank.id]?.hasNext} onClick={() => changePage(tank.id, (transactionPages[tank.id] || 0) + 1)}>Tjetër</button></div>}
+      </article><section ref={transactionsRef} className="bt-fuel-transactions" aria-label={`Transaksionet e rezervarit ${tank.name}`} aria-busy={loadingPageId === tank.id}><div className="bt-fuel-transactions-head"><div><h3>Transaksionet</h3><p>Hyrjet dhe daljet e karburantit</p></div><div className="bt-fuel-transaction-filters" role="group" aria-label="Filtro transaksionet">{[["", "Të gjitha"], ["INCOMING", "Hyrëse"], ["OUTGOING", "Dalëse"]].map(([type, label]) => <button key={type} type="button" className={transactionFilter === type ? "active" : ""} aria-pressed={transactionFilter === type} disabled={loadingPageId != null} onClick={() => changeFilter(type)}>{label}</button>)}</div></div>
+        {transactionError && <p className="bt-inline-error" role="alert">{transactionError}</p>}
+        {loadingPageId === tank.id && <p className="bt-fuel-page-loading" role="status"><LoaderCircle size={18} aria-hidden="true" /> Duke ngarkuar transaksionet…</p>}
+        {!transactions[tank.id]?.items.length ? <p className="bt-fuel-transactions-empty">Nuk ka transaksione në këtë faqe.</p> : <ul className="bt-fuel-transaction-list">{transactions[tank.id].items.map((transaction) => { const isIncoming = transaction.transaction_type === "INCOMING"; return <li className={isIncoming ? "is-incoming" : "is-outgoing"} key={transaction.id}><span className="bt-fuel-transaction-icon">{isIncoming ? <ArrowDownLeft size={20} /> : <ArrowUpRight size={20} />}</span><div><strong>{isIncoming ? "Hyrje" : "Dalje"}{transaction.piusi_detail?.registration_number ? ` · ${transaction.piusi_detail.registration_number}` : ""}</strong><time dateTime={transaction.transaction_date}>{formatDateTime(transaction.transaction_date)}</time></div><b>{isIncoming ? "+" : "−"}{liters(transaction.quantity_liters)}</b><button type="button" className="bt-fuel-transaction-detail" onClick={() => showTransaction(transaction)}>Detaje</button></li>; })}</ul>}
+        {((transactionPages[tank.id] || 0) > 0 || transactions[tank.id]?.hasNext) && <div className="bt-fuel-transaction-pagination"><button type="button" className="bt-btn-secondary" disabled={loadingPageId != null || (transactionPages[tank.id] || 0) === 0} onClick={() => changePage(tank.id, (transactionPages[tank.id] || 0) - 1)}>Mbrapa</button><span className={loadingPageId === tank.id ? "bt-fuel-pagination-loading" : ""}>{loadingPageId === tank.id && <LoaderCircle size={17} aria-hidden="true" />}{loadingPageId === tank.id ? "Duke ngarkuar…" : `Faqja ${(transactionPages[tank.id] || 0) + 1}`}</span><button type="button" className="bt-btn-secondary" disabled={loadingPageId != null || !transactions[tank.id]?.hasNext} onClick={() => changePage(tank.id, (transactionPages[tank.id] || 0) + 1)}>Tjetër</button></div>}
       </section></div>;
     })}</div>
     {form && <Modal title={editingId == null ? "Shto depozitë" : "Përditëso depozitën"} className="bt-fuel-modal" onClose={closeForm}><form className="bt-fuel-form" onSubmit={save}>{error && <p className="bt-inline-error" role="alert">{error}</p>}<div className="bt-fuel-fields">
@@ -200,6 +211,6 @@ export default function FuelTanksPage() {
         <div className="bt-fuel-actions"><button type="submit" className="bt-btn-primary" disabled={busy || supplierLoading || !suppliers.length}>{busy ? "Duke ruajtur…" : "Ruaj hyrjen"}</button><button type="button" className="bt-btn-secondary" disabled={busy} onClick={() => { setIncoming(null); setError(""); }}>Anulo</button></div>
       </form>
     </Modal>}
-    {selectedTransaction && <Modal title={`Detajet e ${selectedTransaction.transaction_type === "INCOMING" ? "hyrjes" : "daljes"}`} className="bt-fuel-transaction-modal" onClose={() => setSelectedTransaction(null)}><dl className="bt-fuel-transaction-details"><div><dt>Sasia</dt><dd>{liters(selectedTransaction.quantity_liters)}</dd></div><div><dt>Data dhe ora</dt><dd>{formatDateTime(selectedTransaction.transaction_date)}</dd></div>{selectedTransaction.incoming_detail && <><div><dt>Furnitori</dt><dd>{suppliers.find((supplier) => supplier.id === selectedTransaction.incoming_detail.supplier_id)?.name || `#${selectedTransaction.incoming_detail.supplier_id}`}</dd></div><div><dt>Çmimi për litër</dt><dd>{money(selectedTransaction.incoming_detail.unit_price, selectedTransaction.incoming_detail.currency)}</dd></div><div><dt>Shuma totale</dt><dd>{money(selectedTransaction.incoming_detail.total_amount, selectedTransaction.incoming_detail.currency)}</dd></div><div><dt>Valuta</dt><dd>{selectedTransaction.incoming_detail.currency || "—"}</dd></div>{selectedTransaction.incoming_detail.comment && <div className="bt-fuel-comment-detail"><dt>Komenti</dt><dd>{selectedTransaction.incoming_detail.comment}</dd></div>}</>}</dl>{selectedTransaction.transaction_type === "INCOMING" && !selectedTransaction.incoming_detail && <p className="bt-fuel-detail-note">Të dhënat shtesë të kësaj hyrjeje nuk janë të disponueshme.</p>}</Modal>}
+    {selectedTransaction && <Modal title={`Detajet e ${selectedTransaction.transaction_type === "INCOMING" ? "hyrjes" : "daljes"}`} className="bt-fuel-transaction-modal" onClose={() => setSelectedTransaction(null)}><dl className="bt-fuel-transaction-details"><div><dt>Sasia</dt><dd>{liters(selectedTransaction.quantity_liters)}</dd></div><div><dt>Data dhe ora</dt><dd>{formatDateTime(selectedTransaction.transaction_date)}</dd></div>{selectedTransaction.incoming_detail && <><div><dt>Furnitori</dt><dd>{suppliers.find((supplier) => supplier.id === selectedTransaction.incoming_detail.supplier_id)?.name || `#${selectedTransaction.incoming_detail.supplier_id}`}</dd></div><div><dt>Çmimi për litër</dt><dd>{money(selectedTransaction.incoming_detail.unit_price, selectedTransaction.incoming_detail.currency)}</dd></div><div><dt>Shuma totale</dt><dd>{money(selectedTransaction.incoming_detail.total_amount, selectedTransaction.incoming_detail.currency)}</dd></div><div><dt>Valuta</dt><dd>{selectedTransaction.incoming_detail.currency || "—"}</dd></div>{selectedTransaction.incoming_detail.comment && <div className="bt-fuel-comment-detail"><dt>Komenti</dt><dd>{selectedTransaction.incoming_detail.comment}</dd></div>}</>}{selectedTransaction.piusi_detail && <>{[["Targa", "registration_number"], ["Kilometrazhi", "odometer"], ["Njësia e kilometrazhit", "odometer_unit"], ["Autorizimi", "auth"], ["Lloji i furnizimit", "dispense_type"], ["Anomalia", "anomaly"], ["Statusi", "status"], ["ID e transaksionit Piusi", "piusi_transaction_id"], ["ID progresive Piusi", "piusi_progressive_id"], ["ID e dispenserit", "piusi_dispenser_id"], ["ID e pompës", "piusi_pump_id"], ["ID e shoferit Piusi", "piusi_driver_id"]].map(([label, key]) => <div key={key}><dt>{label}</dt><dd>{detailValue(selectedTransaction.piusi_detail[key])}</dd></div>)}</>}</dl>{selectedTransaction.transaction_type === "INCOMING" && !selectedTransaction.incoming_detail && <p className="bt-fuel-detail-note">Të dhënat shtesë të kësaj hyrjeje nuk janë të disponueshme.</p>}</Modal>}
   </div>;
 }
