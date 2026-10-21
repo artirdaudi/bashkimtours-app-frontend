@@ -48,9 +48,9 @@ test('the app shell and its assets are precached together without API caching', 
   }
 });
 
-test('new service worker waits for user acceptance before activating', () => {
-  assert.equal(skipped, false);
-  assert.equal(claimed, false);
+test('new service worker activates and takes control automatically', () => {
+  assert.equal(skipped, true);
+  assert.equal(claimed, true);
 });
 
 function launchHarness(standalone, reduced = false) {

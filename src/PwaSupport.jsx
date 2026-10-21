@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import "./pwa.css";
 
@@ -9,19 +9,11 @@ export default function PwaSupport() {
   const [installPrompt, setInstallPrompt] = useState(null);
   const [installed, setInstalled] = useState(isStandalone);
   const [dismissed, setDismissed] = useState(false);
-  const [updateDismissed, setUpdateDismissed] = useState(false);
-  const webUpdateStarted = useRef(false);
   const [error, setError] = useState("");
-  const { needRefresh: [needRefresh], updateServiceWorker } = useRegisterSW({
+  useRegisterSW({
     onRegisterError: () => isStandalone() && setError("Përditësimi automatik nuk është gati. Rifreskoni faqen për të provuar përsëri."),
   });
   const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-
-  useEffect(() => {
-    if (!needRefresh || isStandalone() || webUpdateStarted.current) return;
-    webUpdateStarted.current = true;
-    void updateServiceWorker(true);
-  }, [needRefresh, updateServiceWorker]);
 
   useEffect(() => {
     const displayMode = window.matchMedia("(display-mode: standalone)");
@@ -110,17 +102,15 @@ export default function PwaSupport() {
     </div>
   );
 
-  const showUpdate = needRefresh && isStandalone() && !updateDismissed;
-  if (!showUpdate && !error && (installed || dismissed || (!installPrompt && !ios))) return null;
+  if (!error && (installed || dismissed || (!installPrompt && !ios))) return null;
   return (
     <aside className="bt-pwa-notice" aria-label="Bashkim Tours aplikacioni">
-      {showUpdate && <><strong>Version i ri është gati</strong><p>Përditësojeni pasi të përfundoni punën në formularin e hapur.</p><button type="button" onClick={() => updateServiceWorker(true)}>Përditëso</button></>}
       {error && <p role="alert">{error}</p>}
         {!installed && !dismissed && <>
           <strong>Instalo Bashkim Tours</strong>
           {installPrompt ? <><p>Hapeni aplikacionin direkt nga ekrani kryesor.</p><button type="button" onClick={install}>Instalo</button></> : ios ? <p>Në Safari, hapni menynë “Share”, zgjidhni “Add to Home Screen”, pastaj “Add”.</p> : null}
         </>}
-      <button type="button" onClick={() => { setDismissed(true); setUpdateDismissed(true); setError(""); }}>Mbyll</button>
+      <button type="button" onClick={() => { setDismissed(true); setError(""); }}>Mbyll</button>
     </aside>
   );
 }

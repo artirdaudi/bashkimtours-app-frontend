@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, cwd(), "");
   return {
     plugins: [react(), tailwindcss(), VitePWA({
-      registerType: "prompt",
+      registerType: "autoUpdate",
       manifest: {
         id: "/",
         name: "Bashkim Tours",
@@ -27,6 +27,8 @@ export default defineConfig(({ mode }) => {
         ],
       },
       workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
         // Keep the HTML and hashed assets in the same precache revision so an
         // older page never asks a new deployment for a removed stylesheet.
         globPatterns: ["**/*.{html,js,css,png,jpg,jpeg,svg,woff,woff2}"],
