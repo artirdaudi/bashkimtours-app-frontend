@@ -3511,6 +3511,16 @@
 .bt-fuel-delete { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid #f6d4d1; border-radius: 9px; background: #fff; color: #b42318; cursor: pointer; }
 .bt-fuel-delete:hover { background: #fff1f0; }
 .bt-fuel-suppliers-empty { padding: 24px; border: 1px solid #dce5eb; border-radius: 12px; background: #fff; color: #637582; }
+.bt-fuel-customer-toolbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 22px 0; }
+.bt-fuel-customer-toolbar .bt-fuel-supplier-search { flex: 1 1 300px; margin: 0; }
+.bt-fuel-customer-plate { margin: 0 0 5px; font-weight: 700; color: #253743; }
+.bt-fuel-customer-comment { margin: 7px 0 0; color: #637582; font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.bt-fuel-supplier-info .bt-fuel-customer-status { display: inline-block; margin-left: 6px; padding: 3px 8px; border-radius: 99px; background: #f1f3f5; color: #637582; font-size: 11px; font-weight: 700; vertical-align: middle; }
+.bt-fuel-supplier-info .bt-fuel-customer-status.is-active { background: #e4f5eb; color: #177245; }
+.bt-fuel-customers-page .bt-fuel-fields textarea { width: 100%; padding: 10px 12px; border: 1px solid #dce5eb; border-radius: 9px; font: inherit; resize: vertical; }
+.bt-fuel-customer-comment-field { flex-basis: 100%; }
+.bt-fuel-fields .bt-fuel-customer-active { display: flex; align-items: center; gap: 8px; flex-basis: 100%; color: #253743; }
+.bt-fuel-fields .bt-fuel-customer-active input { width: auto; }
 @media (max-width: 800px) { .bt-fuel-shell .bt-route-stage > .bt-page { padding-top: 24px; } }
 @media (max-width: 520px) { .bt-fuel-supplier-card { flex-wrap: wrap; }.bt-fuel-supplier-actions { margin-left: auto; }.bt-fuel-supplier-search { flex-wrap: wrap; }.bt-fuel-supplier-search button { width: 100%; justify-content: center; } }
 @media (max-width: 520px) { .bt-fuel-transactions-head { align-items: flex-start; flex-direction: column; }.bt-fuel-transaction-filters { width: 100%; }.bt-fuel-transaction-filters button { flex: 1; justify-content: center; } }

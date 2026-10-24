@@ -136,8 +136,8 @@ export default function DashboardLayout() {
         </> : inFuel ? <>
           <NavLink to="/fuel" end><Fuel /><span>Rezervari</span></NavLink>
           <NavLink to="/fuel/suppliers"><Truck /><span>Furnitorët</span></NavLink>
+          <NavLink to="/fuel/external-customers"><UsersRound /><span>Klientët</span></NavLink>
           <NavLink to="/students"><UsersRound /><span>Maarif</span></NavLink>
-          <NavLink to="/payments"><CreditCard /><span>Pagesat</span></NavLink>
         </> : <>
           <NavLink to="/students"><UsersRound /><span>Nxënësit</span></NavLink>
           <NavLink to="/payments"><CreditCard /><span>Pagesat</span></NavLink>

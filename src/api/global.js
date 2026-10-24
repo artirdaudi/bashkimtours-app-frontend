@@ -74,6 +74,7 @@ export const fuelSuppliersApi = {
   update: (id, body) => api(`/fuel/suppliers/${id}`, { method: "PUT", body: JSON.stringify(body) }),
   remove: (id) => api(`/fuel/suppliers/${id}`, { method: "DELETE" }),
 };
+export const fuelExternalCustomersApi = resource("/fuel/external-customers");
 export const charterAssignmentsApi = {
   buses: (charterId, params) => api(`/charters/${charterId}/bus-assignments${query(params)}`),
   assignBus: (charterId, busId) => api(`/charters/${charterId}/bus-assignments`, { method: "POST", body: JSON.stringify({ bus_id: busId }) }),

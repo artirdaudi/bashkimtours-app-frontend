@@ -1,4 +1,4 @@
-import { Fuel, Truck } from "lucide-react";
+import { Fuel, Truck, UsersRound } from "lucide-react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 
 export default function FuelTabs() {
@@ -7,6 +7,7 @@ export default function FuelTabs() {
     <nav className="bt-maarif-tabs bt-fuel-tabs" aria-label="Modulet Nafta">
       <NavLink to="/fuel" end><Fuel size={17} /><span>Rezervari</span></NavLink>
       <NavLink to="/fuel/suppliers"><Truck size={17} /><span>Furnitorët</span></NavLink>
+      <NavLink to="/fuel/external-customers"><UsersRound size={17} /><span>Klientët e jashtëm</span></NavLink>
     </nav>
     <div className="bt-route-stage" key={location.pathname}><Outlet /></div>
   </div>;
