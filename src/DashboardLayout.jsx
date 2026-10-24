@@ -32,7 +32,12 @@ export default function DashboardLayout() {
   const module = location.pathname === "/income" ? "income" : inCharters ? "charters" : inFuel ? "fuel" : maarifPaths.has(location.pathname) ? "maarif" : "more";
   const activeTabs = location.pathname.startsWith("/settings/") || location.pathname === "/messages" ? settingsTabs : moduleTabs[module];
   const moduleIndex = { income: 0, maarif: 1, charters: 2, fuel: 3, more: 4 }[module];
-  const ModuleIcon = moduleMeta[module].icon;
+  const activeModuleMeta = location.pathname === "/autobusat" ? { title: "Autobusët", description: "Regjistri i autobusëve", icon: Bus }
+    : location.pathname === "/shoferat" ? { title: "Shoferat dhe Staff", description: "Shoferët dhe personeli", icon: UsersRound }
+    : location.pathname.startsWith("/settings/") || location.pathname === "/messages" ? { title: "Cilësimet", description: "Llogaritë dhe konfigurimi", icon: Settings }
+    : location.pathname === "/account" ? { title: "Llogaria ime", description: "Profili dhe të dhënat e mia", icon: UserCircle }
+    : moduleMeta[module];
+  const ModuleIcon = activeModuleMeta.icon;
   const inSettings = ["/messages", "/settings/accounts-roles", "/settings/cash-registers", "/settings/document-types"].includes(location.pathname);
   const [settingsOpen, setSettingsOpen] = useState(inSettings);
   const [loginArrival] = useState(() => {
@@ -148,8 +153,8 @@ export default function DashboardLayout() {
         />
       )}
       <main className="bt-main">
-        <div className="bt-pwa-module-head" key={module}><div className="bt-pwa-module-title"><span className="bt-pwa-module-icon"><ModuleIcon size={24} /></span><div><h2>{moduleMeta[module].title}</h2><p>{moduleMeta[module].description}</p></div></div></div>
-        {activeTabs.length > 0 && <nav className="bt-pwa-subnav" aria-label={`Nënmenutë ${moduleMeta[module].title}`}>{activeTabs.map(([path, Icon, label]) => <NavLink key={path} to={path} end onClick={path === "/skano" ? prepareScanAudio : undefined}><Icon size={17} /><span>{label}</span></NavLink>)}</nav>}
+        <div className="bt-pwa-module-head" key={activeModuleMeta.title}><div className="bt-pwa-module-title"><span className="bt-pwa-module-icon"><ModuleIcon size={24} /></span><div><h2>{activeModuleMeta.title}</h2><p>{activeModuleMeta.description}</p></div></div></div>
+        {activeTabs.length > 0 && <nav className="bt-pwa-subnav" aria-label={`Nënmenutë ${activeModuleMeta.title}`}>{activeTabs.map(([path, Icon, label]) => <NavLink key={path} to={path} end onClick={path === "/skano" ? prepareScanAudio : undefined}><Icon size={17} /><span>{label}</span></NavLink>)}</nav>}
         <Outlet />
       </main>
       <nav className="bt-mobile-bottom-nav" aria-label="Navigimi kryesor" style={{ "--bt-module-offset": `${(open ? 4 : moduleIndex) * 100}%` }}>

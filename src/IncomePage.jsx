@@ -8,9 +8,11 @@ import {
   RefreshCw,
   TrendingUp,
 } from "lucide-react";
-import { monthlyPaymentsApi, maarifReportingApi } from "./api";
+import { charterPaymentsApi, monthlyPaymentsApi, maarifReportingApi } from "./api";
 import maarifLogo from "./assets/maarif_logo.jpeg";
+import bashkimToursLogo from "./assets/bashkimtours_logo.png";
 import DateInput from "./DateInput";
+import { charterAmountInEUR, MKD_PER_EUR } from "./charterCurrency";
 
 const euro = new Intl.NumberFormat("sq-AL", {
   style: "currency",
@@ -37,7 +39,6 @@ const monthNames = [
   "Dhjetor",
 ];
 
-// Burimet e ardhshme shtohen këtu me adapterin përkatës të raportimit.
 const incomeSources = [
   {
     id: "maarif",
@@ -46,7 +47,21 @@ const incomeSources = [
     logo: maarifLogo,
     color: "#0faab7",
   },
+  {
+    id: "charters",
+    name: "Charterët",
+    description: "Pagesat e udhëtimeve me porosi",
+    logo: bashkimToursLogo,
+    color: "#073878",
+  },
 ];
+
+const skopjeDate = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Skopje", year: "numeric", month: "2-digit", day: "2-digit" });
+const skopjeHour = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Skopje", hour: "2-digit", hourCycle: "h23" });
+const dateKey = (value) => {
+  const parts = Object.fromEntries(skopjeDate.formatToParts(new Date(value)).map((part) => [part.type, part.value]));
+  return `${parts.year}-${parts.month}-${parts.day}`;
+};
 
 const rangeFor = (period, selectedDay, selectedMonth, selectedYear) => {
   if (period === "day") return [selectedDay, selectedDay];
@@ -101,7 +116,7 @@ const aggregateTimeline = (
     hourlyPayments.forEach((payment) => {
       const createdAt = new Date(payment.created_at);
       if (!Number.isNaN(createdAt.getTime()))
-        hours[createdAt.getHours()].total += Number(payment.amount || 0);
+        hours[Number(skopjeHour.format(createdAt))].total += Number(payment.amount || 0);
     });
     return hours;
   }
@@ -136,10 +151,7 @@ export default function IncomePage() {
   const [selectedMonth, setSelectedMonth] = useState(today.slice(0, 7));
   const [selectedYear, setSelectedYear] = useState(today.slice(0, 4));
   const [sourceId, setSourceId] = useState("all");
-  const [summary, setSummary] = useState();
-  const [byUser, setByUser] = useState([]);
-  const [byDate, setByDate] = useState([]);
-  const [hourlyPayments, setHourlyPayments] = useState([]);
+  const [incomeData, setIncomeData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const years = Array.from(
@@ -167,13 +179,11 @@ export default function IncomePage() {
         maarifReportingApi.byUser(filters),
         maarifReportingApi.byDate(filters),
         period === "day" ? getPaymentsForDay(selectedDay) : Promise.resolve([]),
+        charterPaymentsApi.all(filters),
       ])
-        .then(([summaryData, users, dates, dayPayments]) => {
+        .then(([summaryData, users, dates, dayPayments, charterResponse]) => {
           if (cancelled) return;
-          setSummary(summaryData);
-          setByUser(users);
-          setByDate(dates);
-          setHourlyPayments(dayPayments);
+          setIncomeData({ summaryData, users, dates, dayPayments, charterPayments: charterResponse.items });
         })
         .catch((requestError) => {
           if (!cancelled) setError(requestError.message);
@@ -186,7 +196,37 @@ export default function IncomePage() {
       cancelled = true;
       window.clearTimeout(request);
     };
-  }, [dateFrom, dateTo, period, selectedDay, sourceId]);
+  }, [dateFrom, dateTo, period, selectedDay]);
+
+  const { summary, byUser, byDate, hourlyPayments, sourceTotals } = useMemo(() => {
+    if (!incomeData) return { summary: null, byUser: [], byDate: [], hourlyPayments: [], sourceTotals: { maarif: 0, charters: 0 } };
+    const { summaryData, users, dates, dayPayments, charterPayments } = incomeData;
+    const sourceTotals = {
+      maarif: Number(summaryData.total_income || 0),
+      charters: charterPayments.reduce((total, payment) => total + charterAmountInEUR(payment), 0),
+    };
+    const includeMaarif = sourceId === "all" || sourceId === "maarif";
+    const includeCharters = sourceId === "all" || sourceId === "charters";
+    const dateTotals = new Map();
+    if (includeMaarif) dates.forEach((item) => dateTotals.set(item.payment_date, Number(item.total_income || 0)));
+    if (includeCharters) charterPayments.forEach((payment) => {
+      const day = dateKey(payment.payment_date);
+      dateTotals.set(day, (dateTotals.get(day) || 0) + charterAmountInEUR(payment));
+    });
+    const userTotals = new Map();
+    if (includeMaarif) users.forEach((user) => userTotals.set(user.username, Number(user.total_income || 0)));
+    if (includeCharters) charterPayments.forEach((payment) => {
+      const username = payment.created_by_user?.username || "Përdorues i panjohur";
+      userTotals.set(username, (userTotals.get(username) || 0) + charterAmountInEUR(payment));
+    });
+    return {
+      summary: { total_income: (includeMaarif ? sourceTotals.maarif : 0) + (includeCharters ? sourceTotals.charters : 0) },
+      byUser: [...userTotals].map(([username, total_income]) => ({ user_id: username, username, total_income })).sort((a, b) => b.total_income - a.total_income),
+      byDate: [...dateTotals].map(([payment_date, total_income]) => ({ payment_date, total_income })),
+      hourlyPayments: [...(includeMaarif ? dayPayments : []), ...(includeCharters ? charterPayments.map((payment) => ({ created_at: payment.payment_date, amount: charterAmountInEUR(payment) })) : [])],
+      sourceTotals,
+    };
+  }, [incomeData, sourceId]);
 
   const timeline = useMemo(
     () => aggregateTimeline(byDate, period, selectedMonth, hourlyPayments),
@@ -208,10 +248,10 @@ export default function IncomePage() {
     <div className="bt-page bt-ops-page bt-finance-page">
       <header className="bt-finance-header">
         <div>
-          <span className="bt-eyebrow">Bashkim Tours · Maarif · Financa</span>
+          <span className="bt-eyebrow">Bashkim Tours · Financa</span>
           <h1>Të hyrat</h1>
           <p>
-            Përmbledhja e të hyrave në EUR nga transporti Maarif, e organizuar
+            Përmbledhja e të hyrave në EUR nga Maarif dhe Charterët, e organizuar
             sipas burimit dhe datës së arkëtimit.
           </p>
         </div>
@@ -286,7 +326,7 @@ export default function IncomePage() {
           <section className="bt-finance-overview bt-finance-overview--total-only">
             <article className="bt-finance-total-card">
               <div>
-                <span>TË HYRAT NGA MAARIF</span>
+                <span>{sourceId === "all" ? "TË HYRAT GJITHSEJ" : `TË HYRAT NGA ${sourceId === "maarif" ? "MAARIF" : "CHARTERËT"}`}</span>
               </div>
               <strong>{money(summary.total_income)}</strong>
               <div className="bt-finance-total-meta">
@@ -307,11 +347,11 @@ export default function IncomePage() {
                   <div><h3>{source.name}</h3><p>{source.description}</p></div>
                 </header>
                 <div className="bt-income-source-value bt-income-source-value--clean">
-                  <strong>{money(summary.total_income)}</strong>
+                  <strong>{money(sourceTotals[source.id])}</strong>
                 </div>
                 <div className="bt-income-source-share">
-                  <span style={{ width: totalIncome ? "100%" : "0%" }} />
-                  <small>{totalIncome ? "100% e të hyrave të regjistruara" : "Pa të hyra në këtë periudhë"}</small>
+                  <span style={{ width: sourceTotals.maarif + sourceTotals.charters ? `${(sourceTotals[source.id] / (sourceTotals.maarif + sourceTotals.charters)) * 100}%` : "0%" }} />
+                  <small>{sourceTotals.maarif + sourceTotals.charters ? `${((sourceTotals[source.id] / (sourceTotals.maarif + sourceTotals.charters)) * 100).toFixed(1)}% e të hyrave të regjistruara` : "Pa të hyra në këtë periudhë"}</small>
                 </div>
               </article>
             ))}
@@ -358,7 +398,7 @@ export default function IncomePage() {
 
           <footer className="bt-finance-footer-note">
             <Banknote />
-            <div><strong>Të hyrat bazohen në datën reale të arkëtimit</strong><span>Muaji për të cilin është kryer pagesa nuk ndryshon periudhën financiare ku ajo regjistrohet.</span></div>
+            <div><strong>Të hyrat bazohen në datën reale të arkëtimit</strong><span>Pagesat e Charterëve në MKD paraqiten në EUR me kursin 1 EUR = {MKD_PER_EUR} MKD.</span></div>
           </footer>
         </>
       ) : null}
