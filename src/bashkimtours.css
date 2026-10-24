@@ -3522,16 +3522,79 @@
 .bt-fuel-delete { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid #f6d4d1; border-radius: 9px; background: #fff; color: #b42318; cursor: pointer; }
 .bt-fuel-delete:hover { background: #fff1f0; }
 .bt-fuel-suppliers-empty { padding: 24px; border: 1px solid #dce5eb; border-radius: 12px; background: #fff; color: #637582; }
-.bt-fuel-customer-toolbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 22px 0; }
-.bt-fuel-customer-toolbar .bt-fuel-supplier-search { flex: 1 1 300px; margin: 0; }
-.bt-fuel-customer-plate { margin: 0 0 5px; font-weight: 700; color: #253743; }
-.bt-fuel-customer-comment { margin: 7px 0 0; color: #637582; font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; }
-.bt-fuel-supplier-info .bt-fuel-customer-status { display: inline-block; margin-left: 6px; padding: 3px 8px; border-radius: 99px; background: #f1f3f5; color: #637582; font-size: 11px; font-weight: 700; vertical-align: middle; }
-.bt-fuel-supplier-info .bt-fuel-customer-status.is-active { background: #e4f5eb; color: #177245; }
+.bt-fuel-customer-toolbar { margin: 12px 0; }
+.bt-fuel-customer-tabs { display: flex; gap: 8px; margin-top: 8px; border-bottom: 1px solid #dce5eb; }
+.bt-fuel-customer-tabs button { padding: 11px 16px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #637582; font: inherit; font-weight: 700; cursor: pointer; }
+.bt-fuel-customer-tabs button.active { border-bottom-color: #1257a0; color: #1257a0; }
+.bt-fuel-customer-tabs button:focus-visible { outline: 2px solid #1257a0; outline-offset: -2px; }
+.bt-fuel-customers-page :is(.bt-fuel-customer-toolbar, .bt-fuel-external-controls) { border: 1px solid var(--bt-line); border-radius: 12px; background: #fff; }
+.bt-fuel-customers-page :is(.bt-fuel-customer-toolbar, .bt-fuel-external-controls) .bt-labeled-filter:first-child { flex: 2 1 320px; }
+.bt-fuel-customers-page :is(.bt-fuel-customer-toolbar, .bt-fuel-external-controls) .bt-labeled-filter:last-child { flex: 1 1 200px; }
+.bt-fuel-customers-page :is(.bt-fuel-customer-toolbar, .bt-fuel-external-controls) .bt-labeled-filter select { width: 100%; height: 42px; min-height: 42px; min-width: 0; padding: 0; border: 0; outline: 0; background: transparent; color: var(--bt-ink); font: inherit; cursor: pointer; }
+.bt-fuel-customers-page :is(.bt-fuel-customer-toolbar, .bt-fuel-external-controls) .bt-labeled-filter > div:focus-within { outline: 2px solid #78a6d8; outline-offset: 1px; }
 .bt-fuel-customers-page .bt-fuel-fields textarea { width: 100%; padding: 10px 12px; border: 1px solid #dce5eb; border-radius: 9px; font: inherit; resize: vertical; }
 .bt-fuel-customer-comment-field { flex-basis: 100%; }
 .bt-fuel-fields .bt-fuel-customer-active { display: flex; align-items: center; gap: 8px; flex-basis: 100%; color: #253743; }
 .bt-fuel-fields .bt-fuel-customer-active input { width: auto; }
+.bt-fuel-external-transactions { margin-top: 12px; }
+.bt-fuel-external-transactions-head h2 { margin: 0 0 5px; font-size: 21px; }
+.bt-fuel-external-transactions-head p { margin: 0 0 16px; color: #637582; }
+.bt-fuel-customers-page .bt-fuel-filter-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 14px 0; }
+.bt-fuel-customers-page .bt-fuel-customer-filter-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.bt-fuel-customers-page .bt-fuel-filter-cards button { min-width: 0; font: inherit; }
+.bt-fuel-customers-page .bt-fuel-filter-cards strong { overflow-wrap: anywhere; }
+.bt-fuel-customers-page .bt-fuel-filter-cards small { color: var(--bt-muted); font-size: 13px; font-weight: 700; }
+@media (max-width: 700px) { .bt-fuel-customers-page .bt-fuel-filter-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.bt-fuel-external-summary { display: flex; gap: 10px; flex-wrap: wrap; margin: 14px 0; }
+.bt-fuel-external-summary span { display: inline-flex; align-items: center; gap: 9px; padding: 9px 12px; border: 1px solid #dce5eb; border-radius: 9px; background: #fff; color: #637582; font-size: 13px; }
+.bt-fuel-external-summary strong { color: #253743; font-size: 14px; }
+.bt-fuel-external-controls { margin: 14px 0; }
+.bt-fuel-external-list { overflow: hidden; border: 1px solid #dce5eb; border-radius: 12px; background: #fff; }
+.bt-fuel-unpaid-toolbar, .bt-fuel-unpaid-group-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.bt-fuel-unpaid-toolbar { margin: 16px 0; padding: 12px 16px; border: 1px solid #dce5eb; border-radius: 12px; background: #fff; }
+.bt-fuel-unpaid-toolbar label, .bt-fuel-unpaid-group-head label { display: inline-flex; align-items: center; gap: 9px; cursor: pointer; }
+.bt-fuel-unpaid-toolbar input, .bt-fuel-unpaid-group-head input, .bt-fuel-unpaid-check input { width: 18px; height: 18px; accent-color: var(--bt-blue); cursor: pointer; }
+.bt-fuel-unpaid-toolbar span, .bt-fuel-unpaid-group-head span { color: var(--bt-muted); font-size: 13px; }
+.bt-fuel-unpaid-groups { display: grid; gap: 14px; }
+.bt-fuel-unpaid-group-head { padding: 14px 16px; border: 1px solid #edc8a0; border-bottom: 1px solid #edc8a0; border-radius: 12px 12px 0 0; background: #fff3df; }
+.bt-fuel-unpaid-group-head strong { color: #9a4300; }
+.bt-fuel-unpaid-group-head > span { padding: 5px 9px; border-radius: 99px; background: #fff; color: #9a4300; font-weight: 700; }
+.bt-fuel-group-customer { display: flex; align-items: center; gap: 9px; }
+.bt-fuel-unpaid-group .bt-fuel-external-list { border-radius: 0 0 12px 12px; }
+.bt-fuel-unpaid-check { display: flex; align-items: center; }
+.bt-fuel-unpaid-group .bt-fuel-external-row { grid-template-columns: auto minmax(180px, 1fr) minmax(260px, 1.35fr) auto; }
+.bt-fuel-external-row { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(260px, 1.35fr) auto; align-items: center; gap: 14px; padding: 13px 16px; border-bottom: 1px solid #edf1f4; }
+.bt-fuel-external-row:last-child { border-bottom: 0; }
+.bt-fuel-external-identity { display: grid; gap: 2px; }
+.bt-fuel-external-identity strong { color: #253743; font-size: 15px; }
+.bt-fuel-external-identity span { font-size: 13px; }
+.bt-fuel-external-identity small, .bt-fuel-external-facts small { color: #637582; font-size: 11px; }
+.bt-fuel-external-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.bt-fuel-external-facts span { display: grid; gap: 2px; }
+.bt-fuel-external-facts b { color: #253743; font-size: 13px; white-space: nowrap; }
+.bt-fuel-external-row-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+.bt-fuel-external-row-actions button { min-height: 36px; }
+.bt-fuel-external-detail-button { padding: 7px; border: 0; background: transparent; color: #1257a0; font: inherit; cursor: pointer; }
+.bt-fuel-settlement-status.is-missing_price { background: #f1f3f5; color: #52616c; }
+.bt-fuel-settlement-status.is-unsettled { background: #fff1df; color: #9a4300; }
+.bt-fuel-settlement-status.is-settled { background: #e4f5eb; color: #177245; }
+.bt-fuel-price-preview { display: grid; align-content: center; gap: 5px; flex: 1; color: #637582; font-size: 13px; }
+.bt-fuel-price-preview strong { color: #253743; font-size: 18px; }
+.bt-fuel-success { padding: 10px 12px; border-radius: 9px; background: #e4f5eb; color: #177245; }
+.bt-fuel-customer-open { display: grid; flex: 1; gap: 3px; min-width: 0; padding: 0; border: 0; background: none; color: #253743; text-align: left; font: inherit; cursor: pointer; }
+.bt-fuel-customer-open strong { font-size: 15px; }
+.bt-fuel-customer-open span { font-size: 14px; }
+.bt-fuel-customer-open small { color: #637582; font-size: 12px; }
+.bt-fuel-external-detail-list { display: grid; gap: 8px; }
+.bt-fuel-external-detail-list div { display: flex; justify-content: space-between; gap: 12px; }
+.bt-fuel-external-detail-list dt { color: #637582; }
+.bt-fuel-external-detail-list dd { margin: 0; text-align: right; }
+.bt-fuel-customer-history { display: grid; margin-bottom: 14px; }
+.bt-fuel-customer-history > div { display: grid; grid-template-columns: 1fr auto auto auto; gap: 10px; padding: 10px 0; border-bottom: 1px solid #edf1f4; font-size: 13px; }
+.bt-fuel-customer-history small { color: #637582; }
+@media (max-width: 950px) { .bt-fuel-external-row, .bt-fuel-unpaid-group .bt-fuel-external-row { grid-template-columns: 1fr; gap: 10px; }.bt-fuel-unpaid-group .bt-fuel-external-row { grid-template-columns: auto minmax(0, 1fr); }.bt-fuel-unpaid-group .bt-fuel-external-row > :not(.bt-fuel-unpaid-check) { grid-column: 2; }.bt-fuel-unpaid-check { grid-row: 1 / 4; align-items: flex-start; }.bt-fuel-external-row-actions { justify-content: flex-start; } }
+@media (max-width: 520px) { .bt-fuel-external-facts { gap: 5px; }.bt-fuel-external-facts b { white-space: normal; }.bt-fuel-external-row-actions .bt-btn-primary, .bt-fuel-external-row-actions .bt-btn-secondary { flex: 1; }.bt-fuel-customer-history > div { grid-template-columns: 1fr auto; } }
+.bt-fuel-settlement-status { display: inline-block; padding: 5px 8px; border-radius: 99px; background: #fff1df; color: #9a4300; font-size: 12px; font-weight: 700; }
 @media (max-width: 800px) { .bt-fuel-shell .bt-route-stage > .bt-page { padding-top: 24px; } }
 @media (max-width: 520px) { .bt-fuel-supplier-card { flex-wrap: wrap; }.bt-fuel-supplier-actions { margin-left: auto; }.bt-fuel-supplier-search { flex-wrap: wrap; }.bt-fuel-supplier-search button { width: 100%; justify-content: center; } }
 @media (max-width: 520px) { .bt-fuel-transactions-head { align-items: flex-start; flex-direction: column; }.bt-fuel-transaction-filters { width: 100%; }.bt-fuel-transaction-filters button { flex: 1; justify-content: center; } }

@@ -75,6 +75,13 @@ export const fuelSuppliersApi = {
   remove: (id) => api(`/fuel/suppliers/${id}`, { method: "DELETE" }),
 };
 export const fuelExternalCustomersApi = resource("/fuel/external-customers");
+export const fuelExternalTransactionsApi = {
+  list: (params) => api(`/fuel/external-transactions${query(params)}`),
+  summary: () => api("/fuel/external-transactions/summary"),
+  customerSummaries: () => api("/fuel/external-transactions/customer-summaries"),
+  get: (transactionId) => api(`/fuel/external-transactions/${transactionId}`),
+  update: (transactionId, body) => api(`/fuel/external-transactions/${transactionId}`, { method: "PATCH", body: JSON.stringify(body) }),
+};
 export const charterAssignmentsApi = {
   buses: (charterId, params) => api(`/charters/${charterId}/bus-assignments${query(params)}`),
   assignBus: (charterId, busId) => api(`/charters/${charterId}/bus-assignments`, { method: "POST", body: JSON.stringify({ bus_id: busId }) }),
