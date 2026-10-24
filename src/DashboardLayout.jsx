@@ -1,10 +1,11 @@
-import { Banknote, BellRing, Bus, ChevronDown, CreditCard, FileText, Fuel, LogOut, Menu, Route, ScanLine, Settings, ShieldCheck, Truck, UserCircle, UsersRound, Wallet, X } from "lucide-react";
+import { Banknote, BellRing, Bus, ChevronDown, CreditCard, FileText, Fuel, LogOut, Menu, Route, ScanLine, Settings, ShieldCheck, UserCircle, UsersRound, Wallet, X } from "lucide-react";
 import { useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { logout as endSession } from "./auth";
 import logo from "./assets/bashkimtours_logo.png";
 import maarifLogo from "./assets/maarif_logo.jpeg";
 import { prepareScanAudio } from "./scanAudio";
+import FuelTruckIcon from "./FuelTruckIcon";
 
 export default function DashboardLayout() {
   const [open, setOpen] = useState(false);
@@ -135,7 +136,7 @@ export default function DashboardLayout() {
           <NavLink to="/students"><UsersRound /><span>Maarif</span></NavLink>
         </> : inFuel ? <>
           <NavLink to="/fuel" end><Fuel /><span>Rezervari</span></NavLink>
-          <NavLink to="/fuel/suppliers"><Truck /><span>Furnitorët</span></NavLink>
+          <NavLink to="/fuel/suppliers"><FuelTruckIcon size={21} /><span>Furnitorët</span></NavLink>
           <NavLink to="/fuel/external-customers"><UsersRound /><span>Klientët</span></NavLink>
           <NavLink to="/students"><UsersRound /><span>Maarif</span></NavLink>
         </> : <>

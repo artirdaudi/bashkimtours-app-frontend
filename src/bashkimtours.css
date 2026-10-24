@@ -3492,6 +3492,17 @@
 .bt-fuel-transaction-list .is-outgoing { background: #fff9f9; }
 .bt-fuel-transaction-list .is-outgoing .bt-fuel-transaction-icon { background: #fee2e2; color: #b42318; }
 .bt-fuel-transaction-list .is-outgoing b { color: #b42318; }
+.bt-fuel-transaction-list .is-vehicle { background: #fff9f9; }
+.bt-fuel-transaction-list .is-vehicle .bt-fuel-transaction-icon { background: #fee2e2; color: #b42318; }
+.bt-fuel-transaction-list .is-vehicle b { color: #b42318; }
+.bt-fuel-transaction-list .is-external { background: #fff8ed; }
+.bt-fuel-transaction-list .is-external .bt-fuel-transaction-icon { background: #ffedd5; color: #c65a05; }
+.bt-fuel-transaction-list .is-external b { color: #c65a05; }
+.bt-fuel-transaction-list .is-unmapped { background: #f8fafc; }
+.bt-fuel-transaction-list .is-unmapped .bt-fuel-transaction-icon { background: #e2e8f0; color: #475569; }
+.bt-fuel-transaction-list .is-unmapped b { color: #475569; }
+.bt-fuel-transaction-badge { display: inline-block; margin-left: 8px; padding: 3px 7px; border-radius: 99px; background: #ffedd5; color: #9a4300; font-size: 11px; font-weight: 700; vertical-align: middle; }
+.bt-fuel-transaction-list .is-unmapped .bt-fuel-transaction-badge { background: #e2e8f0; color: #475569; }
 .bt-fuel-transaction-pagination { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 14px 24px; border-top: 1px solid #e5ebef; }
 .bt-fuel-transaction-pagination span { color: #637582; font-size: 13px; white-space: nowrap; }
 .bt-fuel-transaction-pagination .bt-fuel-pagination-loading { display: inline-flex; align-items: center; gap: 6px; color: #1257a0; font-weight: 700; }
