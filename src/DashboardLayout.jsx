@@ -1,4 +1,4 @@
-import { Banknote, BellRing, Bus, ChevronDown, CreditCard, FileText, Fuel, LogOut, Menu, Route, ScanLine, Settings, ShieldCheck, UserCircle, UsersRound, Wallet, X } from "lucide-react";
+import { Banknote, BellRing, Bus, CalendarDays, ChevronDown, Contact, CreditCard, FileText, Fuel, LogOut, MapPin, Menu, Route, ScanLine, Settings, ShieldCheck, UserCircle, UsersRound, Wallet, X } from "lucide-react";
 import { useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { logout as endSession } from "./auth";
@@ -7,11 +7,30 @@ import maarifLogo from "./assets/maarif_logo.jpeg";
 import { prepareScanAudio } from "./scanAudio";
 import FuelTruckIcon from "./FuelTruckIcon";
 
+const moduleTabs = {
+  income: [],
+  maarif: [["/students", UsersRound, "Nxënësit"], ["/payments", CreditCard, "Pagesat"], ["/arka", Wallet, "Arka"], ["/vehicles", Bus, "Automjetet"], ["/drivers", UsersRound, "Shoferët"], ["/areas", MapPin, "Zonat"], ["/calendar", CalendarDays, "Kalendari"], ["/cards", Contact, "Kartelat"], ["/debts", FileText, "Borxhet"], ["/followup-rules", Settings, "Rregullat"], ["/skano", ScanLine, "Skano"]],
+  charters: [["/charters", Route, "Rezervimet"], ["/charters/payments", CreditCard, "Pagesat"], ["/charters/cash", Wallet, "Arka"]],
+  fuel: [["/fuel", Fuel, "Rezervari"], ["/fuel/external-customers", UsersRound, "Klientët e jashtëm"], ["/fuel/suppliers", FuelTruckIcon, "Furnitorët"]],
+  more: [["/autobusat", Bus, "Autobusët"], ["/shoferat", UsersRound, "Shoferat dhe Staff"], ["/messages", BellRing, "Mesazhet"], ["/settings/accounts-roles", ShieldCheck, "Llogaritë dhe rolet"], ["/settings/cash-registers", Wallet, "Arkat"], ["/settings/document-types", FileText, "Llojet e dokumentave"], ["/account", UserCircle, "Llogaria ime"]],
+};
+const moduleMeta = {
+  income: { title: "Të hyrat", description: "Përmbledhja financiare", icon: Banknote },
+  maarif: { title: "Maarif", description: "Nxënësit dhe transporti", icon: UsersRound },
+  charters: { title: "Charterët", description: "Rezervimet dhe pagesat", icon: Route },
+  fuel: { title: "Nafta", description: "Rezervari dhe furnizimet", icon: Fuel },
+  more: { title: "Të tjera", description: "Mjetet dhe cilësimet", icon: Menu },
+};
+const maarifPaths = new Set(moduleTabs.maarif.map(([path]) => path));
+
 export default function DashboardLayout() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
   const inCharters = location.pathname === "/charters" || location.pathname.startsWith("/charters/");
   const inFuel = location.pathname === "/fuel" || location.pathname.startsWith("/fuel/");
+  const module = location.pathname === "/income" ? "income" : inCharters ? "charters" : inFuel ? "fuel" : maarifPaths.has(location.pathname) ? "maarif" : "more";
+  const moduleIndex = { income: 0, maarif: 1, charters: 2, fuel: 3, more: 4 }[module];
+  const ModuleIcon = moduleMeta[module].icon;
   const inSettings = ["/messages", "/settings/accounts-roles", "/settings/cash-registers", "/settings/document-types"].includes(location.pathname);
   const [settingsOpen, setSettingsOpen] = useState(inSettings);
   const [loginArrival] = useState(() => {
@@ -74,6 +93,7 @@ export default function DashboardLayout() {
             <UsersRound />
             <span>Shoferat dhe Staff</span>
           </NavLink>
+          <NavLink className="bt-pwa-settings-link" to="/settings/accounts-roles" onClick={() => setOpen(false)}><Settings /><span>Cilësimet</span></NavLink>
           <div className="bt-settings-group">
             <button
               type="button"
@@ -126,26 +146,17 @@ export default function DashboardLayout() {
         />
       )}
       <main className="bt-main">
+        <div className="bt-pwa-module-head" key={module}><div className="bt-pwa-module-title"><span className="bt-pwa-module-icon"><ModuleIcon size={24} /></span><div><small>Bashkim Tours · Moduli</small><h2>{moduleMeta[module].title}</h2><p>{moduleMeta[module].description}</p></div></div></div>
+        {moduleTabs[module].length > 0 && <nav className="bt-pwa-subnav" aria-label={`Nënmenutë ${moduleMeta[module].title}`}>{moduleTabs[module].map(([path, Icon, label]) => <NavLink key={path} to={path} end onClick={path === "/skano" ? prepareScanAudio : undefined}><Icon size={17} /><span>{label}</span></NavLink>)}</nav>}
         <Outlet />
       </main>
-      <nav className="bt-mobile-bottom-nav" aria-label={inCharters ? "Navigimi Charterët" : inFuel ? "Navigimi Nafta" : "Navigimi kryesor"}>
-        {inCharters ? <>
-          <NavLink to="/charters/payments"><CreditCard /><span>Pagesat</span></NavLink>
-          <NavLink to="/charters/cash"><Wallet /><span>Arka</span></NavLink>
-          <NavLink to="/charters" end><Route /><span>Charters</span></NavLink>
-          <NavLink to="/students"><UsersRound /><span>Maarif</span></NavLink>
-        </> : inFuel ? <>
-          <NavLink to="/fuel" end><Fuel /><span>Rezervari</span></NavLink>
-          <NavLink to="/fuel/suppliers"><FuelTruckIcon size={21} /><span>Furnitorët</span></NavLink>
-          <NavLink to="/fuel/external-customers"><UsersRound /><span>Klientët</span></NavLink>
-          <NavLink to="/students"><UsersRound /><span>Maarif</span></NavLink>
-        </> : <>
-          <NavLink to="/students"><UsersRound /><span>Nxënësit</span></NavLink>
-          <NavLink to="/payments"><CreditCard /><span>Pagesat</span></NavLink>
-          <NavLink to="/arka"><Wallet /><span>Arka</span></NavLink>
-          <NavLink to="/skano" onClick={prepareScanAudio}><ScanLine /><span>Skano</span></NavLink>
-        </>}
-        <button type="button" className={open || (!inCharters && !inFuel && !["/students", "/payments", "/arka", "/skano"].includes(location.pathname)) ? "active" : ""} onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-label="Më shumë faqe"><Menu /><span>Më shumë</span></button>
+      <nav className="bt-mobile-bottom-nav" aria-label="Navigimi kryesor" style={{ "--bt-module-offset": `${(open ? 4 : moduleIndex) * 100}%` }}>
+        <span className="bt-mobile-nav-indicator" aria-hidden="true" />
+        <NavLink to="/income" className={module === "income" ? "active" : ""} onClick={() => setOpen(false)}><Banknote /><span>Të hyrat</span></NavLink>
+        <NavLink to="/students" className={module === "maarif" ? "active" : ""} onClick={() => setOpen(false)}><UsersRound /><span>Maarif</span></NavLink>
+        <NavLink to="/charters" className={module === "charters" ? "active" : ""} onClick={() => setOpen(false)}><Route /><span>Charterët</span></NavLink>
+        <NavLink to="/fuel" className={module === "fuel" ? "active" : ""} onClick={() => setOpen(false)}><Fuel /><span>Nafta</span></NavLink>
+        <button type="button" className={open || module === "more" ? "active" : ""} onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-label="Më shumë"><Menu /><span>Më shumë</span></button>
       </nav>
     </div>
   );

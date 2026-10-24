@@ -27,6 +27,39 @@ export default function PwaSupport() {
   }, []);
 
   useEffect(() => {
+    const viewport = window.visualViewport;
+    const root = document.documentElement;
+    let scrollTimer;
+    let fullHeight = Math.max(window.innerHeight, viewport?.height ?? 0);
+    const updateKeyboard = () => {
+      if (!isStandalone()) { root.classList.remove("bt-pwa-keyboard-open"); return; }
+      const focused = document.activeElement?.matches("input, textarea, select, [contenteditable='true']");
+      const height = viewport?.height ?? window.innerHeight;
+      if (!focused) fullHeight = Math.max(fullHeight, window.innerHeight, height);
+      root.classList.toggle("bt-pwa-keyboard-open", Boolean(focused && fullHeight - height > 120));
+    };
+    const onFocus = (event) => {
+      if (!event.target.matches("input, textarea, select, [contenteditable='true']")) return;
+      updateKeyboard();
+      window.clearTimeout(scrollTimer);
+      scrollTimer = window.setTimeout(() => event.target.scrollIntoView({ block: "center", behavior: "smooth" }), 250);
+    };
+    const onBlur = () => window.setTimeout(updateKeyboard, 80);
+    viewport?.addEventListener("resize", updateKeyboard);
+    document.addEventListener("focusin", onFocus);
+    document.addEventListener("focusout", onBlur);
+    window.addEventListener("resize", updateKeyboard);
+    return () => {
+      window.clearTimeout(scrollTimer);
+      root.classList.remove("bt-pwa-keyboard-open");
+      viewport?.removeEventListener("resize", updateKeyboard);
+      document.removeEventListener("focusin", onFocus);
+      document.removeEventListener("focusout", onBlur);
+      window.removeEventListener("resize", updateKeyboard);
+    };
+  }, []);
+
+  useEffect(() => {
     const online = () => {
       // Public transport eligibility must be fetched again after reconnection.
       if (window.location.pathname.startsWith("/student/")) {
