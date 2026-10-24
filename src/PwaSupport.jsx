@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import "./pwa.css";
 
-const isStandalone = () => window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+const pwaPreview = import.meta.env.DEV && new URLSearchParams(window.location.search).has("pwa-preview");
+const isStandalone = () => pwaPreview || window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
 
 export default function PwaSupport() {
   const [offline, setOffline] = useState(!navigator.onLine);

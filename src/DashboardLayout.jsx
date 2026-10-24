@@ -154,7 +154,7 @@ export default function DashboardLayout() {
       )}
       <main className="bt-main">
         <div className="bt-pwa-module-head" key={activeModuleMeta.title}><div className="bt-pwa-module-title"><span className="bt-pwa-module-icon"><ModuleIcon size={24} /></span><div><h2>{activeModuleMeta.title}</h2><p>{activeModuleMeta.description}</p></div></div></div>
-        {activeTabs.length > 0 && <nav className="bt-pwa-subnav" aria-label={`Nënmenutë ${activeModuleMeta.title}`}>{activeTabs.map(([path, Icon, label]) => <NavLink key={path} to={path} end onClick={path === "/skano" ? prepareScanAudio : undefined}><Icon size={17} /><span>{label}</span></NavLink>)}</nav>}
+        {activeTabs.length > 0 && <nav className="bt-pwa-subnav" key={activeModuleMeta.title} aria-label={`Nënmenutë ${activeModuleMeta.title}`}>{activeTabs.map(([path, Icon, label]) => <NavLink key={path} to={path} end onClick={path === "/skano" ? prepareScanAudio : undefined}><Icon size={17} /><span>{label}</span></NavLink>)}</nav>}
         <Outlet />
       </main>
       <nav className="bt-mobile-bottom-nav" aria-label="Navigimi kryesor" style={{ "--bt-module-offset": `${(open ? 4 : moduleIndex) * 100}%` }}>
