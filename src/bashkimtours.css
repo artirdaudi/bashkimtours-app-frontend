@@ -7368,3 +7368,83 @@ html.bt-pwa-standalone .bt-charter-form-modal :is(input, select, textarea) { box
 @media (max-width: 800px) {
   .bt-fuel-tabs { display: none; }
 }
+
+/* External bus refuellings */
+.bt-external-refuellings-page .bt-page-header { gap: 16px; }
+.bt-external-refuellings-page .bt-page-header > button { margin-left: auto; flex: none; }
+.bt-external-refuelling-filters { padding: 18px; margin-bottom: 20px; border: 1px solid #dce5eb; border-radius: 13px; background: #fff; }
+.bt-external-refuelling-filters .bt-fuel-filters { align-items: end; }
+.bt-external-refuelling-filters .bt-fuel-filters label { min-width: 150px; flex: 1 1 150px; }
+.bt-external-refuelling-filters .bt-fuel-filters label:first-child { flex: 2 1 230px; }
+.bt-external-refuelling-filters .bt-fuel-filters .bt-external-dropdown { min-width: 150px; flex: 1 1 150px; }
+.bt-external-dropdown { display: grid; gap: 6px; min-width: 180px; flex: 1; font-size: 13px; color: #637582; }
+.bt-external-dropdown .bt-charter-reference-picker { width: 100%; }
+.bt-external-dropdown .bt-charter-reference-picker input { color: #253743; }
+.bt-external-filter-toolbar { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.bt-external-filter-actions { display: flex; justify-content: flex-end; gap: 8px; width: max-content; max-width: 100%; margin-left: auto; }
+.bt-external-table-wrap { width: 100%; min-width: 0; border: 1px solid #dce5eb; border-radius: 13px; background: #fff; }
+.bt-external-table { width: 100%; min-width: 0; table-layout: fixed; }
+.bt-external-table th, .bt-external-table td { vertical-align: middle; padding: 12px 9px; overflow-wrap: anywhere; }
+.bt-external-table th:nth-child(1) { width: 11%; }
+.bt-external-table th:nth-child(2) { width: 16%; }
+.bt-external-table th:nth-child(3) { width: 14%; }
+.bt-external-table th:nth-child(4) { width: 12%; }
+.bt-external-table th:nth-child(5) { width: 19%; }
+.bt-external-table th:nth-child(6) { width: 18%; }
+.bt-external-table th:nth-child(7) { width: 10%; }
+.bt-external-clickable-row { cursor: pointer; }
+.bt-external-clickable-row:hover { filter: brightness(.97); }
+.bt-external-clickable-row:focus-visible { outline: 2px solid #0faab7; outline-offset: -2px; }
+.bt-external-row-green { background: #e9f7ef; }
+.bt-external-row-orange { background: #fff1df; }
+.bt-external-row-yellow { background: #fff9d9; }
+.bt-external-row-red { background: #fff0f0; }
+.bt-external-card-cell { overflow: visible !important; }
+.bt-external-card-cell > span { min-width: 0; overflow-wrap: anywhere; }
+.bt-external-table td.bt-external-card-cell { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.bt-external-row-menu { position: relative; display: flex; justify-content: flex-end; }
+.bt-external-row-menu-toggle { display: grid; place-items: center; width: 28px; height: 32px; border: 0; border-radius: 8px; background: transparent; color: #4d6575; cursor: pointer; }
+.bt-external-row-menu-toggle:hover { background: #d9e4eb; }
+.bt-external-color-options { position: absolute; z-index: 10; right: 0; top: 36px; display: flex; gap: 8px; padding: 10px; border: 1px solid #dce5eb; border-radius: 10px; background: #fff; box-shadow: 0 8px 24px #17364c22; }
+.bt-external-color-choice { flex: none; width: 24px; height: 24px; padding: 0; border: 1px solid #c9d5dd; border-radius: 50%; cursor: pointer; }
+.bt-external-color-choice-green { background: #49b77b; }
+.bt-external-color-choice-orange { background: #f4a048; }
+.bt-external-color-choice-yellow { background: #e7c841; }
+.bt-external-color-choice-red { background: #e76a70; }
+.bt-external-color-choice-none { background: #fff; }
+.bt-external-color-choice.is-selected { outline: 2px solid #17364c; outline-offset: 2px; }
+.bt-external-detail-list { display: grid; gap: 0; margin: 0 0 18px; }
+.bt-external-detail-list > div { display: flex; justify-content: space-between; gap: 18px; padding: 10px 0; border-bottom: 1px solid #e5ebef; }
+.bt-external-detail-list dt { color: #637582; }
+.bt-external-detail-list dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
+.bt-external-detail-modal .bt-fuel-actions { justify-content: flex-end; }
+.bt-external-comment { max-width: 220px; overflow-wrap: anywhere; }
+.bt-external-color { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; padding: 5px 8px; border-radius: 999px; background: #f3f6f8; font-size: 12px; font-weight: 600; }
+.bt-external-color i { width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+.bt-external-color-green { color: #198458; background: #e9f7ef; }
+.bt-external-color-orange { color: #b66312; background: #fff1df; }
+.bt-external-color-yellow { color: #9b7900; background: #fff9d9; }
+.bt-external-color-red { color: #b43a43; background: #fff0f0; }
+.bt-external-form-modal .bt-fuel-fields textarea { width: 100%; padding: 10px 12px; border: 1px solid #dce5eb; border-radius: 9px; font: inherit; resize: vertical; }
+.bt-external-form-modal { width: min(1180px, calc(100vw - 40px)); }
+.bt-external-form-modal .bt-fuel-fields { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); align-items: start; gap: 12px; }
+.bt-external-form-modal .bt-fuel-fields > label, .bt-external-form-modal .bt-fuel-fields > .bt-external-dropdown { min-width: 0; }
+.bt-external-form-modal .bt-external-comment-field { grid-column: 1 / -1; }
+.bt-external-form-modal .bt-fuel-actions { justify-content: flex-end; }
+.bt-external-refuellings-page .bt-fuel-transaction-pagination { flex-wrap: wrap; }
+@media (max-width: 1050px) { .bt-external-form-modal .bt-fuel-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 650px) { .bt-external-form-modal .bt-fuel-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 420px) { .bt-external-form-modal .bt-fuel-fields { grid-template-columns: 1fr; } }
+@media (max-width: 900px) {
+  .bt-external-filter-toolbar { align-items: stretch; }
+  .bt-external-filter-actions { flex: 0 1 auto; }
+  .bt-external-refuellings-page .bt-page-header > button { margin-top: 0; }
+  .bt-external-table-wrap { border: 0; background: transparent; overflow: visible; }
+  .bt-external-table, .bt-external-table tbody, .bt-external-table tr, .bt-external-table td { display: block; min-width: 0; width: 100%; }
+  .bt-external-table thead { display: none; }
+  .bt-external-table tr { margin-bottom: 12px; padding: 12px 16px; border: 1px solid #dce5eb; border-radius: 13px; background: #fff; }
+  .bt-external-table td { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 7px 0; border: 0; text-align: right; }
+  .bt-external-table td::before { content: attr(data-label); color: #637582; font-size: 13px; text-align: left; }
+  .bt-external-table td.bt-external-card-cell::before { margin-right: auto; }
+  .bt-external-filter-actions > button { flex: 0 1 auto; justify-content: center; }
+}

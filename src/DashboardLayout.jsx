@@ -11,7 +11,7 @@ const moduleTabs = {
   income: [],
   maarif: [["/students", UsersRound, "Nxënësit"], ["/payments", CreditCard, "Pagesat"], ["/arka", Wallet, "Arka"], ["/vehicles", Bus, "Automjetet"], ["/drivers", UsersRound, "Shoferët"], ["/areas", MapPin, "Zonat"], ["/calendar", CalendarDays, "Kalendari"], ["/cards", Contact, "Kartelat"], ["/debts", FileText, "Borxhet"], ["/followup-rules", Settings, "Rregullat"], ["/skano", ScanLine, "Skano"]],
   charters: [["/charters", Route, "Rezervimet"], ["/charters/payments", CreditCard, "Pagesat"], ["/charters/cash", Wallet, "Arka"]],
-  fuel: [["/fuel", Fuel, "Rezervari"], ["/fuel/external-customers", UsersRound, "Klientët e jashtëm"], ["/fuel/suppliers", FuelTruckIcon, "Furnitorët"], ["/fuel/refuelling-locations", MapPin, "Lokacionet e furnizimit"]],
+  fuel: [["/fuel", Fuel, "Rezervari"], ["/fuel/external-refuellings", Fuel, "Furnizimet e jashtme"], ["/fuel/external-customers", UsersRound, "Klientët e jashtëm"], ["/fuel/suppliers", FuelTruckIcon, "Furnitorët"], ["/fuel/refuelling-locations", MapPin, "Lokacionet e furnizimit"]],
   more: [],
 };
 const settingsTabs = [["/settings/accounts-roles", ShieldCheck, "Llogaritë dhe rolet"], ["/settings/cash-registers", Wallet, "Arkat"], ["/settings/document-types", FileText, "Llojet e dokumentave"], ["/messages", BellRing, "Mesazhet"]];

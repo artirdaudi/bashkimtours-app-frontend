@@ -81,6 +81,12 @@ export const fuelRefuellingLocationsApi = {
   update: (id, body) => api(`/fuel/refuelling-locations/${id}`, { method: "PUT", body: JSON.stringify(body) }),
   remove: (id) => api(`/fuel/refuelling-locations/${id}`, { method: "DELETE" }),
 };
+export const fuelExternalRefuellingsApi = {
+  list: (params) => api(`/fuel/external-refuellings${query(params)}`),
+  create: (body) => api("/fuel/external-refuellings", { method: "POST", body: JSON.stringify(body) }),
+  update: (id, body) => api(`/fuel/external-refuellings/${id}`, { method: "PUT", body: JSON.stringify(body) }),
+  remove: (id) => api(`/fuel/external-refuellings/${id}`, { method: "DELETE" }),
+};
 export const fuelExternalCustomersApi = resource("/fuel/external-customers");
 export const fuelExternalTransactionsApi = {
   list: (params) => api(`/fuel/external-transactions${query(params)}`),
