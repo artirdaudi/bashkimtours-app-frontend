@@ -87,6 +87,9 @@ export const fuelExternalRefuellingsApi = {
   update: (id, body) => api(`/fuel/external-refuellings/${id}`, { method: "PUT", body: JSON.stringify(body) }),
   remove: (id) => api(`/fuel/external-refuellings/${id}`, { method: "DELETE" }),
 };
+export const fuelLedgerApi = {
+  list: (params) => api(`/fuel/ledger${query(params)}`),
+};
 export const fuelExternalCustomersApi = resource("/fuel/external-customers");
 export const fuelExternalTransactionsApi = {
   list: (params) => api(`/fuel/external-transactions${query(params)}`),

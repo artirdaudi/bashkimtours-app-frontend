@@ -40,7 +40,7 @@ export default function FuelExternalRefuellingsPage() {
     const [busSource, busId] = bus ? bus.split(":") : [];
     const params = { ...rest, page: page === 1 ? undefined : page, page_size: pageSize === 30 ? undefined : pageSize, bus_source: busSource, bus_id: busId };
     try { setResult(await fuelExternalRefuellingsApi.list(params)); }
-    catch (cause) { setError(cause.message); }
+    catch (cause) { setResult(null); setError(cause.message); }
     finally { setLoading(false); }
   }, [applied, page, pageSize]);
 
@@ -48,6 +48,11 @@ export default function FuelExternalRefuellingsPage() {
     const timer = window.setTimeout(load, 0);
     return () => window.clearTimeout(timer);
   }, [load, reload]);
+
+  useEffect(() => {
+    window.addEventListener("bt:fuel-reconnected", load);
+    return () => window.removeEventListener("bt:fuel-reconnected", load);
+  }, [load]);
 
   const applyFilters = (next) => { setFilters(next); setPage(1); setApplied(next); };
   const openEdit = (row) => { setDetail(null); setForm({ id: row.id, refuelling_date: row.refuelling_date, bus: busKey(row.bus), quantity_liters: row.quantity_liters, odometer_km: row.odometer_km ?? "", driver_id: row.driver?.id ?? "", location_id: row.location?.id ?? "", color: row.color ?? "", card: row.card ?? "", comment: row.comment ?? "" }); };

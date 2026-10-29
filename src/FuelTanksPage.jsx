@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowDownLeft, ArrowUpRight, Fuel, Info, LoaderCircle, Pencil, Plus } from "lucide-react";
-import { fuelSuppliersApi, fuelTanksApi, fuelTransactionsApi } from "./api";
+import { ArrowDownLeft, ArrowUpRight, ChevronDown, Fuel, Info, LoaderCircle, Pencil, Plus, Search, X } from "lucide-react";
+import { fuelExternalCustomersApi, fuelSuppliersApi, fuelTanksApi, fuelTransactionsApi } from "./api";
 import { Modal } from "./PortalPages";
 import CharterDateTimeField from "./CharterDateTimeField";
 import CharterReferencePicker from "./CharterReferencePicker";
@@ -20,13 +20,21 @@ const calculatedTotal = (quantity, unitPrice) => {
 };
 const localDateTime = () => { const now = new Date(); return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16); };
 const pageSize = 20;
+const emptyHistoryFilters = { search: "", date_from: "", date_to: "", transaction_type: "", supplier_id: "", external_customer_id: "", registration_number: "", piusi_driver_id: "", min_liters: "", max_liters: "", min_odometer: "", max_odometer: "", is_settled: "", sort_order: "desc" };
 const tankId = 1;
+const historyParams = (filters, page) => ({ tank_id: tankId, ...filters, page, page_size: pageSize });
 
 export default function FuelTanksPage() {
   const [tanks, setTanks] = useState([]);
   const [transactions, setTransactions] = useState({});
-  const [transactionPages, setTransactionPages] = useState({});
-  const [transactionFilter, setTransactionFilter] = useState("");
+  const [transactionPage, setTransactionPage] = useState(1);
+  const [historyFilters, setHistoryFilters] = useState(emptyHistoryFilters);
+  const [historyDraft, setHistoryDraft] = useState(emptyHistoryFilters);
+  const [historyPagination, setHistoryPagination] = useState(null);
+  const [advancedHistory, setAdvancedHistory] = useState(false);
+  const [historyOptions, setHistoryOptions] = useState({ suppliers: [], customers: [] });
+  const [historyOptionsLoading, setHistoryOptionsLoading] = useState(false);
+  const [historyOptionsError, setHistoryOptionsError] = useState("");
   const [loadingPageId, setLoadingPageId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -40,57 +48,67 @@ export default function FuelTanksPage() {
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const initialLoadStarted = useRef(false);
   const transactionsRef = useRef(null);
+  const historyOptionsLoaded = useRef(false);
 
   const load = useCallback(async () => {
-    setLoading(true);
-    setError("");
-    setTransactionError("");
-    try {
-      const [tankResult, historyResult] = await Promise.allSettled([
-        fuelTanksApi.get(tankId),
-        fuelTransactionsApi.list({ tank_id: tankId, transaction_type: transactionFilter, limit: pageSize + 1, offset: 0 }),
-      ]);
-      if (tankResult.status === "fulfilled") setTanks([tankResult.value]);
-      else setError(`Rezervari: ${tankResult.reason.message}`);
-      if (historyResult.status === "fulfilled") {
-        const history = historyResult.value;
-        setTransactions({ [tankId]: { items: history.slice(0, pageSize), hasNext: history.length > pageSize } });
-      } else setTransactionError(`Transaksionet: ${historyResult.reason.message}`);
-      setTransactionPages({});
-    } catch (cause) { setError(cause.message); }
-    finally { setLoading(false); }
-  }, [transactionFilter]);
+    setLoading(true); setError(""); setTransactionError("");
+    const [tankResult, historyResult] = await Promise.allSettled([
+      fuelTanksApi.get(tankId),
+      fuelTransactionsApi.list(historyParams(historyFilters, 1)),
+    ]);
+    if (tankResult.status === "fulfilled") setTanks([tankResult.value]);
+    else setError(`Rezervari: ${tankResult.reason.message}`);
+    if (historyResult.status === "fulfilled") {
+      setTransactions({ [tankId]: { items: historyResult.value.items } });
+      setHistoryPagination(historyResult.value.pagination);
+      setTransactionPage(1);
+    } else setTransactionError(`Transaksionet: ${historyResult.reason.message}`);
+    setLoading(false);
+  }, [historyFilters]);
   useEffect(() => {
     if (initialLoadStarted.current) return;
     initialLoadStarted.current = true;
     Promise.resolve().then(load);
   }, [load]);
 
-  const changeFilter = async (type) => {
-    if (type === transactionFilter || loadingPageId != null) return;
-    setLoadingPageId(tankId);
-    setError("");
+  const fetchHistory = async (filters, page, scroll = false) => {
+    if (loadingPageId != null) return;
+    setLoadingPageId(tankId); setTransactionError("");
     try {
-      const rows = await fuelTransactionsApi.list({ tank_id: tankId, transaction_type: type, limit: pageSize + 1, offset: 0 });
-      setTransactions((current) => ({ ...current, [tankId]: { items: rows.slice(0, pageSize), hasNext: rows.length > pageSize } }));
-      setTransactionPages({});
-      setTransactionFilter(type);
-    } catch (cause) { setError(cause.message); }
+      const response = await fuelTransactionsApi.list(historyParams(filters, page));
+      setTransactions((current) => ({ ...current, [tankId]: { items: response.items } }));
+      setHistoryPagination(response.pagination);
+      setHistoryFilters(filters);
+      setTransactionPage(page);
+      if (scroll) requestAnimationFrame(() => transactionsRef.current?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }));
+    } catch (cause) { setTransactions((current) => ({ ...current, [tankId]: { items: [] } })); setHistoryPagination(null); setTransactionError(`Transaksionet: ${cause.message}`); }
     finally { setLoadingPageId(null); }
   };
-
-  const changePage = async (tankId, nextPage) => {
-    if (nextPage < 0 || loadingPageId != null) return;
-    setLoadingPageId(tankId);
-    setError("");
-    try {
-      const rows = await fuelTransactionsApi.list({ tank_id: tankId, transaction_type: transactionFilter, limit: pageSize + 1, offset: nextPage * pageSize });
-      setTransactions((current) => ({ ...current, [tankId]: { items: rows.slice(0, pageSize), hasNext: rows.length > pageSize } }));
-      setTransactionPages((current) => ({ ...current, [tankId]: nextPage }));
-      requestAnimationFrame(() => transactionsRef.current?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }));
-    } catch (cause) { setError(cause.message); }
-    finally { setLoadingPageId(null); }
+  useEffect(() => {
+    const refresh = () => {
+      fuelTanksApi.get(tankId).then((tank) => setTanks([tank])).catch((cause) => setError(`Rezervari: ${cause.message}`));
+      fetchHistory(historyFilters, transactionPage);
+    };
+    window.addEventListener("bt:fuel-reconnected", refresh);
+    return () => window.removeEventListener("bt:fuel-reconnected", refresh);
+  });
+  const changeFilter = (type) => {
+    const next = { ...historyFilters, transaction_type: type };
+    setHistoryDraft((current) => ({ ...current, transaction_type: type }));
+    fetchHistory(next, 1);
   };
+  const loadHistoryOptions = async () => {
+    if (historyOptionsLoaded.current || historyOptionsLoading) return;
+    historyOptionsLoaded.current = true;
+    setHistoryOptionsLoading(true); setHistoryOptionsError("");
+    const responses = await Promise.allSettled([fuelSuppliersApi.list({ limit: 1000 }), fuelExternalCustomersApi.list()]);
+    setHistoryOptions({ suppliers: responses[0].status === "fulfilled" ? responses[0].value : [], customers: responses[1].status === "fulfilled" ? responses[1].value : [] });
+    if (responses.some((result) => result.status === "rejected")) { setHistoryOptionsError("Disa opsione nuk u ngarkuan."); historyOptionsLoaded.current = false; }
+    setHistoryOptionsLoading(false);
+  };
+  const openAdvancedHistory = () => { setAdvancedHistory((current) => !current); if (!advancedHistory) loadHistoryOptions(); };
+  const historyInput = (key, label, type = "text", props = {}) => <label key={key}>{label}<input type={type} value={historyDraft[key]} onChange={(event) => setHistoryDraft({ ...historyDraft, [key]: event.target.value })} {...props} /></label>;
+  const historyPicker = (key, label, choices) => <div className="bt-external-dropdown" key={key}><span>{label}</span><CharterReferencePicker label={label} value={historyDraft[key]} selectedLabel={choices.find((item) => String(item.id) === String(historyDraft[key]))?.label || ""} placeholder={`Kërko ${label.toLocaleLowerCase("sq-AL")}`} searchOptions={(query) => choices.filter((item) => item.label.toLocaleLowerCase("sq-AL").includes(query.toLocaleLowerCase("sq-AL")))} onSelect={(option) => setHistoryDraft({ ...historyDraft, [key]: option ? String(option.id) : key === "sort_order" ? "desc" : "" })} /></div>;
 
   const save = async (event) => {
     event.preventDefault();
@@ -134,9 +152,13 @@ export default function FuelTanksPage() {
     finally { setSupplierLoading(false); }
   };
   const showTransaction = async (transaction) => {
-    setError("");
-    setSelectedTransaction(transaction);
-    const supplierId = transaction.incoming_detail?.supplier_id;
+    setTransactionError("");
+    let detail;
+    try {
+      detail = await fuelTransactionsApi.get(transaction.id);
+      setSelectedTransaction(detail);
+    } catch (cause) { setTransactionError(`Detajet: ${cause.message}`); return; }
+    const supplierId = detail.incoming_detail?.supplier_id;
     if (supplierId && !suppliers.some((supplier) => supplier.id === supplierId)) {
       try {
         const supplier = await fuelSuppliersApi.get(supplierId);
@@ -181,11 +203,11 @@ export default function FuelTanksPage() {
       return <div className="bt-fuel-group" key={tank.id}><article className={`bt-fuel-card ${levelClass}`}>
         <div className="bt-fuel-card-head"><span className="bt-fuel-card-icon"><Fuel size={27} aria-hidden="true" /></span><div><h2>{tank.name}</h2><p>{fuelTypes[tank.fuel_type] || tank.fuel_type}</p></div><div className="bt-fuel-card-actions"><button type="button" className="bt-btn-primary" onClick={() => openIncoming(tank.id)}><Plus size={17} /> Shto hyrje</button><button type="button" className="bt-fuel-edit" aria-label={`Ndrysho rezervarin ${tank.name}`} title="Ndrysho" onClick={() => edit(tank)}><Pencil size={18} /></button></div></div>
         <div className={`bt-fuel-card-quantity ${levelClass}`}><div className="bt-fuel-quantity-heading"><span>Sasia aktuale</span>{critical && <span className="bt-fuel-low">Nivel kritik</span>}{warning && <span className="bt-fuel-low">Afër nivelit të ulët</span>}</div><strong>{liters(tank.current_quantity_liters)}</strong><div className="bt-fuel-meter" role="meter" aria-label={`Mbushja e rezervarit ${tank.name}`} aria-valuemin={0} aria-valuemax={capacity} aria-valuenow={quantity}><span style={{ width: `${fill}%` }} /></div><small>{Math.round(fill)}% e kapacitetit prej {liters(tank.capacity_liters)}</small></div>
-      </article><section ref={transactionsRef} className="bt-fuel-transactions" aria-label={`Transaksionet e rezervarit ${tank.name}`} aria-busy={loadingPageId === tank.id}><div className="bt-fuel-transactions-head"><div><h3>Transaksionet</h3><p>Hyrjet dhe daljet e karburantit</p></div><div className="bt-fuel-transaction-filters" role="group" aria-label="Filtro transaksionet">{[["", "Të gjitha"], ["INCOMING", "Hyrëse"], ["OUTGOING", "Dalëse"]].map(([type, label]) => <button key={type} type="button" className={transactionFilter === type ? "active" : ""} aria-pressed={transactionFilter === type} disabled={loadingPageId != null} onClick={() => changeFilter(type)}>{label}</button>)}</div></div>
+      </article><form className="bt-external-refuelling-filters bt-fuel-history-filters" onSubmit={(event) => { event.preventDefault(); fetchHistory(historyDraft, 1); }}><div className="bt-fuel-filters">{historyInput("search", "Kërko", "search", { placeholder: "Targa, furnitori, klienti…" })}{historyInput("date_from", "Nga data", "date")}{historyInput("date_to", "Deri më", "date")}{historyPicker("sort_order", "Renditja", [{ id: "desc", label: "Më të rejat" }, { id: "asc", label: "Më të vjetrat" }])}</div><div className="bt-fuel-ledger-filter-toolbar"><button type="button" className="bt-btn-secondary" aria-expanded={advancedHistory} onClick={openAdvancedHistory}>Filtra shtesë <ChevronDown size={16} /></button><div className="bt-external-filter-actions"><button type="submit" className="bt-btn-primary" disabled={loadingPageId != null}><Search size={16} /> Kërko</button><button type="button" className="bt-btn-secondary" onClick={() => { setHistoryDraft(emptyHistoryFilters); fetchHistory(emptyHistoryFilters, 1); }}><X size={15} /> Pastro filtrat</button></div></div>{advancedHistory && <div className="bt-fuel-ledger-advanced"><div className="bt-fuel-filters">{historyInput("registration_number", "Targa")}{historyInput("piusi_driver_id", "PIUSI ID", "number", { min: 1 })}{historyInput("min_liters", "Litra min.", "number", { min: 0, step: "any" })}{historyInput("max_liters", "Litra max.", "number", { min: 0, step: "any" })}{historyInput("min_odometer", "Km min.", "number", { min: 0, step: "any" })}{historyInput("max_odometer", "Km max.", "number", { min: 0, step: "any" })}{historyPicker("is_settled", "Pagesa", [{ id: "true", label: "Paguar" }, { id: "false", label: "Pa paguar" }])}{historyPicker("supplier_id", "Furnitori", historyOptions.suppliers.map((item) => ({ id: item.id, label: item.name })))}{historyPicker("external_customer_id", "Klienti i jashtëm", historyOptions.customers.map((item) => ({ id: item.id, label: [item.registration_number, item.first_name, item.last_name].filter(Boolean).join(" · ") })) )}</div>{historyOptionsLoading && <p role="status">Duke ngarkuar opsionet…</p>}{historyOptionsError && <p className="bt-inline-error" role="alert">{historyOptionsError} <button type="button" onClick={loadHistoryOptions}>Provo përsëri</button></p>}</div>}</form><section ref={transactionsRef} className="bt-fuel-transactions" aria-label={`Transaksionet e rezervarit ${tank.name}`} aria-busy={loadingPageId === tank.id}><div className="bt-fuel-transactions-head"><div><h3>Transaksionet</h3><p>Hyrjet dhe daljet e karburantit</p></div><div className="bt-fuel-transaction-filters" role="group" aria-label="Filtro transaksionet">{[["", "Të gjitha"], ["INCOMING", "Hyrëse"], ["OUTGOING", "Dalëse"]].map(([type, label]) => <button key={type} type="button" className={historyFilters.transaction_type === type ? "active" : ""} aria-pressed={historyFilters.transaction_type === type} disabled={loadingPageId != null} onClick={() => changeFilter(type)}>{label}</button>)}</div></div>
         {transactionError && <p className="bt-inline-error" role="alert">{transactionError}</p>}
         {loadingPageId === tank.id && <p className="bt-fuel-page-loading" role="status"><LoaderCircle size={18} aria-hidden="true" /> Duke ngarkuar transaksionet…</p>}
         {!transactions[tank.id]?.items.length ? <p className="bt-fuel-transactions-empty">Nuk ka transaksione në këtë faqe.</p> : <ul className="bt-fuel-transaction-list">{transactions[tank.id].items.map((transaction) => { const mapping = transactionMapping(transaction); const isIncoming = mapping === "incoming"; const label = mapping === "vehicle" ? vehicleLabel(transaction.vehicle) : mapping === "external" ? externalCustomerLabel(transaction.external_customer) : transaction.piusi_detail?.registration_number; return <li className={`is-${mapping}`} key={transaction.id}><span className="bt-fuel-transaction-icon">{isIncoming ? <ArrowDownLeft size={20} /> : <ArrowUpRight size={20} />}</span><div><strong>{isIncoming ? "Hyrje" : "Dalje"}{label ? ` · ${label}` : ""}{mapping === "external" && <span className="bt-fuel-transaction-badge">Klient i jashtëm</span>}{mapping === "unmapped" && <span className="bt-fuel-transaction-badge">Pa mapping</span>}</strong><time dateTime={transaction.transaction_date}>{formatDateTime(transaction.transaction_date)}</time></div><b>{isIncoming ? "+" : "−"}{liters(transaction.quantity_liters)}</b><button type="button" className="bt-fuel-transaction-detail" onClick={() => showTransaction(transaction)}>Detaje</button></li>; })}</ul>}
-        {((transactionPages[tank.id] || 0) > 0 || transactions[tank.id]?.hasNext) && <div className="bt-fuel-transaction-pagination"><button type="button" className="bt-btn-secondary" disabled={loadingPageId != null || (transactionPages[tank.id] || 0) === 0} onClick={() => changePage(tank.id, (transactionPages[tank.id] || 0) - 1)}>Mbrapa</button><span className={loadingPageId === tank.id ? "bt-fuel-pagination-loading" : ""}>{loadingPageId === tank.id && <LoaderCircle size={17} aria-hidden="true" />}{loadingPageId === tank.id ? "Duke ngarkuar…" : `Faqja ${(transactionPages[tank.id] || 0) + 1}`}</span><button type="button" className="bt-btn-secondary" disabled={loadingPageId != null || !transactions[tank.id]?.hasNext} onClick={() => changePage(tank.id, (transactionPages[tank.id] || 0) + 1)}>Tjetër</button></div>}
+        {historyPagination && historyPagination.total_pages > 1 && <div className="bt-fuel-transaction-pagination"><button type="button" className="bt-btn-secondary" disabled={loadingPageId != null || transactionPage <= 1} onClick={() => fetchHistory(historyFilters, transactionPage - 1, true)}>Mbrapa</button><span className={loadingPageId === tank.id ? "bt-fuel-pagination-loading" : ""}>{loadingPageId === tank.id && <LoaderCircle size={17} aria-hidden="true" />}{loadingPageId === tank.id ? "Duke ngarkuar…" : `Faqja ${historyPagination.page} nga ${historyPagination.total_pages} · ${historyPagination.total} transaksione`}</span><button type="button" className="bt-btn-secondary" disabled={loadingPageId != null || transactionPage >= historyPagination.total_pages} onClick={() => fetchHistory(historyFilters, transactionPage + 1, true)}>Tjetër</button></div>}
       </section></div>;
     })}</div>
     {form && <Modal title={editingId == null ? "Shto depozitë" : "Përditëso depozitën"} className="bt-fuel-modal" onClose={closeForm}><form className="bt-fuel-form" onSubmit={save}>{error && <p className="bt-inline-error" role="alert">{error}</p>}<div className="bt-fuel-fields">
