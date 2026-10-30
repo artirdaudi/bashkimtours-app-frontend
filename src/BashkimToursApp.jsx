@@ -33,6 +33,7 @@ import StudentDebtsPage from "./StudentDebtsPage";
 import ScanPage from "./ScanPage";
 import PublicStudentPage from "./PublicStudentPage";
 import "./bashkimtours.css";
+import logo from "./assets/bashkimtours_logo.png";
 
 const Guard = ({ children }) =>
   getAuthStatus() === "authenticated" ? children : <Navigate to="/" replace />;
@@ -40,7 +41,22 @@ const Guard = ({ children }) =>
 export default function BashkimToursApp() {
   const status = useSyncExternalStore(subscribeAuth, getAuthStatus);
   useEffect(() => { initializeAuth(); }, []);
-  if (status === "initializing") return <main role="status" aria-live="polite">Duke ngarkuar…</main>;
+  if (status === "initializing") return (
+    <main className="bt-startup" role="status" aria-live="polite" aria-label="Duke hapur Bashkim Tours">
+      <div className="bt-startup-glow" aria-hidden="true" />
+      <div className="bt-startup-content">
+        <div className="bt-startup-logo-wrap">
+          <img src={logo} alt="Bashkim Tours" className="bt-startup-logo" />
+        </div>
+        <div className="bt-startup-copy">
+          <h1>Bashkim Tours</h1>
+          <p>Udhëtimi juaj fillon këtu.</p>
+        </div>
+        <div className="bt-startup-progress" aria-hidden="true"><span /></div>
+        <p className="bt-startup-status">Duke ngarkuar aplikacionin…</p>
+      </div>
+    </main>
+  );
   if (status === "unavailable") return <main role="status">Nuk mund të lidhemi me serverin. <button onClick={() => window.location.reload()}>Provo përsëri</button></main>;
   return (
     <Routes>

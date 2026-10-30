@@ -8,6 +8,48 @@
   --bt-line: #dfe5ed;
   --bt-surface: #f4f7fb;
 }
+.bt-startup {
+  position: relative;
+  display: grid;
+  min-height: 100vh;
+  min-height: 100dvh;
+  place-items: center;
+  overflow: hidden;
+  padding: 32px 24px;
+  background: radial-gradient(circle at 50% 38%, #fff 0%, #f0f6fc 58%, #e5eef9 100%);
+  color: #073878;
+  font-family: "DM Sans", sans-serif;
+  text-align: center;
+}
+.bt-startup-glow {
+  position: absolute;
+  width: min(76vw, 650px);
+  aspect-ratio: 1;
+  border: 1px solid rgba(7, 56, 120, .09);
+  border-radius: 50%;
+  box-shadow: 0 0 0 80px rgba(255, 255, 255, .2), 0 0 0 170px rgba(255, 255, 255, .15);
+  pointer-events: none;
+}
+.bt-startup-content { position: relative; width: min(100%, 360px); }
+.bt-startup-logo-wrap {
+  display: grid;
+  width: 164px;
+  height: 164px;
+  place-items: center;
+  margin: 0 auto 28px;
+  border: 1px solid #dbe7f5;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .78);
+  box-shadow: 0 18px 50px rgba(7, 56, 120, .12);
+}
+.bt-startup-logo { width: 138px; height: 138px; object-fit: contain; }
+.bt-startup-copy h1 { margin: 0; font-size: clamp(28px, 5vw, 36px); font-weight: 700; letter-spacing: -.045em; }
+.bt-startup-copy p { margin: 9px 0 30px; color: #64788f; font-size: 15px; }
+.bt-startup-progress { width: 140px; height: 4px; margin: 0 auto; overflow: hidden; border-radius: 99px; background: #d8e5f2; }
+.bt-startup-progress span { display: block; width: 42%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #0b69a9, #10aeb8); animation: bt-startup-slide 1.25s ease-in-out infinite alternate; }
+.bt-startup-status { margin: 16px 0 0; color: #64788f; font-size: 13px; font-weight: 600; letter-spacing: .015em; }
+@keyframes bt-startup-slide { from { transform: translateX(-100%); } to { transform: translateX(240%); } }
+@media (prefers-reduced-motion: reduce) { .bt-startup-progress span { animation: none; width: 100%; } }
 .bt-login-page,
 .bt-dashboard {
   min-height: 100vh;
