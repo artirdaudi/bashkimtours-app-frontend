@@ -6,13 +6,15 @@ import { Modal } from "./PortalPages";
 import { monthSq } from "./locale";
 import { groupRelatedMonthlyPayments } from "./monthlyPaymentGrouping";
 import bashkimToursLogo from "./assets/bashkimtours_logo.png";
+import DateInput from "./DateInput";
+import { formatDate, formatDateTime } from "./dateUtils";
 
 const euro = new Intl.NumberFormat("sq-AL", { style: "currency", currency: "EUR" });
 const money = (value) => value == null ? "—" : euro.format(Number(value));
 const mkd = new Intl.NumberFormat("sq-AL", { maximumFractionDigits: 2 });
 const formatMKD = (value) => value == null ? "—" : `${mkd.format(Number(value))} MKD`;
-const dateTime = (value) => value ? new Intl.DateTimeFormat("sq-MK", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value)) : "—";
-const paymentDate = (value) => value ? new Intl.DateTimeFormat("sq-MK", { dateStyle: "medium" }).format(new Date(`${value}T12:00:00`)) : "—";
+const dateTime = formatDateTime;
+const paymentDate = (value) => formatDate(value) || "—";
 const differenceLabel = (value) => value == null ? "—" : Number(value) === 0 ? "Përputhet" : Number(value) > 0 ? `Tepricë: ${money(value)}` : `Mungesë: ${money(Math.abs(Number(value)))}`;
 const emptyAction = () => ({ amount: "", comment: "", currency: "EUR" });
 const amountInEUR = (transaction) => Number(transaction.amount_eur ?? transaction.amount ?? 0);
@@ -445,7 +447,7 @@ export default function MaarifCashPage({ registerType = "MAARIF", moduleLabel = 
         {!detailLoading && open && <><div className="bt-maarif-cash-panel"><h2>Sesioni aktual</h2><Summary session={session} current /><div className="bt-cash-session-actions">{mayOperate && <button type="button" className="bt-btn-primary" onClick={() => { setActionForm(emptyAction()); setAction("expense"); }}><Plus size={17} /> Shto të dalur</button>}</div></div><TransactionColumns items={currentTransactions} expenseRegisterId={mayOperate ? selected.id : null} onExpenseChanged={refreshAfterExpenseChange} registerType={registerType} />{mayOperate && <div className="bt-cash-close-section"><span>Mbyllja e sesionit bëhet pasi të numërohen paratë në arkë.</span><button type="button" className="bt-btn-danger" onClick={() => { setActionForm(emptyAction()); setAction("close"); }}>Mbyll arkën</button></div>}</>}
       </>}
       {section === "history" && !accessDenied && <section className="bt-maarif-cash-panel"><h2>Historia e sesioneve</h2>
-        <div className="bt-cash-history-filters"><label>Prej datës<input type="date" value={filters.date_from} onChange={(event) => { setPage(1); setFilters({ ...filters, date_from: event.target.value }); }} /></label><label>Deri më<input type="date" value={filters.date_to} onChange={(event) => { setPage(1); setFilters({ ...filters, date_to: event.target.value }); }} /></label><label>Statusi<select value={filters.session_status} onChange={(event) => { setPage(1); setFilters({ ...filters, session_status: event.target.value }); }}><option value="">Të gjitha</option><option value="OPEN">E hapur</option><option value="CLOSED">E mbyllur</option></select></label></div>
+        <div className="bt-cash-history-filters"><label>Prej datës<DateInput value={filters.date_from} onChange={(value) => { setPage(1); setFilters({ ...filters, date_from: value }); }} /></label><label>Deri më<DateInput value={filters.date_to} onChange={(value) => { setPage(1); setFilters({ ...filters, date_to: value }); }} /></label><label>Statusi<select value={filters.session_status} onChange={(event) => { setPage(1); setFilters({ ...filters, session_status: event.target.value }); }}><option value="">Të gjitha</option><option value="OPEN">E hapur</option><option value="CLOSED">E mbyllur</option></select></label></div>
         {historyLoading && <p>Duke ngarkuar historinë…</p>}
         {!historyLoading && !history?.items?.length && <p>Nuk ka sesione për këto filtra.</p>}
         {!!history?.items?.length && <div className="bt-accounts-table-wrap"><table className="bt-accounts-table"><thead><tr><th>Hapur më</th><th>Mbyllur më</th><th>Hapur nga</th><th>Mbyllur nga</th><th>Hapja</th><th>Të hyra</th><th>Të dalura</th><th>Pritshmëria</th><th>Fizikisht</th><th>Diferenca</th><th>Statusi</th><th></th></tr></thead><tbody>{history.items.map((item) => <tr key={item.id}><td>{dateTime(item.opened_at)}</td><td>{dateTime(item.closed_at)}</td><td>{item.opened_by_username}</td><td>{item.closed_by_username || "—"}</td><td>{money(item.opening_balance)}</td><td>{money(item.total_income)}</td><td>{money(item.total_expenses)}</td><td>{money(item.expected_closing_balance)}</td><td>{money(item.actual_closing_balance)}</td><td>{differenceLabel(item.difference)}</td><td>{item.status === "OPEN" ? "E hapur" : "E mbyllur"}</td><td><div className="bt-role-actions"><button type="button" className="bt-btn-secondary bt-btn-small" disabled={sessionDetailLoading} onClick={() => showSessionDetail(item.id)}>Detajet</button><button type="button" className="bt-btn-secondary bt-btn-small" disabled={printLoading} onClick={() => printSessionById(selected.id, item.id)}><Printer size={15} /> Printo</button></div></td></tr>)}</tbody></table></div>}

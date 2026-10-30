@@ -3,6 +3,7 @@ import { ArrowDownLeft, ArrowUpRight, ChevronDown, Fuel, Info, LoaderCircle, Pen
 import { fuelExternalCustomersApi, fuelSuppliersApi, fuelTanksApi, fuelTransactionsApi } from "./api";
 import { Modal } from "./PortalPages";
 import CharterDateTimeField from "./CharterDateTimeField";
+import DateInput from "./DateInput";
 import CharterReferencePicker from "./CharterReferencePicker";
 import { formatDateTime } from "./dateUtils";
 
@@ -107,7 +108,7 @@ export default function FuelTanksPage() {
     setHistoryOptionsLoading(false);
   };
   const openAdvancedHistory = () => { setAdvancedHistory((current) => !current); if (!advancedHistory) loadHistoryOptions(); };
-  const historyInput = (key, label, type = "text", props = {}) => <label key={key}>{label}<input type={type} value={historyDraft[key]} onChange={(event) => setHistoryDraft({ ...historyDraft, [key]: event.target.value })} {...props} /></label>;
+  const historyInput = (key, label, type = "text", props = {}) => <label key={key}>{label}{type === "date" ? <DateInput value={historyDraft[key]} onChange={(value) => setHistoryDraft({ ...historyDraft, [key]: value })} /> : <input type={type} value={historyDraft[key]} onChange={(event) => setHistoryDraft({ ...historyDraft, [key]: event.target.value })} {...props} />}</label>;
   const historyPicker = (key, label, choices) => <div className="bt-external-dropdown" key={key}><span>{label}</span><CharterReferencePicker label={label} value={historyDraft[key]} selectedLabel={choices.find((item) => String(item.id) === String(historyDraft[key]))?.label || ""} placeholder={`Kërko ${label.toLocaleLowerCase("sq-AL")}`} searchOptions={(query) => choices.filter((item) => item.label.toLocaleLowerCase("sq-AL").includes(query.toLocaleLowerCase("sq-AL")))} onSelect={(option) => setHistoryDraft({ ...historyDraft, [key]: option ? String(option.id) : key === "sort_order" ? "desc" : "" })} /></div>;
 
   const save = async (event) => {

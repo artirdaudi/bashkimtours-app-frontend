@@ -50,6 +50,29 @@
 .bt-startup-status { margin: 16px 0 0; color: #64788f; font-size: 13px; font-weight: 600; letter-spacing: .015em; }
 @keyframes bt-startup-slide { from { transform: translateX(-100%); } to { transform: translateX(240%); } }
 @media (prefers-reduced-motion: reduce) { .bt-startup-progress span { animation: none; width: 100%; } }
+.bt-date-input { position: relative; display: inline-flex; align-items: center; width: 100%; min-width: 0; }
+.bt-date-input > input { width: 100%; min-width: 0; padding-right: 42px !important; }
+.bt-date-input-trigger { position: absolute; right: 3px; top: 50%; display: grid; width: 36px; height: 36px; place-items: center; transform: translateY(-50%); border: 0; border-radius: 8px; background: transparent; color: #0b5a9d; cursor: pointer; }
+.bt-date-input-trigger:hover, .bt-date-input-trigger:focus-visible { background: #eaf4fb; }
+.bt-date-calendar { position: absolute; z-index: 100; top: calc(100% + 6px); left: 0; width: min(320px, calc(100vw - 32px)); padding: 14px; border: 1px solid #dce5eb; border-radius: 15px; background: #fff; box-shadow: 0 18px 40px rgba(7, 56, 120, .18); color: #17364c; font-family: "DM Sans", sans-serif; }
+.bt-date-calendar-nav { display: flex; align-items: center; gap: 4px; margin-bottom: 10px; }
+.bt-date-calendar-nav button { display: grid; flex: 0 0 36px; height: 36px; place-items: center; border: 0; border-radius: 8px; background: #f2f7fc; color: #073878; cursor: pointer; }
+.bt-date-calendar-nav select { min-width: 0; flex: 1; height: 36px; padding: 0 4px; border: 1px solid #dce5eb; border-radius: 8px; background: #fff; color: #17364c; font: 600 13px "DM Sans", sans-serif; }
+.bt-date-calendar-nav select:nth-of-type(2) { flex: 0 0 76px; }
+.bt-date-calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; text-align: center; }
+.bt-date-calendar-grid span, .bt-date-calendar-grid button { display: grid; min-height: 42px; place-items: center; font-size: 13px; }
+.bt-date-calendar-grid span { color: #73869a; font-weight: 700; }
+.bt-date-calendar-grid button { border: 0; border-radius: 9px; background: transparent; color: #17364c; cursor: pointer; }
+.bt-date-calendar-grid button:hover, .bt-date-calendar-grid button:focus-visible { background: #e8f4fc; }
+.bt-date-calendar-grid button[aria-pressed="true"] { background: #073878; color: #fff; font-weight: 700; }
+.bt-date-calendar-grid button.is-today:not([aria-pressed="true"]) { outline: 1px solid #0b75a6; outline-offset: -2px; }
+.bt-date-calendar-today { display: block; width: 100%; margin-top: 9px; padding: 9px; border: 0; border-radius: 8px; background: #edf6fa; color: #075e83; font: 700 12px "DM Sans", sans-serif; cursor: pointer; }
+.bt-charter-calendar-control > .bt-date-calendar { width: min(320px, calc(100vw - 32px)); }
+.bt-month-input { display: inline-flex; align-items: center; gap: 6px; min-width: 0; width: 100%; }
+.bt-month-input select { min-width: 0; flex: 1; padding: 10px 6px; border: 0; background: transparent; color: #17364c; font: 600 13px "DM Sans", sans-serif; }
+.bt-month-input select:last-child { flex: 0 0 76px; }
+.bt-modal-body:has(.bt-date-calendar) { padding-bottom: 320px; }
+@media (max-width: 600px) { .bt-date-calendar { left: 50%; transform: translateX(-50%); } .bt-date-input-trigger { width: 44px; height: 44px; } }
 .bt-login-page,
 .bt-dashboard {
   min-height: 100vh;

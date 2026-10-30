@@ -6,7 +6,7 @@ import { summarizeBatchMessages } from "./whatsappBatchStats";
 const pageSize = 20;
 const statusNames = { PENDING: "PENDING", ACCEPTED: "ACCEPTED", SENT: "SENT", DELIVERED: "DELIVERED", READ: "READ", FAILED: "FAILED", RUNNING: "Në proces", COMPLETED: "Përfunduar", PARTIAL: "Pjesërisht" };
 const batchNames = { MONTHLY_REPORT: "Raporti mujor Maarif", CARD_COLLECTION_DEADLINE: "Njoftimi i kartelës", PAYMENT_NOTIFICATION: "Njoftimi i pagesës", TEST_MESSAGE: "Mesazh testues" };
-const dateTime = (value) => value ? new Date(value).toLocaleString("sq-AL", { dateStyle: "medium", timeStyle: "short", hour12: false }) : "—";
+const dateTime = (value) => value ? new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(value)) : "—";
 const filters = [
   { key: "", label: "Total", count: "total" },
   { key: "SENT", label: "Sent", count: "sent", denominator: "total" },

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronDown, Search, X } from "lucide-react";
 import { fuelExternalCustomersApi, fuelLedgerApi, fuelRefuellingLocationsApi, fuelSuppliersApi } from "./api";
 import CharterReferencePicker from "./CharterReferencePicker";
+import DateInput from "./DateInput";
 import { Modal } from "./PortalPages";
 import { formatDateTime } from "./dateUtils";
 
@@ -64,7 +65,7 @@ export default function FuelLedgerPage() {
   };
   const openAdvanced = () => { setAdvanced((value) => !value); if (!advanced) loadOptions(); };
   const clear = () => { setSearchInput(""); setFilters(initialFilters); setPage(1); };
-  const input = (key, label, type = "text", props = {}) => <label key={key}>{label}<input type={type} value={filters[key]} onChange={(event) => change(key, event.target.value)} {...props} /></label>;
+  const input = (key, label, type = "text", props = {}) => <label key={key}>{label}{type === "date" ? <DateInput value={filters[key]} onChange={(value) => change(key, value)} /> : <input type={type} value={filters[key]} onChange={(event) => change(key, event.target.value)} {...props} />}</label>;
   const select = (key, label, choices) => <Picker key={key} label={label} value={filters[key]} options={choices.filter(([value]) => value !== "").map(([value, text]) => choice(value, text))} onChange={(value) => change(key, value || (key === "sort_order" ? "desc" : ""))} />;
   const pagination = result?.pagination;
   const start = pagination?.total ? (pagination.page - 1) * pagination.page_size + 1 : 0;

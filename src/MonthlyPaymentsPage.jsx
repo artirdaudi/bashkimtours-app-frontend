@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { monthlyPaymentsApi } from "./api";
 import DateInput from "./DateInput";
+import MonthInput from "./MonthInput";
 import { formatDate, formatDateTime } from "./dateUtils";
 import { PaymentReceipt } from "./StudentsPage";
 import { groupRelatedMonthlyPayments } from "./monthlyPaymentGrouping";
@@ -239,7 +240,7 @@ export default function MonthlyPaymentsPage() {
         <label className="bt-payment-period-input">
           <CalendarDays />
           {period === "day" && <DateInput value={day} onChange={setDay} required />}
-          {period === "month" && <input type="month" value={month} onChange={(event) => setMonth(event.target.value)} />}
+          {period === "month" && <MonthInput value={month} onChange={setMonth} />}
           {period === "year" && <input type="number" min="2000" max="2100" value={year} onChange={(event) => setYear(event.target.value)} />}
         </label>
         <label className="bt-payment-search">
