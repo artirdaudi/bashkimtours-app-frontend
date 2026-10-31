@@ -3544,13 +3544,17 @@
 .bt-fuel-transaction-filters button:focus-visible { outline: 2px solid #1257a0; outline-offset: 2px; }
 .bt-fuel-transaction-filters button:disabled { cursor: wait; }
 .bt-fuel-transactions-empty { margin: 0; padding: 24px; color: #637582; }
-.bt-fuel-transaction-list { margin: 0; padding: 0; list-style: none; }
-.bt-fuel-transaction-list li { display: flex; align-items: center; gap: 12px; padding: 14px 24px; border-bottom: 1px solid #edf1f4; }
+.bt-fuel-transaction-list { margin: 0; padding: 0; list-style: none; overflow-x: auto; }
+.bt-fuel-transaction-list li { display: grid; grid-template-columns: 38px minmax(0, 1fr) 150px 130px 100px 64px; align-items: center; column-gap: 16px; min-width: 760px; box-sizing: border-box; padding: 14px 24px; border-bottom: 1px solid #edf1f4; }
 .bt-fuel-transaction-list li:last-child { border-bottom: 0; }
 .bt-fuel-transaction-icon { display: grid; place-items: center; width: 38px; height: 38px; flex: 0 0 38px; border-radius: 10px; }
-.bt-fuel-transaction-list li > div { display: grid; gap: 3px; flex: 1; min-width: 0; }
+.bt-fuel-transaction-list li > div { display: grid; gap: 3px; min-width: 0; }
 .bt-fuel-transaction-list time { color: #637582; font-size: 12px; }
-.bt-fuel-transaction-list b { white-space: nowrap; font-size: 17px; }
+.bt-fuel-transaction-list li > div:first-of-type strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bt-fuel-transaction-column small { color: #637582; font-size: 11px; }
+.bt-fuel-transaction-column span { overflow: hidden; color: #253743; font-size: 13px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.bt-fuel-transaction-list b { text-align: right; white-space: nowrap; font-size: 15px; }
+.bt-fuel-transaction-detail { justify-self: end; padding: 6px 0; }
 .bt-fuel-transaction-list .is-incoming { background: #f8fdf9; }
 .bt-fuel-transaction-list .is-incoming .bt-fuel-transaction-icon { background: #dcfce7; color: #15803d; }
 .bt-fuel-transaction-list .is-incoming b { color: #15803d; }
