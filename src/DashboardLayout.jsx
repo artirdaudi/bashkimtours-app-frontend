@@ -1,4 +1,4 @@
-import { Banknote, BellRing, Bus, CalendarDays, ChevronDown, Contact, CreditCard, FileText, Fuel, Layers3, LogOut, MapPin, Menu, Route, ScanLine, Settings, ShieldCheck, UserCircle, UsersRound, Wallet, X } from "lucide-react";
+import { Banknote, BellRing, Bus, CalendarDays, CarFront, ChevronDown, Contact, CreditCard, FileText, Fuel, Layers3, LogOut, MapPin, Menu, Route, ScanLine, Settings, ShieldCheck, UserCircle, UsersRound, Wallet, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { logout as endSession } from "./auth";
@@ -11,7 +11,7 @@ const moduleTabs = {
   income: [],
   maarif: [["/students", UsersRound, "Nxënësit"], ["/payments", CreditCard, "Pagesat"], ["/arka", Wallet, "Arka"], ["/vehicles", Bus, "Automjetet"], ["/drivers", UsersRound, "Shoferët"], ["/areas", MapPin, "Zonat"], ["/calendar", CalendarDays, "Kalendari"], ["/cards", Contact, "Kartelat"], ["/debts", FileText, "Borxhet"], ["/followup-rules", Settings, "Rregullat"], ["/skano", ScanLine, "Skano"]],
   charters: [["/charters", Route, "Rezervimet"], ["/charters/payments", CreditCard, "Pagesat"], ["/charters/cash", Wallet, "Arka"]],
-  fuel: [["/fuel/ledger", Layers3, "Komplet"], ["/fuel", Fuel, "Rezervari"], ["/fuel/external-refuellings", Fuel, "Furnizimet e jashtme"], ["/fuel/external-customers", UsersRound, "Klientët e jashtëm"], ["/fuel/suppliers", FuelTruckIcon, "Furnitorët"], ["/fuel/refuelling-locations", MapPin, "Lokacionet e furnizimit"]],
+  fuel: [["/fuel/ledger", Layers3, "Komplet"], ["/fuel", Fuel, "Rezervari"], ["/fuel/external-refuellings", Fuel, "Furnizimet e jashtme"], ["/fuel/external-customers", UsersRound, "Klientët e jashtëm"], ["/fuel/suppliers", FuelTruckIcon, "Furnitorët"], ["/fuel/refuelling-locations", MapPin, "Lokacionet e furnizimit"], ["/fuel/staff-vehicles", CarFront, "Automjetet e stafit"]],
   more: [],
 };
 const settingsTabs = [["/settings/accounts-roles", ShieldCheck, "Llogaritë dhe rolet"], ["/settings/cash-registers", Wallet, "Arkat"], ["/settings/document-types", FileText, "Llojet e dokumentave"], ["/messages", BellRing, "Mesazhet"]];

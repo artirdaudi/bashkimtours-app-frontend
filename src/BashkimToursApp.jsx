@@ -14,6 +14,7 @@ import FuelExternalCustomersPage from "./FuelExternalCustomersPage";
 import FuelRefuellingLocationsPage from "./FuelRefuellingLocationsPage";
 import FuelExternalRefuellingsPage from "./FuelExternalRefuellingsPage";
 import FuelLedgerPage from "./FuelLedgerPage";
+import FuelStaffVehiclesPage from "./FuelStaffVehiclesPage";
 import FuelTabs from "./FuelTabs";
 import ShoferatPage from "./ShoferatPage";
 import AutobusatPage from "./AutobusatPage";
@@ -100,6 +101,7 @@ export default function BashkimToursApp() {
           <Route path="suppliers" element={<FuelSuppliersPage />} />
           <Route path="external-customers" element={<FuelExternalCustomersPage />} />
           <Route path="refuelling-locations" element={<FuelRefuellingLocationsPage />} />
+          <Route path="staff-vehicles" element={<FuelStaffVehiclesPage />} />
         </Route>
         <Route path="shoferat" element={<ShoferatPage />} />
         <Route path="autobusat" element={<AutobusatPage />} />

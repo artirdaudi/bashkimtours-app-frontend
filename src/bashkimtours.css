@@ -7545,6 +7545,7 @@ html.bt-pwa-standalone .bt-charter-form-modal :is(input, select, textarea) { box
 .bt-fuel-ledger-legend i.is-bt_outgoing { color: #1257a0; background: #8dbaf0; }
 .bt-fuel-ledger-legend i.is-external_customer { color: #a45d17; background: #f5bb70; }
 .bt-fuel-ledger-legend i.is-external_refuelling { color: #5b53a5; background: #b5aef0; }
+.bt-fuel-ledger-legend i.is-staff_vehicle { color: #087b83; background: #80d8d1; }
 .bt-fuel-ledger-table { width: 100%; min-width: 0; table-layout: fixed; }
 .bt-fuel-ledger-table th:nth-child(1) { width: 16%; }
 .bt-fuel-ledger-table th:nth-child(2) { width: 15%; }
@@ -7559,6 +7560,7 @@ html.bt-pwa-standalone .bt-charter-form-modal :is(input, select, textarea) { box
 .bt-fuel-ledger-table tbody tr.is-bt_outgoing { background: #deecfc; }
 .bt-fuel-ledger-table tbody tr.is-external_customer { background: #ffecd2; }
 .bt-fuel-ledger-table tbody tr.is-external_refuelling { background: #e9e4fb; }
+.bt-fuel-ledger-table tbody tr.is-staff_vehicle { background: #def5f2; }
 .bt-fuel-ledger-table tbody tr:hover { filter: brightness(.97); }
 .bt-fuel-ledger-table tbody tr:focus-visible { outline: 2px solid #0faab7; outline-offset: -2px; }
 .bt-fuel-ledger-type { display: inline-flex; align-items: center; padding: 5px 8px; border-radius: 999px; background: #eef3f7; color: #395a6d; font-size: 12px; font-weight: 700; white-space: nowrap; }
@@ -7566,6 +7568,14 @@ html.bt-pwa-standalone .bt-charter-form-modal :is(input, select, textarea) { box
 .bt-fuel-ledger-type.is-bt_outgoing { background: #eaf3ff; color: #1257a0; }
 .bt-fuel-ledger-type.is-external_customer { background: #fff1df; color: #a45d17; }
 .bt-fuel-ledger-type.is-external_refuelling { background: #edf0fa; color: #5b53a5; }
+.bt-fuel-ledger-type.is-staff_vehicle { background: #c9efea; color: #076f78; }
+.bt-fuel-transaction-list .is-staff { background: #eaf8f6; }
+.bt-fuel-transaction-list .is-staff .bt-fuel-transaction-icon { background: #c9efea; color: #087b83; }
+.bt-fuel-transaction-list .is-staff b { color: #087b83; }
+.bt-fuel-staff-tab { margin-left: auto; }
+.bt-fuel-staff-modal .bt-fuel-actions { justify-content: flex-end; }
+.bt-fuel-staff-status { display: grid; gap: 8px; }
+.bt-fuel-staff-status > span { color: #253743; font-size: 13px; font-weight: 700; }
 .bt-fuel-ledger-loading { margin: 12px 0; color: #637582; }
 .bt-fuel-ledger-detail dl { display: grid; gap: 0; margin: 0; }
 .bt-fuel-ledger-detail dl > div { display: flex; justify-content: space-between; gap: 18px; padding: 9px 0; border-bottom: 1px solid #e5ebef; }

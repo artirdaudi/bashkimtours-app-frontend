@@ -1,4 +1,4 @@
-import { Fuel, Layers3, MapPin, UsersRound } from "lucide-react";
+import { CarFront, Fuel, Layers3, MapPin, UsersRound } from "lucide-react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import FuelTruckIcon from "./FuelTruckIcon";
 
@@ -12,6 +12,7 @@ export default function FuelTabs() {
       <NavLink to="/fuel/external-customers"><UsersRound size={17} /><span>Klientët e jashtëm</span></NavLink>
       <NavLink to="/fuel/suppliers" className="bt-cards-tab"><FuelTruckIcon size={17} /><span>Furnitorët</span></NavLink>
       <NavLink to="/fuel/refuelling-locations"><MapPin size={17} /><span>Lokacionet e furnizimit</span></NavLink>
+      <NavLink to="/fuel/staff-vehicles" className="bt-fuel-staff-tab"><CarFront size={17} /><span>Automjetet e stafit</span></NavLink>
     </nav>
     <div className="bt-route-stage" key={location.pathname}><Outlet /></div>
   </div>;

@@ -90,6 +90,12 @@ export const fuelExternalRefuellingsApi = {
 export const fuelLedgerApi = {
   list: (params) => api(`/fuel/ledger${query(params)}`),
 };
+export const fuelStaffVehiclesApi = {
+  list: (params) => api(`/fuel/staff-vehicles${query(params)}`),
+  get: (id) => api(`/fuel/staff-vehicles/${id}`),
+  create: (body) => api("/fuel/staff-vehicles", { method: "POST", body: JSON.stringify(body) }),
+  update: (id, body) => api(`/fuel/staff-vehicles/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
+};
 export const fuelExternalCustomersApi = resource("/fuel/external-customers");
 export const fuelExternalTransactionsApi = {
   list: (params) => api(`/fuel/external-transactions${query(params)}`),
