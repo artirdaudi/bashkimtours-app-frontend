@@ -125,6 +125,7 @@ export default function FuelTanksPage() {
     setBusy(true);
     setError("");
     const body = { name: form.name.trim(), fuel_type: form.fuel_type, capacity_liters: capacity, current_quantity_liters: quantity, low_level_threshold_liters: threshold };
+    if (editingId != null) body.low_fuel_alert_enabled = form.low_fuel_alert_enabled;
     try {
       if (editingId != null) await fuelTanksApi.update(editingId, body);
       else await fuelTanksApi.create(body);
@@ -137,7 +138,7 @@ export default function FuelTanksPage() {
 
   const edit = (tank) => {
     setEditingId(tank.id);
-    setForm({ name: tank.name, fuel_type: tank.fuel_type, capacity_liters: tank.capacity_liters, current_quantity_liters: tank.current_quantity_liters, low_level_threshold_liters: tank.low_level_threshold_liters });
+    setForm({ name: tank.name, fuel_type: tank.fuel_type, capacity_liters: tank.capacity_liters, current_quantity_liters: tank.current_quantity_liters, low_level_threshold_liters: tank.low_level_threshold_liters, low_fuel_alert_enabled: tank.low_fuel_alert_enabled });
     setError("");
   };
   const closeForm = () => {
@@ -217,6 +218,7 @@ export default function FuelTanksPage() {
       <label>Emri<input required maxLength={255} value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} /></label>
       <label>Lloji i karburantit<select value={form.fuel_type} onChange={(event) => setForm({ ...form, fuel_type: event.target.value })}>{Object.entries(fuelTypes).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
       {[["capacity_liters", "Kapaciteti (L)"], ["current_quantity_liters", "Sasia aktuale (L)"], ["low_level_threshold_liters", "Njofto kur sasia bie në (L)"]].map(([key, label]) => <label key={key}>{label}<input type="number" required min={key === "capacity_liters" ? "0.001" : "0"} step="any" value={form[key]} onChange={(event) => setForm({ ...form, [key]: event.target.value })} />{key === "low_level_threshold_liters" && <small>Paralajmërimi shfaqet kur sasia aktuale arrin ose bie nën këtë vlerë.</small>}</label>)}
+      {editingId != null && <label className="bt-fuel-alert-enabled"><input type="checkbox" checked={form.low_fuel_alert_enabled} onChange={(event) => setForm({ ...form, low_fuel_alert_enabled: event.target.checked })} /> Aktivizo njoftimin kur nafta bie nën nivelin e caktuar</label>}
     </div><div className="bt-fuel-actions"><button type="submit" className="bt-btn-primary" disabled={busy}>{busy ? "Duke ruajtur…" : "Ruaj"}</button><button type="button" className="bt-btn-secondary" disabled={busy} onClick={closeForm}>Anulo</button></div></form></Modal>}
     {incoming && <Modal title="Shto hyrje karburanti" className="bt-fuel-incoming-modal" onClose={() => { if (!busy) { setIncoming(null); setError(""); } }}>
       <form className="bt-fuel-form" onSubmit={addIncoming}>

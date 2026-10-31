@@ -3462,6 +3462,8 @@
 .bt-fuel-filters label, .bt-fuel-fields label { display: grid; gap: 6px; min-width: 180px; flex: 1; font-size: 13px; color: #637582; }
 .bt-fuel-filters input, .bt-fuel-filters select, .bt-fuel-fields input, .bt-fuel-fields select { width: 100%; padding: 10px 12px; border: 1px solid #dce5eb; border-radius: 9px; background: #fff; font: inherit; color: #253743; }
 .bt-fuel-fields { margin: 16px 0; }
+.bt-fuel-fields .bt-fuel-alert-enabled { display: flex; align-items: center; gap: 9px; flex-basis: 100%; color: #253743; }
+.bt-fuel-fields .bt-fuel-alert-enabled input { width: auto; }
 .bt-fuel-heading { justify-content: space-between; align-items: center; }
 .bt-fuel-detail dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; }
 .bt-fuel-detail dt { color: #637582; font-size: 13px; }.bt-fuel-detail dd { margin: 4px 0 0; font-weight: 700; }
