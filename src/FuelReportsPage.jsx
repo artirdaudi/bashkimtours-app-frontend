@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, BusFront, Download, Fuel, Gauge, RefreshCw, Search, TriangleAlert } from "lucide-react";
+import { ArrowLeft, ArrowRight, BusFront, Download, Fuel, Gauge, Info, RefreshCw, Search, TriangleAlert } from "lucide-react";
 import { fuelReportsApi } from "./api";
 
 const months = ["Jan", "Shk", "Mar", "Pri", "Maj", "Qer", "Kor", "Gus", "Sht", "Tet", "Nën", "Dhj"];
@@ -105,6 +105,7 @@ export default function FuelReportsPage() {
   const visible = showAll ? ranked : ranked.slice(0, 8);
   return <div className="bt-page bt-ops-page bt-fuel-reports-page">
     <header className="bt-page-header"><div><span className="bt-eyebrow">Bashkim Tours · Nafta</span><h1>Dashboard i naftës</h1><p>Shiko konsumin e flotës, burimet e furnizimit dhe ecurinë e secilit autobus.</p></div></header>
+    <div className="bt-fr-data-note" role="note"><Info size={19} aria-hidden="true" /><p>Regjistrimi i litrave për çdo autobus dhe i kilometrazhit ka filluar së fundmi. Sistemit i duhet kohë të grumbullojë matje të mjaftueshme; krahasimet e konsumit L/100 km do të bëhen më të sakta me të dhënat e muajve në vijim.</p></div>
     <div className="bt-fr-controls"><div className="bt-fr-period"><button type="button" aria-label="Muaji i kaluar" disabled={year === 2000 && month === 1} onClick={() => changePeriod(shiftMonth(year, month, -1))}><ArrowLeft size={17} /></button><label>Periudha <input type="month" min="2000-01" max="2100-12" value={`${year}-${String(month).padStart(2, "0")}`} onChange={(e) => { if (e.target.value) { const [y, m] = e.target.value.split("-").map(Number); changePeriod([y, m]); } }} /></label><button type="button" aria-label="Muaji tjetër" disabled={year === 2100 && month === 12} onClick={() => changePeriod(shiftMonth(year, month, 1))}><ArrowRight size={17} /></button></div><div className="bt-fr-actions"><button type="button" onClick={() => { setLoading(true); setHistory(null); setHistoryLoading(Boolean(selected)); setRetry((n) => n + 1); }}><RefreshCw size={16} /> Rifresko</button><button type="button" disabled={!report?.length} onClick={() => exportCsv(report, year, month)}><Download size={16} /> CSV</button></div></div>
     {loading && <p role="status" className="bt-fr-message">Duke ngarkuar dashboard-in…</p>}
     {error && <p className="bt-inline-error" role="alert">{error} <button type="button" onClick={() => { setLoading(true); setRetry((n) => n + 1); }}>Provo përsëri</button></p>}

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowDownLeft, ArrowUpRight, ChevronDown, Fuel, Info, LoaderCircle, Pencil, Plus, Search, X } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, ChevronDown, Fuel, LoaderCircle, Pencil, Plus, Search, X } from "lucide-react";
 import { fuelExternalCustomersApi, fuelSuppliersApi, fuelTanksApi, fuelTransactionsApi } from "./api";
 import { Modal } from "./PortalPages";
 import CharterDateTimeField from "./CharterDateTimeField";
@@ -192,7 +192,6 @@ export default function FuelTanksPage() {
 
   return <div className="bt-page bt-ops-page bt-fuel-page">
     <header className="bt-page-header"><div><span className="bt-eyebrow">Bashkim Tours · Nafta</span><h1>Depozitat e naftës</h1><p>Gjendja dhe detajet e rezervarëve të karburantit.</p></div></header>
-    <div className="bt-income-notice" role="status"><Info aria-hidden="true" /><div><strong>Kjo faqe është ende në përpunim</strong><p>Moduli i naftës mund të ndryshojë ndërsa shtohen funksionet e tjera.</p></div></div>
     {error && !form && !incoming && <p className="bt-inline-error" role="alert">{error}</p>}
     {loading && <p>Duke ngarkuar rezervarët…</p>}
     {!loading && !tanks.length && !error && <p>Nuk ka ende rezervarë.</p>}

@@ -90,7 +90,7 @@ export default function DashboardLayout() {
           <NavLink to="/fuel" className="bt-charter-nav-feature" onClick={() => setOpen(false)}>
             <Fuel />
             <span>Nafta</span>
-            <small className="bt-charter-nav-ribbon bt-fuel-nav-ribbon">NË PËRPUNIM</small>
+            <small className="bt-charter-nav-ribbon">NEW</small>
           </NavLink>
           <NavLink to="/income" onClick={() => setOpen(false)}>
             <Banknote />
