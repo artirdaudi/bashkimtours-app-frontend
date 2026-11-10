@@ -5414,6 +5414,10 @@
 .bt-payment-warning-summary {
   grid-column: 1/-1;
 }
+.bt-payment-due-comment {
+  grid-column: 1/-1;
+  overflow-wrap: anywhere;
+}
 .bt-amount-change-note {
   padding: 8px 9px;
   color: #8a4b08 !important;

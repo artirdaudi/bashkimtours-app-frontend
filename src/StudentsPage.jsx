@@ -1394,6 +1394,10 @@ function MonthlyDuePaymentForm({
             <DueWarningSteps due={due} detailed />
           </div>
         )}
+        <div className="bt-payment-due-comment">
+          <small>Komenti i detyrimit</small>
+          <strong>{due.comment || "Pa koment"}</strong>
+        </div>
       </div>
       {due.status !== "PAID" && (
         <>
@@ -1561,7 +1565,7 @@ function MonthlyDuePaymentForm({
                 <strong>{payment.created_by_username}</strong>
               </div>
               <div>
-                <small>Komenti</small>
+                <small>Komenti i pagesës</small>
                 <strong>{payment.comment || "Pa koment"}</strong>
               </div>
             </>
