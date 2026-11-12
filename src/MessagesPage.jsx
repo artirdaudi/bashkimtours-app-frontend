@@ -18,7 +18,7 @@ const messages = [
   { id: "fuel-monthly", service: "fuel", name: "fuel_raport", title: "Nafta - Raporti Mujor", icon: FileText, description: "Raporti automatik mujor i naftës përmbledh hyrjet dhe daljet në Garazha-Tanker, përdorimin nga automjetet e Bashkim Tours, automjetet e stafit dhe klientët e jashtëm, gjendjen e rezervarit në fund të muajit dhe furnizimet e autobusëve jashtë Garazha-Tanker.", preview: "Shembull i raportit mujor të naftës që u dërgohet marrësve në WhatsApp. Muaji dhe sasitë plotësohen automatikisht nga sistemi." },
   { id: "fuel-alert", service: "fuel", name: "low_fuel_alert", previewImage: "fuel_low_alert", title: "Njoftimi për nivelin e ulët të naftës", icon: BellRing, description: "Njoftim automatik në WhatsApp kur sasia e naftës në rezervarin Garazha-Tanker arrin ose bie nën pragun e caktuar. Mesazhi tregon emrin e rezervarit dhe sasinë aktuale në litra, që të planifikohet furnizimi. Njoftimi dërgohet një herë për çdo rënie nën prag dhe riaktivizohet pasi niveli të ngrihet mbi të.", preview: "Shembull i njoftimit për nivelin e ulët të naftës. Emri i rezervarit dhe sasia aktuale plotësohen automatikisht." },
   { id: "card", name: "card_collection_deadline", title: "Njoftimi i kartelës", icon: IdCard, description: "Njoftim në WhatsApp për afatin e marrjes së kartelës.", preview: "Shembull i mesazhit për afatin e marrjes së kartelës. Të dhënat konkrete plotësohen nga sistemi gjatë dërgimit.", send: whatsappNotificationsApi.sendCard },
-  { id: "payment", name: "payment_notification", title: "Njoftimi i pagesës", icon: CreditCard, description: "Njoftim automatik në WhatsApp për pagesat.", preview: "Njoftim për pagesën e nxënësit. Të dhënat konkrete plotësohen nga sistemi gjatë dërgimit." },
+  { id: "payment", name: "payment_notification", title: "Njoftimi i pagesës", icon: CreditCard, description: "Njoftim automatik në WhatsApp për pagesat.", preview: "Njoftim për pagesën e nxënësit. Të dhënat konkrete plotësohen nga sistemi gjatë dërgimit.", send: whatsappNotificationsApi.sendPayment },
   { id: "test", name: "test_message", title: "Mesazh testues", icon: Send, description: "Dërgo një template WhatsApp te një numër për testim.", manual: true },
 ];
 
@@ -60,7 +60,7 @@ export default function MessagesPage() {
   const [fuelTankError, setFuelTankError] = useState("");
   const [fuelTankSaving, setFuelTankSaving] = useState(false);
   const [fuelTankFeedback, setFuelTankFeedback] = useState("");
-  const filteredMessages = messages.filter((item) => (item.service || "maarif") === service && (activeTab === "manual" ? item.id === "card" || item.manual : item.id !== "card" && !item.manual) && `${item.name} ${item.title} ${item.description}`.toLocaleLowerCase("sq").includes(search.trim().toLocaleLowerCase("sq")));
+  const filteredMessages = messages.filter((item) => (item.service || "maarif") === service && (activeTab === "manual" ? (item.id === "card" || item.id === "payment" || item.manual) : item.id !== "card" && !item.manual) && `${item.name} ${item.title} ${item.description}`.toLocaleLowerCase("sq").includes(search.trim().toLocaleLowerCase("sq")));
 
   useEffect(() => {
     followupRulesApi.get()
@@ -176,7 +176,7 @@ export default function MessagesPage() {
             {item.id === "fuel-alert" && <em className={`bt-messages-status ${fuelTank?.low_fuel_alert_enabled ? "active" : ""}`}>{fuelTankLoading || fuelTankError ? "—" : fuelTank?.low_fuel_alert_enabled ? "Aktiv" : "Joaktiv"}</em>}
             {item.id === "charter-reminder" && <em className="bt-messages-status active">Aktiv</em>}
             {item.id === "payment" && <em className={`bt-messages-status ${paymentRules?.is_active && paymentRules?.message_enabled ? "active" : ""}`}>{rulesLoading || rulesError ? "—" : paymentRules?.is_active && paymentRules?.message_enabled ? "Aktiv" : "Joaktiv"}</em>}
-            {item.id === "card" && <button type="button" className="bt-btn-primary bt-messages-list-send" onClick={() => { setSelected(item); setSendFeedback(null); setPassword(""); setError(""); setConfirmOpen(true); }}><Send size={17} /> Dërgo</button>}
+            {(item.id === "card" || item.id === "payment") && <button type="button" className="bt-btn-primary bt-messages-list-send" onClick={() => { setSelected(item); setSendFeedback(null); setPassword(""); setError(""); setConfirmOpen(true); }}><Send size={17} /> Dërgo</button>}
             {item.id === "test" && <button type="button" className="bt-btn-primary bt-messages-list-send" onClick={() => { setTestOpen(true); setError(""); }}><Send size={17} /> Testo</button>}
           </div>;
         })}</div>
@@ -185,7 +185,7 @@ export default function MessagesPage() {
         <div className="bt-messages-detail-content">
         <div className="bt-messages-detail-heading"><div><h2>{selected.title}</h2><p>{selected.description}</p></div></div>
         <div className="bt-messages-actions">
-          {selected.id === "card" && <button type="button" className="bt-btn-primary" disabled={busy} onClick={() => { setPassword(""); setError(""); setConfirmOpen(true); }}><Send size={17} /> {busy ? "Duke dërguar…" : "Dërgo"}</button>}
+          {(selected.id === "card" || (selected.id === "payment" && activeTab === "manual")) && <button type="button" className="bt-btn-primary" disabled={busy} onClick={() => { setPassword(""); setError(""); setConfirmOpen(true); }}><Send size={17} /> {busy ? "Duke dërguar…" : "Dërgo"}</button>}
         </div>
         {sendFeedback && <p className={sendFeedback.type === "error" ? "bt-inline-error" : sendFeedback.type === "success" ? "bt-followup-rule-saved" : "bt-messages-info"} role="status">{sendFeedback.text}</p>}
         {selected.id === "fuel-alert" && <div className="bt-messages-schedule"><h3><BellRing size={19} /> Njoftimi për rezervarin {fuelTank?.name || "Garazha-Tanker"}</h3><p>Njoftimi dërgohet kur sasia bie në ose nën pragun e rezervarit{fuelTank ? ` (${fuelTank.low_level_threshold_liters} L)` : ""}.</p>{fuelTankLoading && <p role="status">Duke ngarkuar statusin…</p>}{fuelTankError && <p className="bt-inline-error" role="alert">{fuelTankError}</p>}{fuelTankFeedback && <p className="bt-followup-rule-saved" role="status">{fuelTankFeedback}</p>}<div className="bt-messages-alert-options" role="group" aria-label="Statusi i njoftimit të naftës"><button type="button" className={fuelTank?.low_fuel_alert_enabled ? "active" : ""} aria-pressed={fuelTank?.low_fuel_alert_enabled === true} disabled={!fuelTank || fuelTankLoading || fuelTankSaving} onClick={() => updateFuelAlert(true)}>Aktiv</button><button type="button" className={fuelTank && !fuelTank.low_fuel_alert_enabled ? "active" : ""} aria-pressed={fuelTank?.low_fuel_alert_enabled === false} disabled={!fuelTank || fuelTankLoading || fuelTankSaving} onClick={() => updateFuelAlert(false)}>Joaktiv</button></div></div>}
