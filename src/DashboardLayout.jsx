@@ -1,4 +1,4 @@
-import { Banknote, BarChart3, BellRing, Bus, CalendarDays, CarFront, ChevronDown, Contact, CreditCard, FileText, Fuel, Layers3, LogOut, MapPin, Menu, Route, ScanLine, Settings, ShieldCheck, UserCircle, UsersRound, Wallet, X } from "lucide-react";
+import { Banknote, BarChart3, BellRing, Bus, CalendarDays, CarFront, ChevronDown, Contact, CreditCard, FileText, Fuel, Layers3, LogOut, MapPin, Menu, Navigation, Route, ScanLine, Settings, ShieldCheck, UserCircle, UsersRound, Wallet, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { logout as endSession } from "./auth";
@@ -12,6 +12,7 @@ const moduleTabs = {
   maarif: [["/students", UsersRound, "Nxënësit"], ["/payments", CreditCard, "Pagesat"], ["/arka", Wallet, "Arka"], ["/vehicles", Bus, "Automjetet"], ["/drivers", UsersRound, "Shoferët"], ["/areas", MapPin, "Zonat"], ["/calendar", CalendarDays, "Kalendari"], ["/cards", Contact, "Kartelat"], ["/debts", FileText, "Borxhet"], ["/followup-rules", Settings, "Rregullat"], ["/skano", ScanLine, "Skano"]],
   charters: [["/charters", Route, "Rezervimet"], ["/charters/payments", CreditCard, "Pagesat"], ["/charters/cash", Wallet, "Arka"]],
   fuel: [["/fuel/ledger", Layers3, "Komplet"], ["/fuel/reports", BarChart3, "Raportet"], ["/fuel", Fuel, "Rezervari"], ["/fuel/external-refuellings", Fuel, "Furnizimet e jashtme"], ["/fuel/external-customers", UsersRound, "Klientët e jashtëm"], ["/fuel/suppliers", FuelTruckIcon, "Furnitorët"], ["/fuel/refuelling-locations", MapPin, "Lokacionet e furnizimit"], ["/fuel/staff-vehicles", CarFront, "Automjetet e stafit"]],
+  gps: [],
   more: [],
 };
 const settingsTabs = [["/settings/accounts-roles", ShieldCheck, "Llogaritë dhe rolet"], ["/settings/cash-registers", Wallet, "Arkat"], ["/settings/document-types", FileText, "Llojet e dokumentave"], ["/messages", BellRing, "Mesazhet"]];
@@ -20,6 +21,7 @@ const moduleMeta = {
   maarif: { title: "Maarif", description: "Nxënësit dhe transporti", icon: UsersRound },
   charters: { title: "Charterët", description: "Rezervimet dhe pagesat", icon: Route },
   fuel: { title: "Nafta", description: "Rezervari dhe furnizimet", icon: Fuel },
+  gps: { title: "GPS", description: "Vendndodhja e automjeteve", icon: Navigation },
   more: { title: "Të tjera", description: "Mjetet dhe cilësimet", icon: Menu },
 };
 const maarifPaths = new Set(moduleTabs.maarif.map(([path]) => path));
@@ -30,13 +32,13 @@ export default function DashboardLayout() {
   const subnavRef = useRef(null);
   const inCharters = location.pathname === "/charters" || location.pathname.startsWith("/charters/");
   const inFuel = location.pathname === "/fuel" || location.pathname.startsWith("/fuel/");
-  const module = location.pathname === "/income" ? "income" : inCharters ? "charters" : inFuel ? "fuel" : maarifPaths.has(location.pathname) ? "maarif" : "more";
+  const module = location.pathname === "/income" ? "income" : inCharters ? "charters" : inFuel ? "fuel" : location.pathname === "/gps" ? "gps" : maarifPaths.has(location.pathname) ? "maarif" : "more";
   const activeTabs = location.pathname.startsWith("/settings/") || location.pathname === "/messages" ? settingsTabs : moduleTabs[module];
   useEffect(() => {
     if (module !== "fuel") return;
     subnavRef.current?.querySelector("a.active")?.scrollIntoView({ block: "nearest", inline: "center" });
   }, [location.pathname, module]);
-  const moduleIndex = { income: 0, maarif: 1, charters: 2, fuel: 3, more: 4 }[module];
+  const moduleIndex = { income: 0, maarif: 1, charters: 2, fuel: 3, gps: 4, more: 4 }[module];
   const activeModuleMeta = location.pathname === "/autobusat" ? { title: "Autobusët", description: "Regjistri i autobusëve", icon: Bus }
     : location.pathname === "/shoferat" ? { title: "Shoferat dhe Staff", description: "Shoferët dhe personeli", icon: UsersRound }
     : location.pathname.startsWith("/settings/") || location.pathname === "/messages" ? { title: "Cilësimet", description: "Llogaritë dhe konfigurimi", icon: Settings }
@@ -91,6 +93,11 @@ export default function DashboardLayout() {
             <Fuel />
             <span>Nafta</span>
             <small className="bt-charter-nav-ribbon">NEW</small>
+          </NavLink>
+          <NavLink to="/gps" className="bt-charter-nav-feature bt-gps-nav-feature" onClick={() => setOpen(false)}>
+            <Navigation />
+            <span>GPS</span>
+            <small className="bt-charter-nav-ribbon bt-gps-nav-ribbon">Në përpunim</small>
           </NavLink>
           <NavLink to="/income" onClick={() => setOpen(false)}>
             <Banknote />

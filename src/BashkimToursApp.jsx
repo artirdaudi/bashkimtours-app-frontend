@@ -17,6 +17,7 @@ import FuelLedgerPage from "./FuelLedgerPage";
 import FuelReportsPage from "./FuelReportsPage";
 import FuelStaffVehiclesPage from "./FuelStaffVehiclesPage";
 import FuelTabs from "./FuelTabs";
+import GpsPage from "./GpsPage";
 import ShoferatPage from "./ShoferatPage";
 import AutobusatPage from "./AutobusatPage";
 import ChartersPage from "./ChartersPage";
@@ -95,6 +96,7 @@ export default function BashkimToursApp() {
         </Route>
         <Route path="account" element={<AccountPage />} />
         <Route path="income" element={<IncomePage />} />
+        <Route path="gps" element={<GpsPage />} />
         <Route path="fuel" element={<FuelTabs />}>
           <Route path="ledger" element={<FuelLedgerPage />} />
           <Route path="reports" element={<FuelReportsPage />} />

@@ -3453,6 +3453,8 @@
 
 .bt-sidebar-new .bt-nav a.bt-charter-nav-feature { position: relative; padding-right: 35px; }
 .bt-sidebar-new .bt-nav .bt-charter-nav-ribbon { position: absolute; top: 3px; right: -6px; display: grid; place-items: center; width: 33px; height: 16px; border-radius: 3px; background: var(--bt-blue); color: #fff; box-shadow: 0 2px 5px #07387830; font-size: 8px; font-weight: 800; letter-spacing: .08em; line-height: 1; transform: rotate(16deg); }
+.bt-sidebar-new .bt-nav a.bt-gps-nav-feature { padding-right: 78px; }
+.bt-sidebar-new .bt-nav .bt-gps-nav-ribbon { width: 82px; background: #facc15; color: #4a3800; box-shadow: 0 2px 5px #8a650030; font-size: 8px; letter-spacing: 0; }
 .bt-fuel-filters, .bt-fuel-fields, .bt-fuel-actions, .bt-fuel-heading, .bt-fuel-pagination { display: flex; align-items: end; gap: 12px; flex-wrap: wrap; }
 .bt-fuel-filters, .bt-fuel-form, .bt-fuel-detail { margin: 20px 0; padding: 20px; border: 1px solid #dce5eb; border-radius: 12px; background: #fff; }
 .bt-fuel-modal .bt-fuel-form { margin: 0; padding: 0; border: 0; }
