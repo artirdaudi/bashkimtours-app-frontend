@@ -7682,6 +7682,8 @@ html.bt-pwa-standalone .bt-charter-form-modal :is(input, select, textarea) { box
 .bt-fuel-transaction-list .is-staff { background: #eaf8f6; }
 .bt-fuel-transaction-list .is-staff .bt-fuel-transaction-icon { background: #c9efea; color: #087b83; }
 .bt-fuel-transaction-list .is-staff b { color: #087b83; }
+
+
 .bt-fuel-staff-tab { margin-left: auto; }
 .bt-fuel-staff-modal .bt-fuel-actions { justify-content: flex-end; }
 .bt-fuel-staff-status { display: grid; gap: 8px; }

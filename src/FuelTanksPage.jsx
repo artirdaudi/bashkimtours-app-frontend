@@ -453,7 +453,7 @@ export default function FuelTanksPage() {
     setError("");
   };
   const openIncoming = async (id) => {
-    setIncoming({ tank_id: id, quantity_liters: "", transaction_date: localDateTime(), supplier_id: "", unit_price: "", total_amount: "", currency: "EUR", comment: "" });
+    setIncoming({ tank_id: id, quantity_liters: "", transaction_date: localDateTime(), supplier_id: "", unit_price: "", total_amount: "", comment: "" });
     setError("");
     setSupplierLoading(true);
     try { setSuppliers(await fuelSuppliersApi.list({ limit: 1000 })); }
@@ -487,7 +487,7 @@ export default function FuelTanksPage() {
     setBusy(true);
     setError("");
     try {
-      const created = await fuelTransactionsApi.createIncoming({ tank_id: incoming.tank_id, quantity_liters: quantity, transaction_date: new Date(incoming.transaction_date).toISOString(), supplier_id: Number(incoming.supplier_id), unit_price: incoming.unit_price === "" ? null : Number(incoming.unit_price), total_amount: incoming.total_amount === "" ? null : Number(incoming.total_amount), currency: incoming.unit_price || incoming.total_amount ? incoming.currency : null, comment: incoming.comment.trim() || null });
+      const created = await fuelTransactionsApi.createIncoming({ tank_id: incoming.tank_id, quantity_liters: quantity, transaction_date: new Date(incoming.transaction_date).toISOString(), supplier_id: Number(incoming.supplier_id), unit_price: incoming.unit_price === "" ? null : Number(incoming.unit_price), total_amount: incoming.total_amount === "" ? null : Number(incoming.total_amount), currency: "MKD", comment: incoming.comment.trim() || null });
       setIncoming(null);
       await load();
       if (overviewType === "INCOMING" || overviewType === "UNMAPPED") await fetchHistory(historyFilters, 1);
@@ -535,9 +535,8 @@ export default function FuelTanksPage() {
           <label>Sasia hyrëse<input type="number" inputMode="decimal" required min="0.001" step="any" value={incoming.quantity_liters} onChange={(event) => { const quantity_liters = event.target.value; setIncoming({ ...incoming, quantity_liters, total_amount: calculatedTotal(quantity_liters, incoming.unit_price) }); }} /></label>
         </div></fieldset>
         <fieldset className="bt-fuel-incoming-group"><legend>Pagesa dhe data</legend><div className="bt-fuel-fields">
-          <div className="bt-fuel-currency-field"><span>Valuta</span><div role="group" aria-label="Valuta" className="bt-fuel-currency-options">{["EUR", "MKD"].map((currency) => <button key={currency} type="button" className={incoming.currency === currency ? "active" : ""} aria-pressed={incoming.currency === currency} onClick={() => setIncoming({ ...incoming, currency })}>{currency}</button>)}</div></div>
-          <label>Çmimi për litër<input type="number" min="0.001" step="any" value={incoming.unit_price} onChange={(event) => { const unit_price = event.target.value; setIncoming({ ...incoming, unit_price, total_amount: calculatedTotal(incoming.quantity_liters, unit_price) }); }} /></label>
-          <label>Shuma totale<input type="number" min="0.001" step="any" value={incoming.total_amount} placeholder="Llogaritet ose shkruhet manualisht" onChange={(event) => setIncoming({ ...incoming, total_amount: event.target.value })} /></label>
+          <label>Çmimi për litër (MKD)<input type="number" min="0.001" step="any" value={incoming.unit_price} onChange={(event) => { const unit_price = event.target.value; setIncoming({ ...incoming, unit_price, total_amount: calculatedTotal(incoming.quantity_liters, unit_price) }); }} /></label>
+          <label>Shuma totale (MKD)<input type="number" min="0.001" step="any" value={incoming.total_amount} placeholder="Llogaritet ose shkruhet manualisht" onChange={(event) => setIncoming({ ...incoming, total_amount: event.target.value })} /></label>
           <CharterDateTimeField label="Data dhe ora (DD/MM/YYYY)" value={incoming.transaction_date} onChange={(value) => setIncoming({ ...incoming, transaction_date: value })} />
           <label className="bt-fuel-comment-field">Koment<textarea value={incoming.comment} onChange={(event) => setIncoming({ ...incoming, comment: event.target.value })} rows={3} /></label>
         </div></fieldset>

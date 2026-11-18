@@ -404,20 +404,47 @@ html.bt-pwa-standalone .bt-login-page.is-exiting .bt-submit { background: #15803
   .bt-main > .bt-pwa-subnav a.active { border-color: #a9c9e9; background: #eaf2fc; color: #073878; }
 }
 
-/* Reservoir transactions: compact cards instead of the desktop's 760px row. */
+/* Reservoir transaction cards in the installed PWA. */
 @media screen and (max-width: 800px) {
-  .bt-fuel-page .bt-fuel-transaction-list { overflow-x: hidden; padding: 10px; }
-  .bt-fuel-page .bt-fuel-transaction-list li { display: grid; grid-template-columns: 38px minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "icon main main" "plate plate km" "amount amount detail"; align-items: center; gap: 11px 10px; width: 100%; min-width: 0; margin-bottom: 10px; padding: 13px; border: 1px solid #dce5eb; border-radius: 12px; }
-  .bt-fuel-page .bt-fuel-transaction-list li:last-child { margin-bottom: 0; border-bottom: 1px solid #dce5eb; }
-  .bt-fuel-page .bt-fuel-transaction-list .bt-fuel-transaction-icon { grid-area: icon; }
-  .bt-fuel-page .bt-fuel-transaction-list .bt-fuel-transaction-main { grid-area: main; min-width: 0; }
-  .bt-fuel-page .bt-fuel-transaction-list .bt-fuel-transaction-main strong { overflow: visible; text-overflow: clip; white-space: normal; overflow-wrap: anywhere; font-size: 13px; }
-  .bt-fuel-page .bt-fuel-transaction-list .bt-fuel-transaction-main time { font-size: 11px; }
-  .bt-fuel-page .bt-fuel-transaction-list .bt-fuel-transaction-plate { grid-area: plate; }
-  .bt-fuel-page .bt-fuel-transaction-list .bt-fuel-transaction-km { grid-area: km; }
-  .bt-fuel-page .bt-fuel-transaction-list .bt-fuel-transaction-column { min-width: 0; padding: 8px 10px; border-radius: 8px; background: rgb(255 255 255 / 76%); }
-  .bt-fuel-page .bt-fuel-transaction-list .bt-fuel-transaction-column small { font-size: 10px; }
-  .bt-fuel-page .bt-fuel-transaction-list .bt-fuel-transaction-column span { overflow: visible; text-overflow: clip; white-space: normal; overflow-wrap: anywhere; font-size: 13px; }
-  .bt-fuel-page .bt-fuel-transaction-list li > b { grid-area: amount; justify-self: start; text-align: left; font-size: 17px; }
-  .bt-fuel-page .bt-fuel-transaction-list li > .bt-fuel-transaction-detail { grid-area: detail; justify-self: end; min-height: 44px; padding: 8px 10px; }
+  html.bt-pwa-standalone .bt-fuel-transaction-list { overflow-x: visible; padding: 10px; }
+  html.bt-pwa-standalone .bt-fuel-transaction-list li,
+  html.bt-pwa-standalone .bt-fuel-transaction-list li.is-refuelling,
+  html.bt-pwa-standalone .bt-fuel-transaction-list li.bt-fuel-customer-overview-row {
+    grid-template-columns: 42px minmax(0, 1fr) minmax(0, 1fr);
+    min-width: 0;
+    gap: 11px 12px;
+    margin-bottom: 10px;
+    padding: 15px;
+    border: 1px solid #dce5eb;
+    border-radius: 14px;
+    box-shadow: 0 3px 12px #1734510d;
+  }
+  html.bt-pwa-standalone .bt-fuel-transaction-list li:last-child { margin-bottom: 0; border-bottom: 1px solid #dce5eb; }
+  html.bt-pwa-standalone .bt-fuel-transaction-icon { grid-column: 1; grid-row: 1; width: 42px; height: 42px; }
+  html.bt-pwa-standalone .bt-fuel-transaction-list li > .bt-fuel-transaction-main { grid-column: 2 / -1; grid-row: 1; align-self: center; }
+  html.bt-pwa-standalone .bt-fuel-transaction-list li > .bt-fuel-transaction-main strong { overflow: visible; white-space: normal; line-height: 1.3; }
+  html.bt-pwa-standalone .bt-fuel-transaction-list li > b { grid-column: 2 / -1; grid-row: 2; text-align: left; font-size: 19px; }
+  html.bt-pwa-standalone .bt-fuel-transaction-list li > .bt-fuel-transaction-column { grid-row: 3; padding-top: 10px; border-top: 1px solid #dce5eb; }
+  html.bt-pwa-standalone .bt-fuel-transaction-list li > .bt-fuel-transaction-column:nth-of-type(2) { grid-column: 2; }
+  html.bt-pwa-standalone .bt-fuel-transaction-list li > .bt-fuel-transaction-column:nth-of-type(3) { grid-column: 3; }
+  html.bt-pwa-standalone .bt-fuel-transaction-column span,
+  html.bt-pwa-standalone .bt-fuel-customer-overview-person .bt-fuel-customer-person-name { white-space: normal; overflow-wrap: anywhere; }
+  html.bt-pwa-standalone .bt-fuel-transaction-list li > .bt-fuel-transaction-detail,
+  html.bt-pwa-standalone .bt-fuel-transaction-list li > .bt-fuel-transaction-row-actions { grid-column: 2 / -1; grid-row: 4; justify-self: stretch; justify-content: flex-end; min-height: 38px; }
+  html.bt-pwa-standalone .bt-fuel-transaction-list li > .bt-fuel-transaction-detail { width: fit-content; margin-left: auto; padding: 7px 10px; }
+  html.bt-pwa-standalone .bt-fuel-transaction-list li.is-refuelling > .bt-fuel-transaction-row-actions { gap: 8px; }
+  html.bt-pwa-standalone .bt-fuel-transaction-list li.is-refuelling .bt-external-row-menu { position: relative; top: auto; left: auto; width: 40px; transform: none; }
+  html.bt-pwa-standalone .bt-fuel-transaction-list li.is-refuelling .bt-external-row-menu-toggle { width: 40px; height: 40px; }
+  html.bt-pwa-standalone .bt-fuel-transaction-list li.is-refuelling .bt-external-color-options { top: auto; bottom: calc(100% + 4px); }
+  html.bt-pwa-standalone .bt-fuel-transaction-list li.is-refuelling > .bt-fuel-external-row-facts { grid-column: 2 / -1; grid-row: 5; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; padding-top: 10px; border-top: 1px solid #dce5eb; }
+  html.bt-pwa-standalone .bt-fuel-external-row-facts > span:nth-child(3) { grid-column: auto; }
+  html.bt-pwa-standalone .bt-fuel-transaction-list li > .bt-fuel-customer-overview-secondary { grid-column: 2 / -1; grid-row: 5; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding-top: 11px; }
+  html.bt-pwa-standalone .bt-fuel-transaction-list li .bt-fuel-customer-overview-price { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  html.bt-pwa-standalone .bt-fuel-customer-overview-price > span:first-child,
+  html.bt-pwa-standalone .bt-fuel-customer-overview-price > span:last-child { grid-column: auto; min-width: 0; }
+  html.bt-pwa-standalone .bt-fuel-customer-overview-actions { grid-column: 1 / -1; justify-content: flex-start; }
+  html.bt-pwa-standalone .bt-fuel-transaction-list li > .bt-fuel-customer-overview-extra { grid-column: 2 / -1; grid-row: 6; padding-top: 10px; border-top: 1px solid #e9e2d6; }
+  html.bt-pwa-standalone .bt-fuel-customer-status { min-height: 34px; padding: 6px 10px; font-size: 11px; }
+  html.bt-pwa-standalone .bt-fuel-transactions-head { padding: 16px; }
+  html.bt-pwa-standalone .bt-fuel-transaction-pagination { justify-content: center; padding: 14px; }
 }
