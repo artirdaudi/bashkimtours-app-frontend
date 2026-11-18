@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Bus, ChevronLeft, ChevronRight, LoaderCircle, Pencil, Plus, Search, Trash2, X } from "lucide-react";
+import { Bus, ChevronLeft, ChevronRight, LoaderCircle, Pencil, Plus, Search, UserRoundCheck, UserRoundX, X } from "lucide-react";
 import { autobusiApi, busExtApi } from "./api";
 import { confirmAction } from "./confirmAction";
 import { Modal } from "./PortalPages";
@@ -44,6 +44,11 @@ export default function AutobusatPage() {
   const [error, setError] = useState("");
   const [form, setForm] = useState(null);
   const [refresh, setRefresh] = useState(0);
+  const [showInactive, setShowInactive] = useState(false);
+  const [inactiveItems, setInactiveItems] = useState([]);
+  const [inactiveOffset, setInactiveOffset] = useState(0);
+  const [inactiveLoading, setInactiveLoading] = useState(false);
+  const [inactiveError, setInactiveError] = useState("");
   const api = tab === "autobusi" ? autobusiApi : busExtApi;
   const fields = tab === "autobusi" ? baseFields : extendedFields;
 
@@ -56,7 +61,7 @@ export default function AutobusatPage() {
     setLoading(true);
     try {
       const result = await (tab === "autobusi" ? autobusiApi : busExtApi).list({
-        limit: pageSize, offset, [tab === "autobusi" ? "Targat" : "targa"]: queryText,
+        limit: pageSize, offset, is_active: true, [tab === "autobusi" ? "Targat" : "targa"]: queryText,
       });
       setItems(result);
       setError("");
@@ -72,13 +77,29 @@ export default function AutobusatPage() {
     return () => window.clearTimeout(timer);
   }, [load, refresh]);
 
-  function chooseTab(next) {
+  useEffect(() => {
+    if (!showInactive) return;
+    let active = true;
+    queueMicrotask(() => { if (active) setInactiveLoading(true); });
+    (tab === "autobusi" ? autobusiApi : busExtApi).list({ limit: pageSize, offset: inactiveOffset, is_active: false })
+      .then((result) => { if (active) { setInactiveItems(result); setInactiveError(""); } })
+      .catch((requestError) => { if (active) setInactiveError(requestError.message); })
+      .finally(() => { if (active) setInactiveLoading(false); });
+    return () => { active = false; };
+  }, [showInactive, inactiveOffset, refresh, tab]);
+
+  function chooseTab(next, keepInactiveOpen = false) {
+    if (next === tab) return;
     setTab(next);
     setOffset(0);
     setItems([]);
     setSearch("");
     setQueryText("");
     setForm(null);
+    setShowInactive(keepInactiveOpen);
+    setInactiveOffset(0);
+    setInactiveItems([]);
+    if (keepInactiveOpen) setInactiveLoading(true);
     setError("");
   }
 
@@ -108,23 +129,28 @@ export default function AutobusatPage() {
     }
   }
 
-  async function remove(item) {
-    if (busy || !await confirmAction(`Të fshihet autobusi ${item.Targat || item.targa || `#${item.ID}`}?`)) return;
+  async function changeActive(item, isActive) {
+    if (busy || (!isActive && !await confirmAction(`A dëshironi ta çaktivizoni autobusin ${item.Targat || item.targa || `#${item.ID}`}?`))) return;
     setBusy(true);
     setError("");
+    setInactiveError("");
     try {
-      await api.remove(item.ID);
-      if (items.length === 1 && offset > 0) setOffset(offset - pageSize);
-      else setRefresh((value) => value + 1);
+      await api.setActive(item.ID, isActive);
+      if (!isActive) setItems((current) => current.filter((entry) => entry.ID !== item.ID));
+      else setInactiveItems((current) => current.filter((entry) => entry.ID !== item.ID));
+      if (!isActive && items.length === 1 && offset > 0) setOffset(offset - pageSize);
+      if (isActive && inactiveItems.length === 1 && inactiveOffset > 0) setInactiveOffset(inactiveOffset - pageSize);
+      setRefresh((value) => value + 1);
     } catch (requestError) {
-      setError(requestError.message);
+      if (isActive) setInactiveError(requestError.message);
+      else setError(requestError.message);
     } finally {
       setBusy(false);
     }
   }
 
   return <div className="bt-page bt-shoferat-page bt-autobusat-page">
-    <header className="bt-page-header"><div><span className="bt-eyebrow">Bashkim Tours</span><h1>Autobusët</h1><p>Regjistri i autobusëve.</p></div><button type="button" className="bt-btn-primary" onClick={() => openForm()}><Plus size={18} /> Shto autobus</button></header>
+    <header className="bt-page-header"><div><span className="bt-eyebrow">Bashkim Tours</span><h1>Autobusët</h1><p>Regjistri i autobusëve.</p></div><div className="bt-shoferat-header-actions"><button type="button" className="bt-btn-secondary" onClick={() => { setInactiveOffset(0); setInactiveLoading(true); setShowInactive(true); }}><Bus size={18} /> Autobusët joaktivë</button><button type="button" className="bt-btn-primary" onClick={() => openForm()}><Plus size={18} /> Shto autobus</button></div></header>
     <div className="bt-shoferat-notice" role="note">Faqja ende është në përpunim.</div>
     <div className="bt-accounts-tabs" role="tablist" aria-label="Regjistrat e autobusëve">
       <button type="button" role="tab" aria-selected={tab === "autobusi"} className={tab === "autobusi" ? "active" : ""} onClick={() => chooseTab("autobusi")}>Autobusi</button>
@@ -132,11 +158,12 @@ export default function AutobusatPage() {
     </div>
     <section className="bt-shoferat-toolbar"><label className="bt-shoferat-search"><Search size={19} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Kërko sipas targës…" aria-label="Kërko autobusët sipas targës" />{search && <button type="button" onClick={() => setSearch("")} aria-label="Pastro kërkimin"><X size={16} /></button>}</label></section>
     {error && !form && <p className="bt-inline-error" role="alert">{error}</p>}
-    <div className="bt-shoferat-summary"><Bus size={20} /><strong>{items.length}</strong> autobusë në këtë faqe</div>
+    <div className="bt-shoferat-summary"><Bus size={20} /><strong>{items.length}</strong> autobusë aktivë në këtë faqe</div>
     <div className="bt-shoferat-table-wrap" aria-busy={loading}><table className="bt-shoferat-table bt-autobusat-table"><thead><tr>{fields.map((field) => <th key={field.key}>{field.label}</th>)}<th>Veprimet</th></tr></thead><tbody>
-      {!loading && items.map((item) => <tr key={item.ID}>{fields.map((field) => <td key={field.key} data-label={field.label}>{item[field.key] ?? "—"}</td>)}<td data-label="Veprimet"><div className="bt-role-actions"><button type="button" className="bt-btn-secondary" onClick={() => openForm(item)}><Pencil size={16} /> Ndrysho</button><button type="button" className="bt-btn-danger" disabled={busy} onClick={() => remove(item)}><Trash2 size={16} /> Fshi</button></div></td></tr>)}
+      {!loading && items.map((item) => <tr key={item.ID}>{fields.map((field) => <td key={field.key} data-label={field.label}>{item[field.key] ?? "—"}</td>)}<td data-label="Veprimet"><div className="bt-role-actions"><button type="button" className="bt-btn-secondary" onClick={() => openForm(item)}><Pencil size={16} /> Ndrysho</button><button type="button" className="bt-autobusat-deactivate" disabled={busy} onClick={() => changeActive(item, false)} aria-label={`Çaktivizo autobusin ${item.Targat || item.targa || `#${item.ID}`}`} title="Çaktivizo autobusin"><UserRoundX size={17} /></button></div></td></tr>)}
     </tbody></table>{loading && <div className="bt-shoferat-empty bt-shoferat-loading" role="status"><LoaderCircle size={22} /> Duke ngarkuar autobusët…</div>}{!loading && !items.length && !error && <div className="bt-shoferat-empty">{queryText ? "Nuk u gjet asnjë autobus." : "Nuk ka autobusë në këtë regjistër."}</div>}</div>
     <nav className="bt-shoferat-pages" aria-label="Faqet e autobusëve"><button type="button" aria-label="Faqja e mëparshme" disabled={loading || offset === 0} onClick={() => setOffset(Math.max(0, offset - pageSize))}><ChevronLeft size={19} /></button><span>Faqja {offset / pageSize + 1}</span><button type="button" aria-label="Faqja tjetër" disabled={loading || items.length < pageSize} onClick={() => setOffset(offset + pageSize)}><ChevronRight size={19} /></button></nav>
+    {showInactive && <Modal title={`Autobusët joaktivë · ${tab === "autobusi" ? "Autobusi" : "BusExt"}`} className="bt-autobusat-inactive-modal" onClose={() => setShowInactive(false)}><div className="bt-shoferat-inactive-list"><div className="bt-accounts-tabs" role="tablist" aria-label="Regjistrat e autobusëve joaktivë"><button type="button" role="tab" aria-selected={tab === "autobusi"} className={tab === "autobusi" ? "active" : ""} onClick={() => chooseTab("autobusi", true)}>Autobusi</button><button type="button" role="tab" aria-selected={tab === "busext"} className={tab === "busext" ? "active" : ""} onClick={() => chooseTab("busext", true)}>BusExt</button></div>{inactiveError && <p className="bt-inline-error" role="alert">{inactiveError}</p>}{inactiveLoading && <p role="status">Duke ngarkuar autobusët…</p>}{!inactiveLoading && !inactiveItems.length && !inactiveError && <p>Nuk ka autobusë joaktivë.</p>}{!inactiveLoading && inactiveItems.map((item) => <div className="bt-shoferat-inactive-row" key={item.ID}><div><strong>{item.Targat || item.targa || `#${item.ID}`}</strong><small>{item.Tipi || item.tipi || item.marka || ""}</small></div><button type="button" className="bt-btn-primary" disabled={busy} onClick={() => changeActive(item, true)}><UserRoundCheck size={17} /> Aktivizo</button></div>)}<nav className="bt-shoferat-pages" aria-label="Faqet e autobusëve joaktivë"><button type="button" aria-label="Faqja e mëparshme" disabled={inactiveLoading || inactiveOffset === 0} onClick={() => setInactiveOffset(Math.max(0, inactiveOffset - pageSize))}><ChevronLeft size={19} /></button><span>Faqja {inactiveOffset / pageSize + 1}</span><button type="button" aria-label="Faqja tjetër" disabled={inactiveLoading || inactiveItems.length < pageSize} onClick={() => setInactiveOffset(inactiveOffset + pageSize)}><ChevronRight size={19} /></button></nav></div></Modal>}
     {form && <Modal title={form.ID != null ? "Ndrysho autobusin" : "Shto autobus"} className="bt-shoferat-form-modal" onClose={() => { if (!busy) setForm(null); }}><form className="bt-shoferat-form" onSubmit={save}>
       {fields.map(({ key, label, type, required }) => <label key={key}><span>{label}</span><input type={type || "text"} min={type === "number" ? 0 : undefined} required={required} value={form[key]} onChange={(event) => setForm({ ...form, [key]: event.target.value })} /></label>)}
       {error && <p className="bt-inline-error" role="alert">{error}</p>}

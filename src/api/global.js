@@ -39,12 +39,14 @@ export const autobusiApi = {
   list: (params) => api(`/autobusi${query(params)}`),
   create: (body) => api("/autobusi", { method: "POST", body: JSON.stringify(body) }),
   update: (id, body) => api(`/autobusi/${id}`, { method: "PUT", body: JSON.stringify(body) }),
+  setActive: (id, isActive) => api(`/autobusi/${id}/active`, { method: "PATCH", body: JSON.stringify({ is_active: isActive }) }),
   remove: (id) => api(`/autobusi/${id}`, { method: "DELETE" }),
 };
 export const busExtApi = {
   list: (params) => api(`/busext${query(params)}`),
   create: (body) => api("/busext", { method: "POST", body: JSON.stringify(body) }),
   update: (id, body) => api(`/busext/${id}`, { method: "PUT", body: JSON.stringify(body) }),
+  setActive: (id, isActive) => api(`/busext/${id}/active`, { method: "PATCH", body: JSON.stringify({ is_active: isActive }) }),
   remove: (id) => api(`/busext/${id}`, { method: "DELETE" }),
 };
 export const chartersApi = {
@@ -135,6 +137,7 @@ export const driversApi = resource("/drivers");
 export const shoferiApi = {
   ...resource("/shoferi"),
   select: (params) => api(`/shoferi/select${query(params)}`),
+  setActive: (id, isActive) => api(`/shoferi/${id}/active`, { method: "PATCH", body: JSON.stringify({ is_active: isActive }) }),
 };
 
 export const transportCardsApi = {

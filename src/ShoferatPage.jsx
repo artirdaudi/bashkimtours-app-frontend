@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CalendarDays, ChevronLeft, ChevronRight, LoaderCircle, Pencil, Plus, Search, UsersRound, X } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, LoaderCircle, Pencil, Plus, Search, UserRoundCheck, UserRoundX, UsersRound, X } from "lucide-react";
 import { documentsApi, shoferiApi } from "./api";
 import { Modal } from "./PortalPages";
 import DriverDocuments from "./DriverDocuments";
 import DateInput from "./DateInput";
 import { formatDate as formatNumericDate } from "./dateUtils";
+import { confirmAction } from "./confirmAction";
 
 const emptyForm = { emri: "", telefoni: "", embg: "", llogaria: "", rroga: "", cd: "", licenca_transport_nderkombtar: "" };
 const fields = [
@@ -31,6 +32,12 @@ export default function ShoferatPage() {
   const [form, setForm] = useState(null);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
+  const [showInactive, setShowInactive] = useState(false);
+  const [inactivePage, setInactivePage] = useState(1);
+  const [inactiveData, setInactiveData] = useState(null);
+  const [inactiveLoading, setInactiveLoading] = useState(false);
+  const [inactiveError, setInactiveError] = useState("");
+  const [changingId, setChangingId] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
   const [documentsByDriver, setDocumentsByDriver] = useState({});
   const documentsCache = useRef({});
@@ -70,19 +77,19 @@ export default function ShoferatPage() {
     let active = true;
     if (!queryText) return () => { active = false; };
     shoferiApi.select({ search: queryText, limit: 6 })
-      .then((items) => { if (active) setSuggestions(items); })
+      .then((items) => { if (active) setSuggestions(items.filter((item) => item.is_active !== false)); })
       .catch(() => { if (active) setSuggestions([]); });
     return () => { active = false; };
   }, [queryText]);
 
   useEffect(() => {
     let active = true;
-    shoferiApi.list({ page, page_size: 20, search: queryText })
+    shoferiApi.list({ page, page_size: 20, search: queryText, is_active: true })
       .then((result) => { if (active) { setData(result); setError(""); } })
       .catch(async (requestError) => {
         if (requestError.status === 422) {
           try {
-            const result = await shoferiApi.list({ page, page_size: 20 });
+            const result = await shoferiApi.list({ page, page_size: 20, is_active: true });
             if (active) { setData(result); setError("Filtrat nuk u pranuan nga serveri; po shfaqet lista bazë."); }
             return;
           } catch (retryError) { requestError = retryError; }
@@ -92,6 +99,37 @@ export default function ShoferatPage() {
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [page, queryText, refresh]);
+
+  useEffect(() => {
+    if (!showInactive) return;
+    let active = true;
+    queueMicrotask(() => { if (active) setInactiveLoading(true); });
+    shoferiApi.list({ page: inactivePage, page_size: 20, is_active: false })
+      .then((result) => { if (active) { setInactiveData(result); setInactiveError(""); } })
+      .catch((requestError) => { if (active) setInactiveError(requestError.message); })
+      .finally(() => { if (active) setInactiveLoading(false); });
+    return () => { active = false; };
+  }, [showInactive, inactivePage, refresh]);
+
+  async function changeActive(driver, isActive) {
+    if (!isActive && !await confirmAction(`A dëshironi ta çaktivizoni shoferin/staff ${driver.emri}?`)) return;
+    setChangingId(driver.id);
+    setInactiveError("");
+    setFormError("");
+    try {
+      await shoferiApi.setActive(driver.id, isActive);
+      setData((current) => current ? { ...current, items: current.items.filter((item) => item.id !== driver.id), total: Math.max(0, current.total + (isActive ? 1 : -1)) } : current);
+      setInactiveData((current) => current ? { ...current, items: current.items.filter((item) => item.id !== driver.id), total: Math.max(0, current.total + (isActive ? -1 : 1)) } : current);
+      setLoading(true);
+      if (!isActive && data?.items?.length === 1 && page > 1) setPage(page - 1);
+      if (isActive && inactiveData?.items?.length === 1 && inactivePage > 1) setInactivePage(inactivePage - 1);
+      setSelected(null);
+      setRefresh((value) => value + 1);
+    } catch (requestError) {
+      if (isActive) setInactiveError(requestError.message);
+      else setError(requestError.message);
+    } finally { setChangingId(null); }
+  }
 
   async function openDriver(driver) {
     setFormError("");
@@ -138,18 +176,19 @@ export default function ShoferatPage() {
 
   const items = loading ? [] : data?.items ?? [];
   return <div className="bt-page bt-shoferat-page">
-    <header className="bt-page-header"><div><span className="bt-eyebrow">Bashkim Tours</span><h1>Shoferat dhe Staff</h1><p>Regjistri i shoferëve dhe dokumenteve të tyre.</p></div><button className="bt-btn-primary" onClick={() => startEdit(null)}><Plus size={18} /> Shto shofer</button></header>
+    <header className="bt-page-header"><div><span className="bt-eyebrow">Bashkim Tours</span><h1>Shoferat dhe Staff</h1><p>Regjistri i shoferëve dhe dokumenteve të tyre.</p></div><div className="bt-shoferat-header-actions"><button type="button" className="bt-btn-secondary" onClick={() => { setInactivePage(1); setInactiveLoading(true); setShowInactive(true); }}><UserRoundX size={18} /> Shoferët joaktivë</button><button className="bt-btn-primary" onClick={() => startEdit(null)}><Plus size={18} /> Shto shofer</button></div></header>
     <div className="bt-shoferat-notice" role="note">Faqja ende është në përpunim.</div>
     <section className="bt-shoferat-toolbar">
       <label className="bt-shoferat-search"><Search size={19} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Kërko sipas emrit, telefonit, EMBG…" aria-label="Kërko shoferët" />{search && <button type="button" onClick={() => setSearch("")} aria-label="Pastro kërkimin"><X size={16} /></button>}</label>
     </section>
     {queryText && suggestions.length > 0 && <div className="bt-shoferat-suggestions"><span>Hap shpejt:</span>{suggestions.map((driver) => <button key={driver.id} onClick={() => openDriver(driver)}>{driver.emri}</button>)}</div>}
     {error && <p className="bt-inline-error" role="alert">{error} <button type="button" onClick={() => { setLoading(true); setRefresh((value) => value + 1); }}>Provo përsëri</button></p>}
-    <div className="bt-shoferat-summary"><UsersRound size={20} /><strong>{data?.total ?? 0}</strong> shoferë në regjistër</div>
+    <div className="bt-shoferat-summary"><UsersRound size={20} /><strong>{data?.total ?? 0}</strong> shoferë aktivë</div>
     <div className="bt-shoferat-table-wrap" aria-busy={loading}><table className="bt-shoferat-table"><thead><tr><th>Shoferi</th><th>Telefoni</th><th>EMBG</th><th>Llogaria</th><th>Rroga</th><th>CD</th><th>Licenca Transport Nderkombtar</th><th>Dokumenta</th><th></th></tr></thead><tbody>
-      {items.map((driver) => <tr key={driver.id} className="bt-shoferat-row" onClick={() => openDriver(driver)}><td><button type="button" className="bt-shoferat-name" onClick={(event) => { event.stopPropagation(); openDriver(driver); }}>{driver.emri}</button></td><td>{driver.telefoni || "—"}</td><td>{driver.embg}</td><td>{driver.llogaria}</td><td>{hiddenSalary(driver.rroga)}</td><td>{formatDate(driver.cd)}</td><td>{formatDate(driver.licenca_transport_nderkombtar)}</td><td onClick={(event) => event.stopPropagation()}><DriverDocuments driver={driver} defer documents={documentsByDriver[String(driver.id)]} loadDocuments={loadDocuments} /></td><td><button type="button" className="bt-shoferat-icon" onClick={(event) => { event.stopPropagation(); openDriver(driver); }} aria-label={`Hap profilin e ${driver.emri}`}><Pencil size={17} /></button></td></tr>)}
+      {items.map((driver) => <tr key={driver.id} className="bt-shoferat-row" onClick={() => openDriver(driver)}><td><button type="button" className="bt-shoferat-name" onClick={(event) => { event.stopPropagation(); openDriver(driver); }}>{driver.emri}</button></td><td>{driver.telefoni || "—"}</td><td>{driver.embg}</td><td>{driver.llogaria}</td><td>{hiddenSalary(driver.rroga)}</td><td>{formatDate(driver.cd)}</td><td>{formatDate(driver.licenca_transport_nderkombtar)}</td><td onClick={(event) => event.stopPropagation()}><DriverDocuments driver={driver} defer documents={documentsByDriver[String(driver.id)]} loadDocuments={loadDocuments} /></td><td><div className="bt-shoferat-row-actions"><button type="button" className="bt-shoferat-icon" onClick={(event) => { event.stopPropagation(); openDriver(driver); }} aria-label={`Hap profilin e ${driver.emri}`}><Pencil size={17} /></button><button type="button" className="bt-shoferat-icon bt-shoferat-deactivate" disabled={changingId === driver.id} onClick={(event) => { event.stopPropagation(); changeActive(driver, false); }} aria-label={`Çaktivizo ${driver.emri}`} title="Çaktivizo shoferin"><UserRoundX size={17} /></button></div></td></tr>)}
     </tbody></table>{!loading && !items.length && !error && <div className="bt-shoferat-empty">Nuk u gjet asnjë shofer.</div>}{loading && <div className="bt-shoferat-empty bt-shoferat-loading" role="status"><LoaderCircle size={22} /> Duke ngarkuar shoferët…</div>}</div>
     {data && data.pages > 1 && <nav className="bt-shoferat-pages" aria-label="Faqet e shoferëve"><button type="button" aria-label="Faqja e mëparshme" disabled={loading || page <= 1} onClick={() => changePage(page - 1)}><ChevronLeft size={19} /></button><span>Faqja {page} nga {data.pages}</span><button type="button" aria-label="Faqja tjetër" disabled={loading || page >= data.pages} onClick={() => changePage(page + 1)}><ChevronRight size={19} /></button></nav>}
+    {showInactive && <Modal title="Shoferët joaktivë" className="bt-shoferat-inactive-modal" onClose={() => setShowInactive(false)}><div className="bt-shoferat-inactive-list">{inactiveError && <p className="bt-inline-error" role="alert">{inactiveError}</p>}{inactiveLoading && <p role="status">Duke ngarkuar shoferët…</p>}{!inactiveLoading && !inactiveData?.items?.length && !inactiveError && <p>Nuk ka shoferë joaktivë.</p>}{!inactiveLoading && inactiveData?.items?.map((driver) => <div className="bt-shoferat-inactive-row" key={driver.id}><div><strong>{driver.emri}</strong><small>{driver.telefoni || driver.embg || ""}</small></div><button type="button" className="bt-btn-primary" disabled={changingId === driver.id} onClick={() => changeActive(driver, true)}><UserRoundCheck size={17} /> {changingId === driver.id ? "Duke aktivizuar…" : "Aktivizo"}</button></div>)}{inactiveData?.pages > 1 && <nav className="bt-shoferat-pages" aria-label="Faqet e shoferëve joaktivë"><button type="button" disabled={inactiveLoading || inactivePage <= 1} onClick={() => { setInactiveLoading(true); setInactivePage(inactivePage - 1); }} aria-label="Faqja e mëparshme"><ChevronLeft size={19} /></button><span>Faqja {inactivePage} nga {inactiveData.pages}</span><button type="button" disabled={inactiveLoading || inactivePage >= inactiveData.pages} onClick={() => { setInactiveLoading(true); setInactivePage(inactivePage + 1); }} aria-label="Faqja tjetër"><ChevronRight size={19} /></button></nav>}</div></Modal>}
     {selected && !form && <Modal title={selected.emri} className="bt-shoferat-profile-modal" onClose={() => setSelected(null)}><div className="bt-shoferat-detail"><h3>Të dhënat e shoferit</h3><div className="bt-shoferat-detail-grid">{fields.map((field) => <div key={field.key}><span>{field.label}</span><strong>{field.key === "rroga" ? hiddenSalary(selected[field.key]) : field.type === "date" ? formatDate(selected[field.key]) : selected[field.key] || "—"}</strong></div>)}</div><section className="bt-shoferat-profile-documents"><h3>Dokumentet</h3><DriverDocuments driver={selected} documents={documentsByDriver[String(selected.id)]} loadDocuments={loadDocuments} /></section>{formError && <p className="bt-inline-error">{formError}</p>}<div className="bt-shoferat-actions"><button className="bt-btn-primary" onClick={() => startEdit(selected)}><Pencil size={17} /> Ndrysho</button></div></div></Modal>}
     {form && <Modal title={form.id ? "Ndrysho shoferin" : "Shto shofer"} className="bt-shoferat-form-modal" onClose={() => { if (!saving) setForm(null); }}><form className="bt-shoferat-form" onSubmit={save}>{fields.map((field) => <label key={field.key}><span>{field.type === "date" && <CalendarDays size={15} />}{field.label}</span>{field.type === "date" ? <DateInput value={form[field.key]} onChange={(value) => setForm({ ...form, [field.key]: value })} required={field.required} /> : <input type={field.key === "rroga" ? "password" : field.type || "text"} inputMode={field.key === "rroga" ? "decimal" : field.key === "telefoni" ? "tel" : undefined} enterKeyHint="next" autoComplete={field.key === "rroga" ? "off" : undefined} step={field.step} value={form[field.key]} required={field.required} onChange={(event) => setForm({ ...form, [field.key]: event.target.value })} />}{field.key === "licenca_transport_nderkombtar" && form.id && <small>Data ekzistuese: {formatDate(form.existingLicense)}. Zgjidhni datë vetëm nëse doni ta ndryshoni.</small>}</label>)}{formError && <p className="bt-inline-error" role="alert">{formError}</p>}<div className="bt-shoferat-actions"><button className="bt-btn-primary" disabled={saving}>{saving ? "Duke ruajtur…" : "Ruaj"}</button><button type="button" className="bt-btn-secondary" disabled={saving} onClick={() => setForm(null)}>Anulo</button></div></form></Modal>}
   </div>;
