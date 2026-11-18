@@ -7633,9 +7633,33 @@ html.bt-pwa-standalone .bt-charter-form-modal :is(input, select, textarea) { box
 .bt-fuel-external-create-modal .bt-external-dropdown { min-width: 0; flex: none; font-size: 12px; font-weight: 700; }
 .bt-fuel-external-create-modal .bt-external-dropdown .bt-charter-reference-picker input { min-height: 40px; }
 .bt-fuel-external-create-button { margin-left: auto; padding: 7px 11px; font-size: 12px; font-weight: 600; }
+.bt-fuel-external-modal-form .bt-fuel-actions .bt-btn-danger { margin-right: auto; }
+.bt-fuel-customer-management-filters { display: flex; align-items: end; flex-wrap: wrap; gap: 12px; margin: 18px 0; }
+.bt-fuel-customer-management-filters > label { display: grid; flex: 1 1 260px; gap: 6px; color: #637582; font-size: 13px; font-weight: 700; }
+.bt-fuel-customer-management-search { display: flex; align-items: center; gap: 8px; min-height: 42px; box-sizing: border-box; padding: 0 12px; border: 1px solid #dce5eb; border-radius: 9px; background: #fff; color: #637582; }
+.bt-fuel-customer-management-search:focus-within { border-color: #1257a0; box-shadow: 0 0 0 3px #dceafb; }
+.bt-fuel-customer-management-search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: #253743; font: inherit; }
+.bt-fuel-customer-management-status { display: flex; flex-wrap: wrap; gap: 6px; }
+.bt-fuel-customer-management-status button { min-height: 42px; padding: 8px 12px; border: 1px solid #dce5eb; border-radius: 9px; background: #fff; color: #475569; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.bt-fuel-customer-management-status button.active { border-color: #1257a0; background: #eaf2fc; color: #1257a0; }
+.bt-fuel-customer-management-card .bt-fuel-supplier-info { display: grid; gap: 3px; }
+.bt-fuel-customer-management-card .bt-fuel-supplier-info h2 { margin: 0; }
+.bt-fuel-customer-management-card .bt-fuel-supplier-info strong { color: #253743; font-size: 14px; }
+.bt-fuel-customer-management-card .bt-fuel-supplier-info small { color: #637582; overflow-wrap: anywhere; }
+.bt-fuel-customer-management-badge { padding: 5px 9px; border-radius: 999px; font-size: 11px; font-weight: 800; white-space: nowrap; }
+.bt-fuel-customer-management-badge.is-active { background: #dcfce7; color: #067647; }
+.bt-fuel-customer-management-badge.is-inactive { background: #e2e8f0; color: #475569; }
+.bt-fuel-customer-management-modal .bt-fuel-fields textarea { width: 100%; padding: 10px 12px; border: 1px solid #dce5eb; border-radius: 9px; font: inherit; resize: vertical; }
+.bt-fuel-customer-management-comment { flex-basis: 100% !important; }
+@media (max-width: 640px) { .bt-fuel-customer-management-card { flex-wrap: wrap; }.bt-fuel-customer-management-card .bt-btn-secondary { margin-left: auto; }.bt-fuel-customer-management-page .bt-page-header { align-items: flex-start; flex-direction: column; }.bt-fuel-customer-management-page .bt-page-header > button { width: 100%; justify-content: center; } }
 @media (max-width: 640px) { .bt-fuel-transactions-head { flex-wrap: wrap; }.bt-fuel-external-create-button { width: 100%; margin-left: 0; } }
 @media (max-width: 520px) { .bt-fuel-external-modal-form { grid-template-columns: 1fr; } }
 .bt-fuel-history-filters { margin: 16px 0 0; }
+.bt-fuel-history-date-presets { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 11px; }
+.bt-fuel-history-date-presets button { min-height: 30px; padding: 4px 10px; border: 1px solid #d7e1e9; border-radius: 999px; background: #f8fafc; color: #526576; font: inherit; font-size: 11px; font-weight: 700; cursor: pointer; }
+.bt-fuel-history-date-presets button:hover { border-color: #a9c7e4; background: #eef6ff; }
+.bt-fuel-history-date-presets button.active { border-color: #1257a0; background: #eaf2fc; color: #1257a0; }
+.bt-fuel-history-date-presets button:focus-visible { outline: 2px solid #1257a0; outline-offset: 2px; }
 .bt-fuel-overview-tabs + .bt-fuel-history-filters { margin-top: 8px; }
 .bt-fuel-history-filters .bt-fuel-filters { margin: 0; padding: 0; border: 0; background: transparent; }
 .bt-fuel-history-filters .bt-fuel-filters label, .bt-fuel-history-filters .bt-fuel-filters .bt-external-dropdown { min-width: 160px; flex: 1 1 160px; }

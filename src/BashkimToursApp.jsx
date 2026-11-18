@@ -11,6 +11,7 @@ import IncomePage from "./IncomePage";
 import FuelTanksPage from "./FuelTanksPage";
 import FuelSuppliersPage from "./FuelSuppliersPage";
 import FuelExternalCustomersPage from "./FuelExternalCustomersPage";
+import FuelCustomerManagementPage from "./FuelCustomerManagementPage";
 import FuelRefuellingLocationsPage from "./FuelRefuellingLocationsPage";
 import FuelExternalRefuellingsPage from "./FuelExternalRefuellingsPage";
 import FuelLedgerPage from "./FuelLedgerPage";
@@ -104,6 +105,7 @@ export default function BashkimToursApp() {
           <Route path="external-refuellings" element={<FuelExternalRefuellingsPage />} />
           <Route path="suppliers" element={<FuelSuppliersPage />} />
           <Route path="external-customers" element={<FuelExternalCustomersPage />} />
+          <Route path="customer-management" element={<FuelCustomerManagementPage />} />
           <Route path="refuelling-locations" element={<FuelRefuellingLocationsPage />} />
           <Route path="staff-vehicles" element={<FuelStaffVehiclesPage />} />
         </Route>
