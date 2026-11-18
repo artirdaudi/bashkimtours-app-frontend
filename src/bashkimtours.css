@@ -3551,6 +3551,13 @@
 .bt-fuel-transaction-list li:last-child { border-bottom: 0; }
 .bt-fuel-transaction-icon { display: grid; place-items: center; width: 38px; height: 38px; flex: 0 0 38px; border-radius: 10px; }
 .bt-fuel-transaction-list li > div { display: grid; gap: 3px; min-width: 0; }
+.bt-fuel-transaction-list li.is-refuelling { grid-template-columns: 38px minmax(0, 1fr) 150px 130px 100px 64px; }
+.bt-fuel-transaction-list li.is-refuelling > .bt-fuel-transaction-row-actions { position: relative; flex-direction: row; align-items: center; justify-content: flex-end; gap: 0; padding: 0; margin: 0; overflow: visible; }
+.bt-fuel-transaction-list li.is-refuelling .bt-fuel-transaction-detail { flex: none; width: auto; padding: 6px 0; margin: 0; font-size: 13px; }
+.bt-fuel-transaction-list li.is-refuelling .bt-external-row-menu { position: absolute; top: 50%; left: calc(100% + 2px); width: 22px; margin: 0; padding: 0; transform: translateY(-50%); }
+.bt-fuel-transaction-list li.is-refuelling .bt-external-row-menu-toggle { width: 22px; height: 30px; margin: 0; padding: 0; }
+.bt-fuel-transaction-list li.is-refuelling .bt-external-color-options { top: 32px; }
+.bt-fuel-transaction-list li > .bt-fuel-transaction-row-actions { display: flex; flex-direction: row; align-items: center; justify-content: flex-end; gap: 8px; }
 .bt-fuel-transaction-list time { color: #637582; font-size: 12px; }
 .bt-fuel-transaction-list li > div:first-of-type strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .bt-fuel-transaction-column small { color: #637582; font-size: 11px; }
@@ -7544,10 +7551,96 @@ html.bt-pwa-standalone .bt-charter-form-modal :is(input, select, textarea) { box
 }
 
 /* Unified fuel ledger */
+.bt-fuel-overview-tabs { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 16px; }
+.bt-fuel-overview-tabs button { min-height: 38px; padding: 7px 13px; border: 1px solid #dce5eb; border-radius: 9px; background: #f1f5f9; color: #475569; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.bt-fuel-overview-tabs button.is-incoming { background: #f0fdf4; border-color: #bbebcc; color: #15803d; }
+.bt-fuel-overview-tabs button.is-refuelling { background: #f2efff; border-color: #d6cff8; color: #5b53a5; }
+.bt-fuel-overview-tabs button.is-customer { background: #fff4e7; border-color: #f3d5ac; color: #a45d17; }
+.bt-fuel-overview-tabs button.is-staff { background: #eaf8f6; border-color: #a9dfd8; color: #087b83; }
+.bt-fuel-overview-tabs button.is-unmapped { background: #f1f5f9; border-color: #cbd5e1; color: #475569; }
+.bt-fuel-overview-tabs button.active { box-shadow: inset 0 0 0 2px currentColor; }
+.bt-fuel-overview-tabs button:focus-visible { outline: 2px solid #1257a0; outline-offset: 2px; }
+.bt-fuel-transaction-list .is-refuelling { background: #f8f7ff; }
+.bt-fuel-transaction-list .is-refuelling .bt-fuel-transaction-icon { background: #e9e5ff; color: #5b53a5; }
+.bt-fuel-transaction-list .is-refuelling b { color: #5b53a5; }
+.bt-fuel-transaction-badge.is-staff { background: #c9efea; color: #087b83; }
+.bt-fuel-transaction-badge.is-refuelling { background: #e9e5ff; color: #5b53a5; }
+.bt-fuel-transaction-origin { width: fit-content; color: #637582; font-size: 11px; font-weight: 700; letter-spacing: .03em; }
+.bt-fuel-transaction-list li.is-refuelling > .bt-fuel-external-row-facts { grid-column: 3 / -1; display: grid; grid-template-columns: 150px 130px 100px 64px; column-gap: 16px; row-gap: 8px; min-width: 0; padding-top: 8px; }
+.bt-fuel-external-row-facts > span { display: grid; gap: 2px; min-width: 0; }
+.bt-fuel-external-row-facts small { color: #637582; font-size: 11px; }
+.bt-fuel-external-row-facts strong { color: #253743; font-size: 13px; overflow-wrap: anywhere; }
+.bt-fuel-external-row-facts .bt-fuel-external-row-comment { grid-column: 1 / -1; }
+.bt-fuel-external-row-facts > span:nth-child(3) { grid-column: 3 / -1; }
+.bt-fuel-external-row-comment strong { white-space: normal; overflow-wrap: anywhere; font-weight: 600; }
+.bt-fuel-customer-quick-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 16px; }
+.bt-fuel-customer-quick-filters button { min-height: 36px; padding: 6px 12px; border: 1px solid #dce5eb; border-radius: 8px; background: #fff; color: #344054; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.bt-fuel-customer-quick-filters button.is-paid { color: #067647; border-color: #a9dec2; background: #f0fdf4; }
+.bt-fuel-customer-quick-filters button.is-unpaid { color: #b42318; border-color: #efb4ac; background: #fff4f2; }
+.bt-fuel-customer-quick-filters button.is-no_price { color: #805700; border-color: #ead390; background: #fff9e8; }
+.bt-fuel-customer-quick-filters button.active { box-shadow: inset 0 0 0 2px currentColor; }
+.bt-fuel-customer-quick-filters button:focus-visible { outline: 2px solid #1257a0; outline-offset: 2px; }
+/* Customer refuellings share the PIUSI transaction column grid. */
+.bt-fuel-transaction-list li.bt-fuel-customer-overview-row { grid-template-columns: 38px minmax(0, 1fr) 150px 130px 100px 64px; gap: 10px 16px; min-width: 760px; }
+.bt-fuel-transaction-list li.bt-fuel-customer-overview-row > div { min-width: 0; }
+.bt-fuel-customer-overview-main strong { color: #253743; font-size: 14px; }
+.bt-fuel-customer-overview-person .bt-fuel-customer-person-name { overflow: hidden; color: #637582; font-size: 12px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.bt-fuel-customer-overview-quantity { text-align: right; }
+.bt-fuel-transaction-list li > .bt-fuel-customer-overview-secondary { grid-column: 2 / -1; display: grid; grid-template-columns: minmax(0, 1fr) 150px 130px 100px 64px; align-items: center; column-gap: 16px; min-width: 0; padding-top: 9px; border-top: 1px solid #e9e2d6; }
+.bt-fuel-transaction-list li .bt-fuel-customer-overview-price { display: contents; }
+.bt-fuel-customer-overview-price > span:first-child { grid-column: 2; }
+.bt-fuel-customer-overview-price > span:last-child { grid-column: 3; }
+.bt-fuel-customer-overview-price > span { display: grid; gap: 3px; min-width: 90px; }
+.bt-fuel-customer-overview-price strong { color: #253743; font-size: 13px; overflow-wrap: anywhere; }
+.bt-fuel-customer-overview-price small, .bt-fuel-customer-overview-extra small { color: #637582; font-size: 11px; }
+.bt-fuel-customer-overview-actions { grid-column: 4 / -1; display: flex; align-items: center; justify-content: flex-end; gap: 6px; flex-wrap: wrap; }
+.bt-fuel-customer-status { padding: 4px 8px; border: 0; border-radius: 999px; font: inherit; font-size: 10px; font-weight: 800; white-space: nowrap; cursor: pointer; }
+.bt-fuel-customer-status.is-missing { background: #fff0c2; color: #805700; }
+.bt-fuel-customer-status.is-unpaid { background: #fee2e2; color: #b42318; }
+.bt-fuel-customer-status.is-paid { background: #dcfce7; color: #067647; }
+.bt-fuel-customer-status:focus-visible { outline: 2px solid #1257a0; outline-offset: 2px; }
+.bt-fuel-customer-status:disabled { opacity: .6; cursor: wait; }
+.bt-fuel-customer-price-input { width: 100%; max-width: 115px; box-sizing: border-box; padding: 5px 7px; border: 1px solid #d8a936; border-radius: 6px; font: inherit; font-size: 14px; }
+.bt-fuel-transaction-list li > .bt-fuel-customer-overview-extra { grid-column: 2 / -1; display: flex; flex-wrap: wrap; gap: 8px 24px; padding-top: 8px; }
+.bt-fuel-customer-overview-extra > span { display: grid; gap: 3px; min-width: 130px; }
+.bt-fuel-customer-overview-extra strong { color: #253743; font-size: 13px; overflow-wrap: anywhere; }
+.bt-fuel-external-row-color { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+.bt-fuel-external-row-color > i { width: 13px; height: 13px; border: 1px solid #ffffffaa; border-radius: 50%; background: var(--choice-color); box-shadow: 0 0 0 1px #17364c33; }
+.bt-fuel-external-row-color .bt-external-color-options { top: auto; bottom: 44px; }
+.bt-fuel-transaction-list li.is-refuelling.bt-fuel-refuelling-accent-green { box-shadow: inset 4px 0 #49b77b; }
+.bt-fuel-transaction-list li.is-refuelling.bt-fuel-refuelling-accent-orange { box-shadow: inset 4px 0 #f4a048; }
+.bt-fuel-transaction-list li.is-refuelling.bt-fuel-refuelling-accent-yellow { box-shadow: inset 4px 0 #e7c841; }
+.bt-fuel-transaction-list li.is-refuelling.bt-fuel-refuelling-accent-red { box-shadow: inset 4px 0 #e76a70; }
+.bt-fuel-external-modal.bt-external-row-green { background: #e9f7ef; }
+.bt-fuel-external-modal.bt-external-row-orange { background: #fff1df; }
+.bt-fuel-external-modal.bt-external-row-yellow { background: #fff9d9; }
+.bt-fuel-external-modal.bt-external-row-red { background: #fff0f0; }
+.bt-fuel-customer-detail-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.bt-fuel-customer-detail-form .bt-fuel-transaction-details, .bt-fuel-customer-detail-comment, .bt-fuel-customer-detail-form .bt-fuel-actions { grid-column: 1 / -1; }
+.bt-fuel-customer-detail-form label { display: grid; gap: 6px; color: #637582; font-size: 13px; font-weight: 700; }
+.bt-fuel-customer-detail-form input, .bt-fuel-customer-detail-form select, .bt-fuel-customer-detail-form textarea { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; color: #253743; font: inherit; }
+.bt-fuel-customer-detail-form .bt-fuel-actions { justify-content: flex-end; }
+@media (max-width: 520px) { .bt-fuel-customer-detail-form { grid-template-columns: 1fr; } }
+.bt-fuel-external-modal-colors { display: flex; align-items: center; gap: 3px; margin: 0 0 18px; }
+.bt-fuel-external-modal-toolbar { display: flex; justify-content: flex-end; margin: 0 0 16px; }
+.bt-fuel-external-modal-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.bt-fuel-external-modal-form label { display: grid; gap: 5px; color: #637582; font-size: 12px; font-weight: 700; }
+.bt-fuel-external-modal-form input, .bt-fuel-external-modal-form select, .bt-fuel-external-modal-form textarea { width: 100%; min-height: 40px; box-sizing: border-box; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; font: inherit; font-size: 14px; }
+.bt-fuel-external-modal-comment, .bt-fuel-external-modal-form .bt-fuel-actions { grid-column: 1 / -1; }
+.bt-fuel-external-modal-form .bt-fuel-actions { justify-content: flex-end; }
+.bt-fuel-external-create-error { grid-column: 1 / -1; margin: 0; }
+.bt-fuel-external-create-modal .bt-modal-body:has(.bt-date-calendar) { padding-bottom: 23px; }
+.bt-fuel-external-create-modal .bt-external-dropdown { min-width: 0; flex: none; font-size: 12px; font-weight: 700; }
+.bt-fuel-external-create-modal .bt-external-dropdown .bt-charter-reference-picker input { min-height: 40px; }
+.bt-fuel-external-create-button { margin-left: auto; padding: 7px 11px; font-size: 12px; font-weight: 600; }
+@media (max-width: 640px) { .bt-fuel-transactions-head { flex-wrap: wrap; }.bt-fuel-external-create-button { width: 100%; margin-left: 0; } }
+@media (max-width: 520px) { .bt-fuel-external-modal-form { grid-template-columns: 1fr; } }
 .bt-fuel-history-filters { margin: 16px 0 0; }
+.bt-fuel-overview-tabs + .bt-fuel-history-filters { margin-top: 8px; }
 .bt-fuel-history-filters .bt-fuel-filters { margin: 0; padding: 0; border: 0; background: transparent; }
 .bt-fuel-history-filters .bt-fuel-filters label, .bt-fuel-history-filters .bt-fuel-filters .bt-external-dropdown { min-width: 160px; flex: 1 1 160px; }
 .bt-fuel-history-filters .bt-fuel-filters label:first-child { flex: 2 1 260px; }
+.bt-fuel-advanced-filter-actions { display: flex; justify-content: flex-end; margin-top: 16px; }
 .bt-fuel-ledger-page .bt-page-header { margin-bottom: 22px; }
 .bt-fuel-ledger-filters .bt-fuel-filters label, .bt-fuel-ledger-filters .bt-fuel-filters .bt-external-dropdown { min-width: 160px; flex: 1 1 160px; }
 .bt-fuel-ledger-filters .bt-fuel-filters label:first-child { flex: 2 1 300px; }
